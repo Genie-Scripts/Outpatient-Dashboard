@@ -9,6 +9,7 @@
     python -m src.cli build slot
     python -m src.cli build doctor
     python -m src.cli build doctor-heatmap
+    python -m src.cli build slot-heatmap
     python -m src.cli build hub
     python -m src.cli run-all [--no-llm]
 """
@@ -34,6 +35,7 @@ from src.dashboards.drug_revisit import build_drug_revisit
 from src.dashboards.hourly_heatmap import build_hourly_heatmap
 from src.dashboards.hub import build_hub_page
 from src.dashboards.monthly import build_monthly_dashboard
+from src.dashboards.slot_heatmap import build_slot_heatmap
 from src.dashboards.slot_redesign import build_slot_redesign
 
 _ANON_FILE_RE = re.compile(r"^raw_data_(\d{4}-\d{2})\.csv$")
@@ -311,6 +313,36 @@ def _cmd_build_doctor_heatmap(
     )
 
 
+def _cmd_build_slot_heatmap(
+    month: str | None,
+    paths: dict[str, Path] = DEFAULT_PATHS,
+) -> None:
+    all_months = _detect_months(paths["anon_dir"])
+    available = [
+        m for m in all_months
+        if (paths["agg_root"] / m / "15_slot_hourly.csv").exists()
+    ]
+    if not available:
+        raise FileNotFoundError(
+            "15_slot_hourly.csv を持つ月がありません。先に aggregate を実行してください。"
+        )
+    default_month = month if month in available else available[-1]
+    output_path = paths["docs_dir"] / "slot_heatmap.html"
+    build_slot_heatmap(
+        months=available,
+        aggregated_root=paths["agg_root"],
+        templates_dir=paths["templates_dir"],
+        output_path=output_path,
+        classification_path=paths["dept_classification"],
+        theme_css=_read_static(paths["theme_css"]),
+        common_js=_read_static(paths["common_js"]),
+        default_month=default_month,
+    )
+    print(
+        f"✓ 外来枠×時間帯ヒートマップ生成 ({len(available)}ヶ月, 既定={default_month}): {output_path}"
+    )
+
+
 def _cmd_build_drug_revisit(
     month: str | None,
     paths: dict[str, Path] = DEFAULT_PATHS,
@@ -358,6 +390,7 @@ def _cmd_run_all(month: str | None, use_llm: bool, no_anon: bool = False) -> Non
     _cmd_build_doctor(month, paths, use_real_names=no_anon)
     _cmd_build_heatmap(month, paths)
     _cmd_build_doctor_heatmap(month, paths)
+    _cmd_build_slot_heatmap(month, paths)
     _cmd_build_drug_revisit(month, paths)
     _cmd_build_hub(paths)
     print("=== 全処理完了 ===")
@@ -399,6 +432,9 @@ def _build_parser() -> argparse.ArgumentParser:
     p_dheat = build_sub.add_parser("doctor-heatmap", help="医師×時間帯ヒートマップ（最新月）")
     p_dheat.add_argument("--month", default=None, help="YYYY-MM（省略時は最新月）")
 
+    p_sheat = build_sub.add_parser("slot-heatmap", help="外来枠×時間帯ヒートマップ（最新月）")
+    p_sheat.add_argument("--month", default=None, help="YYYY-MM（省略時は最新月）")
+
     p_drev = build_sub.add_parser("drug-revisit", help="薬再診候補スコア（最新月）")
     p_drev.add_argument("--month", default=None, help="YYYY-MM（省略時は最新月）")
 
@@ -439,6 +475,8 @@ def main(argv: list[str] | None = None) -> int:
                 _cmd_build_heatmap(args.month)
             elif args.target == "doctor-heatmap":
                 _cmd_build_doctor_heatmap(args.month)
+            elif args.target == "slot-heatmap":
+                _cmd_build_slot_heatmap(args.month)
             elif args.target == "drug-revisit":
                 _cmd_build_drug_revisit(args.month)
             elif args.target == "hub":

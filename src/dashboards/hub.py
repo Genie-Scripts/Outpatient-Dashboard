@@ -243,6 +243,11 @@ def _build_extras(docs_dir: Path) -> list[dict[str, str]]:
             "href": "doctor_heatmap.html" if (docs_dir / "doctor_heatmap.html").exists() else "",
         },
         {
+            "title": "外来枠×時間帯ヒートマップ",
+            "desc": "予約名称(外来枠)別の曜日×時間帯 稼働パターン。枠再編(縮小・統合)検討用",
+            "href": "slot_heatmap.html" if (docs_dir / "slot_heatmap.html").exists() else "",
+        },
+        {
             "title": "薬再診候補スコア",
             "desc": "短時間再診比率等から逆紹介候補を抽出",
             "href": "drug_revisit.html" if (docs_dir / "drug_revisit.html").exists() else "",

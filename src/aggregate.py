@@ -271,6 +271,7 @@ def _agg_hourly_load(df: pd.DataFrame) -> pd.DataFrame:
 
 
 DOCTOR_HOURLY_CATEGORIES = ("全体", "初診", "再診", "薬再診")
+SLOT_HOURLY_CATEGORIES = DOCTOR_HOURLY_CATEGORIES
 
 
 def _agg_doctor_hourly(df: pd.DataFrame) -> pd.DataFrame:
@@ -384,6 +385,123 @@ def _agg_doctor_hourly(df: pd.DataFrame) -> pd.DataFrame:
     merged = merged.assign(_cat_order=cat_order)
     return merged[columns + ["_cat_order"]].sort_values(
         ["診療科名", DOCTOR_ID_COLUMN, "_cat_order", "曜日", "bin_idx"]
+    ).drop(columns="_cat_order").reset_index(drop=True)
+
+
+def _agg_slot_hourly(df: pd.DataFrame) -> pd.DataFrame:
+    """曜日×30分刻みの外来枠別(予約名称)稼働パターンを区分別に集計する。
+
+    医師版 `_agg_doctor_hourly` のグループキーを `SLOT_ID_COLUMN(予約名称)` に
+    置き換えた版。外来枠の再編(縮小・統合・廃止)検討に用いる。
+
+    区分: 全体 / 初診 / 再診 / 薬再診（再診 ∧ 診察時間 ≤ DRUG_REVISIT_SHORT_EXAM_MIN 分）。
+    薬再診は再診の部分集合のため、同じ診察が再診と薬再診の双方に計上される。
+
+    - 稼働日数: 当該(枠, 区分, 曜日, bin)で1件以上診察した日数
+    - 該当日数: 当該曜日が月内に存在した日数（区分によらず全データで算出）
+    - 稼働頻度率: 稼働日数 / 該当日数（0.0-1.0）
+    - 件数合計: 当該区分の月内総診察件数
+    - 実診察分数: 当該ビンと各診察の時間重なり分（分）の月内合計
+    - 件数_日平均 / 実診察分数_日平均: 月合計 / 該当日数
+    ビンは 08:00-20:00（12時間 / 30分 = 24ビン）。
+    """
+    columns = [
+        "診療科名", SLOT_ID_COLUMN, "区分", "曜日", "bin_idx", "bin_label",
+        "稼働日数", "該当日数", "稼働頻度率",
+        "件数合計", "実診察分数", "件数_日平均", "実診察分数_日平均",
+    ]
+    valid = df[_valid_time_mask(df)].copy()
+    valid = valid[valid[SLOT_ID_COLUMN].notna()]
+    if valid.empty:
+        return pd.DataFrame(columns=columns)
+
+    day_start = HEATMAP_DAY_START_H * 60
+    valid["start_bin"] = np.clip(
+        (valid["開始_分"] - day_start) // HEATMAP_BIN_MIN, 0, HEATMAP_BIN_COUNT - 1
+    ).astype(int)
+    valid["end_bin"] = np.clip(
+        (valid["終了_分"] - 1 - day_start) // HEATMAP_BIN_MIN, 0, HEATMAP_BIN_COUNT - 1
+    ).astype(int)
+
+    valid["bin_list"] = valid.apply(
+        lambda r: list(range(r["start_bin"], r["end_bin"] + 1)), axis=1
+    )
+    exploded = valid.explode("bin_list").copy()
+    exploded["bin_idx"] = exploded["bin_list"].astype(int)
+
+    bin_start_min = day_start + exploded["bin_idx"] * HEATMAP_BIN_MIN
+    bin_end_min = bin_start_min + HEATMAP_BIN_MIN
+    exploded["overlap_min"] = (
+        np.minimum(exploded["終了_分"], bin_end_min)
+        - np.maximum(exploded["開始_分"], bin_start_min)
+    ).clip(lower=0)
+
+    is_sho = exploded["初再診区分"] == "初診"
+    is_sai = exploded["初再診区分"] == "再診"
+    is_drug = is_sai & (exploded["診察時間"] <= DRUG_REVISIT_SHORT_EXAM_MIN)
+    category_masks: dict[str, pd.Series] = {
+        "全体": pd.Series(True, index=exploded.index),
+        "初診": is_sho,
+        "再診": is_sai,
+        "薬再診": is_drug,
+    }
+
+    weekday_days = (
+        valid.groupby("曜日")["予約日"].nunique().rename("該当日数").reset_index()
+    )
+
+    frames: list[pd.DataFrame] = []
+    for cat, mask in category_masks.items():
+        sub = exploded[mask]
+        if sub.empty:
+            continue
+        per_bin = (
+            sub.groupby(["診療科名", SLOT_ID_COLUMN, "曜日", "bin_idx"])
+            .agg(
+                稼働日数=("予約日", "nunique"),
+                件数合計=("予約日", "size"),
+                実診察分数=("overlap_min", "sum"),
+            )
+            .reset_index()
+        )
+        per_bin["区分"] = cat
+        frames.append(per_bin)
+
+    if not frames:
+        return pd.DataFrame(columns=columns)
+
+    merged = pd.concat(frames, ignore_index=True).merge(
+        weekday_days, on="曜日", how="left"
+    )
+    merged["該当日数"] = merged["該当日数"].fillna(0).astype(int)
+    merged["稼働頻度率"] = np.where(
+        merged["該当日数"] > 0,
+        (merged["稼働日数"] / merged["該当日数"]).round(3),
+        0.0,
+    )
+    merged["件数_日平均"] = np.where(
+        merged["該当日数"] > 0,
+        (merged["件数合計"] / merged["該当日数"]).round(2),
+        0.0,
+    )
+    merged["実診察分数_日平均"] = np.where(
+        merged["該当日数"] > 0,
+        (merged["実診察分数"] / merged["該当日数"]).round(1),
+        0.0,
+    )
+    merged["実診察分数"] = merged["実診察分数"].round(1)
+
+    def _label(idx: int) -> str:
+        total = day_start + idx * HEATMAP_BIN_MIN
+        return f"{total // 60:02d}:{total % 60:02d}"
+
+    merged["bin_label"] = merged["bin_idx"].apply(_label)
+    cat_order = pd.Categorical(
+        merged["区分"], categories=list(SLOT_HOURLY_CATEGORIES), ordered=True
+    )
+    merged = merged.assign(_cat_order=cat_order)
+    return merged[columns + ["_cat_order"]].sort_values(
+        ["診療科名", SLOT_ID_COLUMN, "_cat_order", "曜日", "bin_idx"]
     ).drop(columns="_cat_order").reset_index(drop=True)
 
 
@@ -578,6 +696,9 @@ def aggregate_monthly_data(
 
     _write(_agg_doctor_hourly(df), out / "14_doctor_hourly.csv")
     generated.append("14_doctor_hourly.csv")
+
+    _write(_agg_slot_hourly(df), out / "15_slot_hourly.csv")
+    generated.append("15_slot_hourly.csv")
 
     logger.info("集計完了: %d行 → %d ファイル (%s)", len(df), len(generated), out)
     return AggregationResult(
