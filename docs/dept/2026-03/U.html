@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>泌尿器科 深掘り 2026-03</title>
+<style>/* 外来効率化ダッシュボード 共通テーマ（ウォームライト） */
+:root {
+  --color-bg: #fdfaf4;
+  --color-surface: #ffffff;
+  --color-surface-alt: #f5f0e6;
+  --color-text: #2d2a26;
+  --color-text-muted: #6b6660;
+  --color-border: #e5dfd2;
+  --color-primary: #b25c2e;
+  --color-primary-weak: #f0d8c5;
+  --color-accent: #3d6b7d;
+  --color-naika: #5b8a72;
+  --color-geka: #b25c2e;
+  --color-other: #9a7c4e;
+  --color-good: #3d7a4d;
+  --color-warn: #c98a2a;
+  --color-bad: #b8413c;
+  --radius: 6px;
+  --shadow-card: 0 1px 3px rgba(45, 42, 38, 0.08);
+  --font-sans: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN",
+               "Yu Gothic", Meiryo, sans-serif;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: var(--font-sans);
+  color: var(--color-text);
+  background: var(--color-bg);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+
+/* Header */
+.site-header {
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.site-title { font-size: 18px; font-weight: 600; margin: 0; }
+.site-meta { color: var(--color-text-muted); font-size: 12px; }
+
+/* Cards */
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow-card);
+  margin-bottom: 16px;
+}
+.card h2 { margin-top: 0; font-size: 16px; }
+.card h3 { font-size: 14px; margin-top: 16px; margin-bottom: 8px; }
+
+.grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+/* Tables */
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th, td { padding: 6px 8px; text-align: left; border-bottom: 1px solid var(--color-border); }
+th { background: var(--color-surface-alt); font-weight: 600; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+/* Grades */
+.grade {
+  display: inline-block;
+  min-width: 22px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-weight: 600;
+  text-align: center;
+  color: #fff;
+  font-size: 12px;
+}
+.grade-S { background: var(--color-good); }
+.grade-A { background: #6ba074; }
+.grade-B { background: var(--color-warn); }
+.grade-C { background: #d87f3e; }
+.grade-D { background: var(--color-bad); }
+
+/* Type badges */
+.type-badge {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 11px;
+  color: #fff;
+}
+.type-naika { background: var(--color-naika); }
+.type-geka { background: var(--color-geka); }
+.type-other { background: var(--color-other); }
+
+/* Nav links */
+.nav-list { list-style: none; padding: 0; margin: 0; }
+.nav-list li { margin-bottom: 6px; }
+.nav-list a {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+.nav-list a:hover { text-decoration: underline; }
+
+/* Chart wrappers */
+.chart-wrap { position: relative; height: 280px; }
+.chart-wrap-sm { position: relative; height: 180px; }
+
+footer.site-footer {
+  color: var(--color-text-muted);
+  font-size: 11px;
+  padding: 16px 24px;
+  text-align: center;
+}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <h1 class="site-title">泌尿器科 深掘り (2026-03)</h1>
+  <div class="site-meta">生成: 2026-04-24 21:11</div>
+</header>
+
+<main class="container">
+<div class="card">
+  <h2>泌尿器科 <span class="type-badge type-geka">外科</span> — 2026-03 深掘り</h2>
+  <div class="grid">
+    <div>
+      <h3>当月サマリ</h3>
+      <table>
+        <tbody>
+          <tr><th>総件数</th><td class="num">3,687</td></tr>
+          <tr><th>初診</th><td class="num">123</td></tr>
+          <tr><th>再診</th><td class="num">3,564</td></tr>
+          <tr><th>紹介状あり初診</th><td class="num">100</td></tr>
+          <tr><th>未来院</th><td class="num">200</td></tr>
+          <tr><th>初診率</th><td class="num">3.34%</td></tr>
+          <tr><th>紹介率（初診）</th><td class="num">81.3%</td></tr>
+          <tr><th>未来院率</th><td class="num">5.42%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <h3>KPI 評価</h3>
+      <table>
+        <thead><tr><th>指標</th><th class="num">実績</th><th class="num">目標</th><th>評価</th></tr></thead>
+        <tbody>
+          
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>時間帯別（曜日×時間帯ゾーン）件数</h2>
+  <div class="chart-wrap"><canvas id="chartTimezone"></canvas></div>
+</div>
+
+<div class="card">
+  <h2>医師別 当月内訳（上位10名）</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th><th>医師</th>
+        <th class="num">総件数</th><th class="num">初診</th><th class="num">再診</th>
+        <th class="num">紹介状あり初診</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+      <tr>
+        <td class="num">1</td>
+        <td>医師A</td>
+        <td class="num">547</td>
+        <td class="num">15</td>
+        <td class="num">532</td>
+        <td class="num">14</td>
+      </tr>
+      
+      <tr>
+        <td class="num">2</td>
+        <td>医師B</td>
+        <td class="num">533</td>
+        <td class="num">16</td>
+        <td class="num">517</td>
+        <td class="num">14</td>
+      </tr>
+      
+      <tr>
+        <td class="num">3</td>
+        <td>医師C</td>
+        <td class="num">437</td>
+        <td class="num">18</td>
+        <td class="num">419</td>
+        <td class="num">18</td>
+      </tr>
+      
+      <tr>
+        <td class="num">4</td>
+        <td>医師D</td>
+        <td class="num">402</td>
+        <td class="num">15</td>
+        <td class="num">387</td>
+        <td class="num">12</td>
+      </tr>
+      
+      <tr>
+        <td class="num">5</td>
+        <td>医師E</td>
+        <td class="num">313</td>
+        <td class="num">0</td>
+        <td class="num">313</td>
+        <td class="num">0</td>
+      </tr>
+      
+      <tr>
+        <td class="num">6</td>
+        <td>医師F</td>
+        <td class="num">239</td>
+        <td class="num">15</td>
+        <td class="num">224</td>
+        <td class="num">12</td>
+      </tr>
+      
+      <tr>
+        <td class="num">7</td>
+        <td>医師G</td>
+        <td class="num">232</td>
+        <td class="num">0</td>
+        <td class="num">232</td>
+        <td class="num">0</td>
+      </tr>
+      
+      <tr>
+        <td class="num">8</td>
+        <td>医師H</td>
+        <td class="num">214</td>
+        <td class="num">3</td>
+        <td class="num">211</td>
+        <td class="num">2</td>
+      </tr>
+      
+      <tr>
+        <td class="num">9</td>
+        <td>医師I</td>
+        <td class="num">127</td>
+        <td class="num">3</td>
+        <td class="num">124</td>
+        <td class="num">3</td>
+      </tr>
+      
+      <tr>
+        <td class="num">10</td>
+        <td>医師J</td>
+        <td class="num">96</td>
+        <td class="num">0</td>
+        <td class="num">96</td>
+        <td class="num">0</td>
+      </tr>
+      
+    </tbody>
+  </table>
+</div>
+
+<div class="card">
+  <h2>逆紹介候補（薬のみ・短時間・紹介状なし・併科なし 再診）</h2>
+  <p class="site-meta">抽出条件：初再診=再診、紹介状無し、併科無、診察時間 9分以下、診察前検査なし</p>
+  <table>
+    <thead><tr><th>診察時間階級</th><th class="num">件数</th></tr></thead>
+    <tbody>
+      
+      <tr><td>0-4分</td><td class="num">496</td></tr>
+      
+      <tr><td>5-9分</td><td class="num">22</td></tr>
+      
+      <tr><th>合計</th><th class="num">518</th></tr>
+    </tbody>
+  </table>
+</div>
+
+<p><a href="../../index.html">← ハブへ戻る</a></p>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>// 共通ユーティリティ（Chart.js のデフォルト、数値整形、評価バッジ生成など）
+
+const OutpatientCommon = (() => {
+  const palette = {
+    naika: '#5b8a72',
+    geka: '#b25c2e',
+    other: '#9a7c4e',
+    primary: '#b25c2e',
+    accent: '#3d6b7d',
+    muted: '#6b6660',
+  };
+
+  function formatInt(n) {
+    if (n == null || Number.isNaN(n)) return '-';
+    return Math.round(n).toLocaleString('ja-JP');
+  }
+
+  function formatPct(n, digits = 1) {
+    if (n == null || Number.isNaN(n)) return '-';
+    return `${n.toFixed(digits)}%`;
+  }
+
+  function gradeFromPct(pct, inverse = false) {
+    if (pct == null || Number.isNaN(pct)) return 'D';
+    if (inverse) {
+      if (pct <= 90) return 'S';
+      if (pct <= 100) return 'A';
+      if (pct <= 110) return 'B';
+      if (pct <= 125) return 'C';
+      return 'D';
+    }
+    if (pct >= 110) return 'S';
+    if (pct >= 100) return 'A';
+    if (pct >= 90) return 'B';
+    if (pct >= 75) return 'C';
+    return 'D';
+  }
+
+  function gradeBadge(grade) {
+    const el = document.createElement('span');
+    el.className = `grade grade-${grade}`;
+    el.textContent = grade;
+    return el.outerHTML;
+  }
+
+  function typeBadge(type) {
+    const label = { naika: '内科', geka: '外科', other: 'その他' }[type] || type;
+    return `<span class="type-badge type-${type}">${label}</span>`;
+  }
+
+  if (typeof window !== 'undefined' && window.Chart) {
+    Chart.defaults.font.family =
+      '-apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif';
+    Chart.defaults.font.size = 12;
+    Chart.defaults.color = '#2d2a26';
+  }
+
+  return { palette, formatInt, formatPct, gradeFromPct, gradeBadge, typeBadge };
+})();
+</script>
+<script>
+const TZ_DATA = {"labels": ["月", "火", "水", "木", "金", "土", "日"], "datasets": [{"label": "午前(〜12時)", "data": [709, 726, 767, 153, 496, 1, 0]}, {"label": "午後前半(12-15時)", "data": [193, 160, 249, 18, 152, 0, 0]}, {"label": "午後後半(15-17時)", "data": [14, 6, 13, 4, 12, 0, 0]}, {"label": "夕方以降(17時〜)", "data": [6, 0, 5, 1, 0, 1, 1]}]};
+new Chart(document.getElementById('chartTimezone'), {
+  type: 'bar',
+  data: {
+    labels: TZ_DATA.labels,
+    datasets: TZ_DATA.datasets.map((ds, i) => ({
+      label: ds.label,
+      data: ds.data,
+      backgroundColor: [
+        OutpatientCommon.palette.primary,
+        OutpatientCommon.palette.accent,
+        OutpatientCommon.palette.naika,
+        OutpatientCommon.palette.other,
+      ][i % 4],
+    })),
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } },
+  },
+});
+</script>
+</main>
+
+<footer class="site-footer">
+  外来効率化ダッシュボード
+</footer>
+
+
+</body>
+</html>

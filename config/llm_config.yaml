@@ -1,0 +1,12 @@
+# Ollama 接続設定
+# Ollama を OpenAI互換サーバとして起動し、推奨モデル（Qwen2.5-14B-Instruct Q4_K_M 等）をロードすること
+endpoint: http://localhost:11434/v1/chat/completions
+model: ki-krugle-jp/llm-jp-4-8b-thinking:q4_k_m
+temperature: 0.3
+max_tokens: 500
+timeout: 120
+system_prompt: |
+  あなたは病院経営企画室のデータアナリストです。
+  経営層向けに、数値データから簡潔で示唆に富むハイライト文を作成します。
+  必ず日本語で、各項目につき2〜3文（50〜80字程度）で記述してください。
+  与えられた数値以外の推測や創作は絶対にしないでください。

@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+build/
+dist/
+
+# 仮想環境
+.venv/
+venv/
+env/
+
+# macOS / エディタ
+.DS_Store
+.vscode/
+.idea/
+
+# 環境変数
+.env
+
+# 患者情報を含む生データ（Gitコミット厳禁）
+data/raw/
+
+# 医師実名↔匿名ID 対応表（Gitコミット厳禁）
+config/master_key.csv
+
+# 予約名称↔匿名ID 対応表（Gitコミット厳禁）
+config/slot_key.csv
+
+# ローカル確認用（実名表示・Gitコミット厳禁）
+local/
+
+# 一時作業
+Temp/
+
+# 作業ディレクトリ（暫定。必要になったら都度解除）
+spec/

@@ -1,0 +1,119 @@
+/* 外来効率化ダッシュボード 共通テーマ（ウォームライト） */
+:root {
+  --color-bg: #fdfaf4;
+  --color-surface: #ffffff;
+  --color-surface-alt: #f5f0e6;
+  --color-text: #2d2a26;
+  --color-text-muted: #6b6660;
+  --color-border: #e5dfd2;
+  --color-primary: #b25c2e;
+  --color-primary-weak: #f0d8c5;
+  --color-accent: #3d6b7d;
+  --color-naika: #5b8a72;
+  --color-geka: #b25c2e;
+  --color-other: #9a7c4e;
+  --color-good: #3d7a4d;
+  --color-warn: #c98a2a;
+  --color-bad: #b8413c;
+  --radius: 6px;
+  --shadow-card: 0 1px 3px rgba(45, 42, 38, 0.08);
+  --font-sans: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN",
+               "Yu Gothic", Meiryo, sans-serif;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: var(--font-sans);
+  color: var(--color-text);
+  background: var(--color-bg);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+
+/* Header */
+.site-header {
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.site-title { font-size: 18px; font-weight: 600; margin: 0; }
+.site-meta { color: var(--color-text-muted); font-size: 12px; }
+
+/* Cards */
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow-card);
+  margin-bottom: 16px;
+}
+.card h2 { margin-top: 0; font-size: 16px; }
+.card h3 { font-size: 14px; margin-top: 16px; margin-bottom: 8px; }
+
+.grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+/* Tables */
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th, td { padding: 6px 8px; text-align: left; border-bottom: 1px solid var(--color-border); }
+th { background: var(--color-surface-alt); font-weight: 600; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+/* Grades */
+.grade {
+  display: inline-block;
+  min-width: 22px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-weight: 600;
+  text-align: center;
+  color: #fff;
+  font-size: 12px;
+}
+.grade-S { background: var(--color-good); }
+.grade-A { background: #6ba074; }
+.grade-B { background: var(--color-warn); }
+.grade-C { background: #d87f3e; }
+.grade-D { background: var(--color-bad); }
+
+/* Type badges */
+.type-badge {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 11px;
+  color: #fff;
+}
+.type-naika { background: var(--color-naika); }
+.type-geka { background: var(--color-geka); }
+.type-other { background: var(--color-other); }
+
+/* Nav links */
+.nav-list { list-style: none; padding: 0; margin: 0; }
+.nav-list li { margin-bottom: 6px; }
+.nav-list a {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+.nav-list a:hover { text-decoration: underline; }
+
+/* Chart wrappers */
+.chart-wrap { position: relative; height: 280px; }
+.chart-wrap-sm { position: relative; height: 180px; }
+
+footer.site-footer {
+  color: var(--color-text-muted);
+  font-size: 11px;
+  padding: 16px 24px;
+  text-align: center;
+}

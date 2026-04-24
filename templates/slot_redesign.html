@@ -1,0 +1,83 @@
+<div class="card">
+  <h2>予約枠 再設計提案 — {{ month }}</h2>
+  <p class="site-meta">
+    A枠 = 紹介状あり初診 / 稀用枠 = 月間件数 {{ rare_threshold }} 未満。
+    命名乖離は「予約名称」と実運用が乖離している枠（例: 初診枠で再診多用）。
+  </p>
+</div>
+
+<div class="card">
+  <h2>診療科別 サマリ（問題の多い順）</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>診療科</th>
+        <th>タイプ</th>
+        <th class="num">当月件数</th>
+        <th class="num">初診</th>
+        <th class="num">A枠件数</th>
+        <th class="num">A枠シェア</th>
+        <th class="num">稀用枠</th>
+        <th class="num">命名乖離</th>
+        <th>詳細</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for o in overview %}
+      <tr>
+        <td>{{ o.name }}</td>
+        <td>{{ o.type_label }}</td>
+        <td class="num">{{ o.total }}</td>
+        <td class="num">{{ o.sho }}</td>
+        <td class="num">{{ o.a_count }}</td>
+        <td class="num">{{ o.a_share }}%</td>
+        <td class="num">{{ o.rare_slots }}</td>
+        <td class="num">{{ o.naming_issues }}</td>
+        <td><a href="#{{ o.anchor }}">&darr;</a></td>
+      </tr>
+      {% endfor %}
+      {% if not overview %}
+      <tr><td colspan="9" class="site-meta">対象データがありません。</td></tr>
+      {% endif %}
+    </tbody>
+  </table>
+</div>
+
+{% for d in dept_sections %}
+<div class="card" id="{{ d.anchor }}">
+  <h2>{{ d.name }} <span class="type-badge">{{ d.type_label }}</span></h2>
+  <p class="site-meta">A枠件数 {{ d.a_count }} / A枠シェア {{ d.a_share }}%</p>
+  <table>
+    <thead>
+      <tr>
+        <th>予約名称</th>
+        <th class="num">総件数</th>
+        <th class="num">初診</th>
+        <th class="num">再診</th>
+        <th class="num">紹介状あり初診</th>
+        <th>検出</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in d.rows %}
+      <tr>
+        <td>{{ r.name }}</td>
+        <td class="num">{{ r.total }}</td>
+        <td class="num">{{ r.sho }}</td>
+        <td class="num">{{ r.sai }}</td>
+        <td class="num">{{ r.shokai_sho }}</td>
+        <td>
+          {% for f in r.flags %}
+          <span class="grade grade-C">{{ f }}</span>
+          {% endfor %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endfor %}
+
+<p><a href="../index.html">← ハブへ戻る</a></p>
+
+<script>{{ common_js | safe }}</script>

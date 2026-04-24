@@ -1,0 +1,5015 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>医師別 深掘り 2026-04</title>
+<style>/* 外来効率化ダッシュボード 共通テーマ（ウォームライト） */
+:root {
+  --color-bg: #fdfaf4;
+  --color-surface: #ffffff;
+  --color-surface-alt: #f5f0e6;
+  --color-text: #2d2a26;
+  --color-text-muted: #6b6660;
+  --color-border: #e5dfd2;
+  --color-primary: #b25c2e;
+  --color-primary-weak: #f0d8c5;
+  --color-accent: #3d6b7d;
+  --color-naika: #5b8a72;
+  --color-geka: #b25c2e;
+  --color-other: #9a7c4e;
+  --color-good: #3d7a4d;
+  --color-warn: #c98a2a;
+  --color-bad: #b8413c;
+  --radius: 6px;
+  --shadow-card: 0 1px 3px rgba(45, 42, 38, 0.08);
+  --font-sans: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN",
+               "Yu Gothic", Meiryo, sans-serif;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: var(--font-sans);
+  color: var(--color-text);
+  background: var(--color-bg);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+
+/* Header */
+.site-header {
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.site-title { font-size: 18px; font-weight: 600; margin: 0; }
+.site-meta { color: var(--color-text-muted); font-size: 12px; }
+
+/* Cards */
+.card {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow-card);
+  margin-bottom: 16px;
+}
+.card h2 { margin-top: 0; font-size: 16px; }
+.card h3 { font-size: 14px; margin-top: 16px; margin-bottom: 8px; }
+
+.grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+/* Tables */
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th, td { padding: 6px 8px; text-align: left; border-bottom: 1px solid var(--color-border); }
+th { background: var(--color-surface-alt); font-weight: 600; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+
+/* Grades */
+.grade {
+  display: inline-block;
+  min-width: 22px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-weight: 600;
+  text-align: center;
+  color: #fff;
+  font-size: 12px;
+}
+.grade-S { background: var(--color-good); }
+.grade-A { background: #6ba074; }
+.grade-B { background: var(--color-warn); }
+.grade-C { background: #d87f3e; }
+.grade-D { background: var(--color-bad); }
+
+/* Type badges */
+.type-badge {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 11px;
+  color: #fff;
+}
+.type-naika { background: var(--color-naika); }
+.type-geka { background: var(--color-geka); }
+.type-other { background: var(--color-other); }
+
+/* Nav links */
+.nav-list { list-style: none; padding: 0; margin: 0; }
+.nav-list li { margin-bottom: 6px; }
+.nav-list a {
+  color: var(--color-accent);
+  text-decoration: none;
+}
+.nav-list a:hover { text-decoration: underline; }
+
+/* Chart wrappers */
+.chart-wrap { position: relative; height: 280px; }
+.chart-wrap-sm { position: relative; height: 180px; }
+
+footer.site-footer {
+  color: var(--color-text-muted);
+  font-size: 11px;
+  padding: 16px 24px;
+  text-align: center;
+}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <h1 class="site-title">医師別 分析 (2026-04)</h1>
+  <div class="site-meta">生成: 2026-04-24 21:11</div>
+</header>
+
+<main class="container">
+<div class="card">
+  <h2>医師別 分析 — 2026-04</h2>
+  <p class="site-meta">
+    匿名ID は診療科内の件数順で「医師A, 医師B, ...」の表示名に付け替えています。
+    <br>sps = 再診件数 / 初診件数（低いほど新規依存度が高い）。
+  </p>
+</div>
+
+<div class="card">
+  <h2>診療科ナビ</h2>
+  <ul class="nav-list">
+    
+    <li><a href="#dept-U">泌尿器科（26名 / 2975件）</a></li>
+    
+    <li><a href="#dept-E">眼科（35名 / 2536件）</a></li>
+    
+    <li><a href="#dept-G">産婦人科（17名 / 1563件）</a></li>
+    
+    <li><a href="#dept-OR">整形外科（29名 / 1403件）</a></li>
+    
+    <li><a href="#dept-ENT">耳鼻咽喉科（18名 / 1268件）</a></li>
+    
+    <li><a href="#dept-GI">消化器内科（13名 / 1186件）</a></li>
+    
+    <li><a href="#dept-BR">乳腺外科（13名 / 1066件）</a></li>
+    
+    <li><a href="#dept-CV">循環器内科（17名 / 1254件）</a></li>
+    
+    <li><a href="#dept-RS">呼吸器内科（14名 / 998件）</a></li>
+    
+    <li><a href="#dept-GM">総合内科（23名 / 869件）</a></li>
+    
+    <li><a href="#dept-DM">皮膚科（12名 / 934件）</a></li>
+    
+    <li><a href="#dept-GS">一般消化器外科（15名 / 816件）</a></li>
+    
+    <li><a href="#dept-RH">リウマチ膠原病内科（13名 / 837件）</a></li>
+    
+    <li><a href="#dept-OS">歯科口腔外科（19名 / 732件）</a></li>
+    
+    <li><a href="#dept-RT">放射線治療科（11名 / 750件）</a></li>
+    
+    <li><a href="#dept-HE">血液内科（12名 / 703件）</a></li>
+    
+    <li><a href="#dept-NE">腎内科（9名 / 586件）</a></li>
+    
+    <li><a href="#dept-PD">小児科（16名 / 456件）</a></li>
+    
+    <li><a href="#dept-NR">脳神経内科（8名 / 381件）</a></li>
+    
+    <li><a href="#dept-PS">形成外科（15名 / 377件）</a></li>
+    
+    <li><a href="#dept-ER">救急科（2名 / 252件）</a></li>
+    
+    <li><a href="#dept-IM">内科（1名 / 251件）</a></li>
+    
+    <li><a href="#dept-MN">メンタルケア科（8名 / 302件）</a></li>
+    
+    <li><a href="#dept-NS">脳神経外科（9名 / 188件）</a></li>
+    
+    <li><a href="#dept-CS">心臓血管外科（5名 / 90件）</a></li>
+    
+    <li><a href="#dept-RS2">呼吸器外科（5名 / 151件）</a></li>
+    
+    <li><a href="#dept-ON">臨床腫瘍科（4名 / 121件）</a></li>
+    
+    <li><a href="#dept-AL">アレルギー科（4名 / 154件）</a></li>
+    
+    <li><a href="#dept-DB">糖尿病内分泌内科（2名 / 72件）</a></li>
+    
+    
+  </ul>
+</div>
+
+
+<div class="card" id="dept-U">
+  <h2>泌尿器科 <span class="type-badge">外科</span></h2>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>医師</th>
+        <th class="num">総件数</th>
+        <th class="num">初診</th>
+        <th class="num">再診</th>
+        <th class="num">紹介状あり初診</th>
+        <th class="num">sps</th>
+        <th class="num">紹介率</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+      <tr>
+        <td class="num">1</td>
+        <td>医師A</td>
+        <td class="num">467</td>
+        <td class="num">15</td>
+        <td class="num">452</td>
+        <td class="num">14</td>
+        <td class="num">30.1</td>
+        <td class="num">93.3%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">2</td>
+        <td>医師B</td>
+        <td class="num">409</td>
+        <td class="num">10</td>
+        <td class="num">399</td>
+        <td class="num">8</td>
+        <td class="num">39.9</td>
+        <td class="num">80.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">3</td>
+        <td>医師C</td>
+        <td class="num">370</td>
+        <td class="num">11</td>
+        <td class="num">359</td>
+        <td class="num">9</td>
+        <td class="num">32.6</td>
+        <td class="num">81.8%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">4</td>
+        <td>医師D</td>
+        <td class="num">302</td>
+        <td class="num">9</td>
+        <td class="num">293</td>
+        <td class="num">9</td>
+        <td class="num">32.6</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">5</td>
+        <td>医師E</td>
+        <td class="num">243</td>
+        <td class="num">0</td>
+        <td class="num">243</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">6</td>
+        <td>医師F</td>
+        <td class="num">232</td>
+        <td class="num">0</td>
+        <td class="num">232</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">7</td>
+        <td>医師G</td>
+        <td class="num">218</td>
+        <td class="num">4</td>
+        <td class="num">214</td>
+        <td class="num">3</td>
+        <td class="num">53.5</td>
+        <td class="num">75.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">8</td>
+        <td>医師H</td>
+        <td class="num">181</td>
+        <td class="num">3</td>
+        <td class="num">178</td>
+        <td class="num">2</td>
+        <td class="num">59.3</td>
+        <td class="num">66.7%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">9</td>
+        <td>医師I</td>
+        <td class="num">103</td>
+        <td class="num">8</td>
+        <td class="num">95</td>
+        <td class="num">4</td>
+        <td class="num">11.9</td>
+        <td class="num">50.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">10</td>
+        <td>医師J</td>
+        <td class="num">84</td>
+        <td class="num">1</td>
+        <td class="num">83</td>
+        <td class="num">1</td>
+        <td class="num">83.0</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">11</td>
+        <td>医師K</td>
+        <td class="num">66</td>
+        <td class="num">0</td>
+        <td class="num">66</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">12</td>
+        <td>医師L</td>
+        <td class="num">57</td>
+        <td class="num">0</td>
+        <td class="num">57</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">13</td>
+        <td>医師M</td>
+        <td class="num">55</td>
+        <td class="num">9</td>
+        <td class="num">46</td>
+        <td class="num">6</td>
+        <td class="num">5.1</td>
+        <td class="num">66.7%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">14</td>
+        <td>医師N</td>
+        <td class="num">46</td>
+        <td class="num">0</td>
+        <td class="num">46</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">15</td>
+        <td>医師O</td>
+        <td class="num">41</td>
+        <td class="num">2</td>
+        <td class="num">39</td>
+        <td class="num">2</td>
+        <td class="num">19.5</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">16</td>
+        <td>医師P</td>
+        <td class="num">16</td>
+        <td class="num">0</td>
+        <td class="num">16</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">17</td>
+        <td>医師Q</td>
+        <td class="num">15</td>
+        <td class="num">2</td>
+        <td class="num">13</td>
+        <td class="num">0</td>
+        <td class="num">6.5</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">18</td>
+        <td>医師R</td>
+        <td class="num">13</td>
+        <td class="num">0</td>
+        <td class="num">13</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">19</td>
+        <td>医師S</td>
+        <td class="num">13</td>
+        <td class="num">11</td>
+        <td class="num">2</td>
+        <td class="num">2</td>
+        <td class="num">0.2</td>
+        <td class="num">18.2%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">20</td>
+        <td>医師T</td>
+        <td class="num">11</td>
+        <td class="num">0</td>
+        <td class="num">11</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">21</td>
+        <td>医師U</td>
+        <td class="num">10</td>
+        <td class="num">1</td>
+        <td class="num">9</td>
+        <td class="num">1</td>
+        <td class="num">9.0</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">22</td>
+        <td>医師V</td>
+        <td class="num">9</td>
+        <td class="num">0</td>
+        <td class="num">9</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">23</td>
+        <td>医師W</td>
+        <td class="num">7</td>
+        <td class="num">0</td>
+        <td class="num">7</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">24</td>
+        <td>医師X</td>
+        <td class="num">3</td>
+        <td class="num">0</td>
+        <td class="num">3</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">25</td>
+        <td>医師Y</td>
+        <td class="num">2</td>
+        <td class="num">0</td>
+        <td class="num">2</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">26</td>
+        <td>医師Z</td>
+        <td class="num">2</td>
+        <td class="num">2</td>
+        <td class="num">0</td>
+        <td class="num">2</td>
+        <td class="num">0.0</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+    </tbody>
+  </table>
+</div>
+
+<div class="card" id="dept-E">
+  <h2>眼科 <span class="type-badge">外科</span></h2>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>医師</th>
+        <th class="num">総件数</th>
+        <th class="num">初診</th>
+        <th class="num">再診</th>
+        <th class="num">紹介状あり初診</th>
+        <th class="num">sps</th>
+        <th class="num">紹介率</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+      <tr>
+        <td class="num">1</td>
+        <td>医師A</td>
+        <td class="num">230</td>
+        <td class="num">2</td>
+        <td class="num">228</td>
+        <td class="num">1</td>
+        <td class="num">114.0</td>
+        <td class="num">50.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">2</td>
+        <td>医師B</td>
+        <td class="num">219</td>
+        <td class="num">19</td>
+        <td class="num">200</td>
+        <td class="num">16</td>
+        <td class="num">10.5</td>
+        <td class="num">84.2%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">3</td>
+        <td>医師C</td>
+        <td class="num">198</td>
+        <td class="num">0</td>
+        <td class="num">198</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">4</td>
+        <td>医師D</td>
+        <td class="num">181</td>
+        <td class="num">26</td>
+        <td class="num">155</td>
+        <td class="num">26</td>
+        <td class="num">6.0</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">5</td>
+        <td>医師E</td>
+        <td class="num">172</td>
+        <td class="num">18</td>
+        <td class="num">154</td>
+        <td class="num">18</td>
+        <td class="num">8.6</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">6</td>
+        <td>医師F</td>
+        <td class="num">171</td>
+        <td class="num">18</td>
+        <td class="num">153</td>
+        <td class="num">15</td>
+        <td class="num">8.5</td>
+        <td class="num">83.3%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">7</td>
+        <td>医師G</td>
+        <td class="num">161</td>
+        <td class="num">30</td>
+        <td class="num">131</td>
+        <td class="num">29</td>
+        <td class="num">4.4</td>
+        <td class="num">96.7%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">8</td>
+        <td>医師H</td>
+        <td class="num">141</td>
+        <td class="num">0</td>
+        <td class="num">141</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">9</td>
+        <td>医師I</td>
+        <td class="num">117</td>
+        <td class="num">0</td>
+        <td class="num">117</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">10</td>
+        <td>医師J</td>
+        <td class="num">110</td>
+        <td class="num">0</td>
+        <td class="num">110</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">11</td>
+        <td>医師K</td>
+        <td class="num">109</td>
+        <td class="num">11</td>
+        <td class="num">98</td>
+        <td class="num">11</td>
+        <td class="num">8.9</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">12</td>
+        <td>医師L</td>
+        <td class="num">103</td>
+        <td class="num">13</td>
+        <td class="num">90</td>
+        <td class="num">13</td>
+        <td class="num">6.9</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">13</td>
+        <td>医師M</td>
+        <td class="num">94</td>
+        <td class="num">41</td>
+        <td class="num">53</td>
+        <td class="num">40</td>
+        <td class="num">1.3</td>
+        <td class="num">97.6%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">14</td>
+        <td>医師N</td>
+        <td class="num">85</td>
+        <td class="num">0</td>
+        <td class="num">85</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">15</td>
+        <td>医師O</td>
+        <td class="num">69</td>
+        <td class="num">0</td>
+        <td class="num">69</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">16</td>
+        <td>医師P</td>
+        <td class="num">64</td>
+        <td class="num">0</td>
+        <td class="num">64</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">17</td>
+        <td>医師Q</td>
+        <td class="num">49</td>
+        <td class="num">7</td>
+        <td class="num">42</td>
+        <td class="num">6</td>
+        <td class="num">6.0</td>
+        <td class="num">85.7%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">18</td>
+        <td>医師R</td>
+        <td class="num">47</td>
+        <td class="num">0</td>
+        <td class="num">47</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">19</td>
+        <td>医師S</td>
+        <td class="num">43</td>
+        <td class="num">0</td>
+        <td class="num">43</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">20</td>
+        <td>医師T</td>
+        <td class="num">31</td>
+        <td class="num">0</td>
+        <td class="num">31</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">21</td>
+        <td>医師U</td>
+        <td class="num">23</td>
+        <td class="num">0</td>
+        <td class="num">23</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">22</td>
+        <td>医師V</td>
+        <td class="num">18</td>
+        <td class="num">0</td>
+        <td class="num">18</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">23</td>
+        <td>医師W</td>
+        <td class="num">16</td>
+        <td class="num">3</td>
+        <td class="num">13</td>
+        <td class="num">0</td>
+        <td class="num">4.3</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">24</td>
+        <td>医師X</td>
+        <td class="num">16</td>
+        <td class="num">0</td>
+        <td class="num">16</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">25</td>
+        <td>医師Y</td>
+        <td class="num">14</td>
+        <td class="num">4</td>
+        <td class="num">10</td>
+        <td class="num">1</td>
+        <td class="num">2.5</td>
+        <td class="num">25.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">26</td>
+        <td>医師Z</td>
+        <td class="num">14</td>
+        <td class="num">0</td>
+        <td class="num">14</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">27</td>
+        <td>医師27</td>
+        <td class="num">10</td>
+        <td class="num">0</td>
+        <td class="num">10</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">28</td>
+        <td>医師28</td>
+        <td class="num">8</td>
+        <td class="num">0</td>
+        <td class="num">8</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">29</td>
+        <td>医師29</td>
+        <td class="num">5</td>
+        <td class="num">0</td>
+        <td class="num">5</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">30</td>
+        <td>医師30</td>
+        <td class="num">5</td>
+        <td class="num">0</td>
+        <td class="num">5</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">31</td>
+        <td>医師31</td>
+        <td class="num">4</td>
+        <td class="num">0</td>
+        <td class="num">4</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">32</td>
+        <td>医師32</td>
+        <td class="num">4</td>
+        <td class="num">0</td>
+        <td class="num">4</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">33</td>
+        <td>医師33</td>
+        <td class="num">3</td>
+        <td class="num">0</td>
+        <td class="num">3</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">34</td>
+        <td>医師34</td>
+        <td class="num">1</td>
+        <td class="num">0</td>
+        <td class="num">1</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">35</td>
+        <td>医師35</td>
+        <td class="num">1</td>
+        <td class="num">0</td>
+        <td class="num">1</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+    </tbody>
+  </table>
+</div>
+
+<div class="card" id="dept-G">
+  <h2>産婦人科 <span class="type-badge">外科</span></h2>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>医師</th>
+        <th class="num">総件数</th>
+        <th class="num">初診</th>
+        <th class="num">再診</th>
+        <th class="num">紹介状あり初診</th>
+        <th class="num">sps</th>
+        <th class="num">紹介率</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+      <tr>
+        <td class="num">1</td>
+        <td>医師A</td>
+        <td class="num">293</td>
+        <td class="num">35</td>
+        <td class="num">258</td>
+        <td class="num">34</td>
+        <td class="num">7.4</td>
+        <td class="num">97.1%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">2</td>
+        <td>医師B</td>
+        <td class="num">238</td>
+        <td class="num">9</td>
+        <td class="num">229</td>
+        <td class="num">9</td>
+        <td class="num">25.4</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">3</td>
+        <td>医師C</td>
+        <td class="num">237</td>
+        <td class="num">6</td>
+        <td class="num">231</td>
+        <td class="num">6</td>
+        <td class="num">38.5</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">4</td>
+        <td>医師D</td>
+        <td class="num">177</td>
+        <td class="num">0</td>
+        <td class="num">177</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">5</td>
+        <td>医師E</td>
+        <td class="num">153</td>
+        <td class="num">12</td>
+        <td class="num">141</td>
+        <td class="num">11</td>
+        <td class="num">11.8</td>
+        <td class="num">91.7%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">6</td>
+        <td>医師F</td>
+        <td class="num">143</td>
+        <td class="num">22</td>
+        <td class="num">121</td>
+        <td class="num">21</td>
+        <td class="num">5.5</td>
+        <td class="num">95.5%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">7</td>
+        <td>医師G</td>
+        <td class="num">95</td>
+        <td class="num">8</td>
+        <td class="num">87</td>
+        <td class="num">8</td>
+        <td class="num">10.9</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">8</td>
+        <td>医師H</td>
+        <td class="num">64</td>
+        <td class="num">10</td>
+        <td class="num">54</td>
+        <td class="num">4</td>
+        <td class="num">5.4</td>
+        <td class="num">40.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">9</td>
+        <td>医師I</td>
+        <td class="num">31</td>
+        <td class="num">0</td>
+        <td class="num">31</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">10</td>
+        <td>医師J</td>
+        <td class="num">30</td>
+        <td class="num">15</td>
+        <td class="num">15</td>
+        <td class="num">0</td>
+        <td class="num">1.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">11</td>
+        <td>医師K</td>
+        <td class="num">28</td>
+        <td class="num">0</td>
+        <td class="num">28</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">12</td>
+        <td>医師L</td>
+        <td class="num">25</td>
+        <td class="num">1</td>
+        <td class="num">24</td>
+        <td class="num">1</td>
+        <td class="num">24.0</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">13</td>
+        <td>医師M</td>
+        <td class="num">19</td>
+        <td class="num">0</td>
+        <td class="num">19</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">14</td>
+        <td>医師N</td>
+        <td class="num">12</td>
+        <td class="num">0</td>
+        <td class="num">12</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">15</td>
+        <td>医師O</td>
+        <td class="num">11</td>
+        <td class="num">0</td>
+        <td class="num">11</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">16</td>
+        <td>医師P</td>
+        <td class="num">5</td>
+        <td class="num">0</td>
+        <td class="num">5</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">17</td>
+        <td>医師Q</td>
+        <td class="num">2</td>
+        <td class="num">0</td>
+        <td class="num">2</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+    </tbody>
+  </table>
+</div>
+
+<div class="card" id="dept-OR">
+  <h2>整形外科 <span class="type-badge">外科</span></h2>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>医師</th>
+        <th class="num">総件数</th>
+        <th class="num">初診</th>
+        <th class="num">再診</th>
+        <th class="num">紹介状あり初診</th>
+        <th class="num">sps</th>
+        <th class="num">紹介率</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+      <tr>
+        <td class="num">1</td>
+        <td>医師A</td>
+        <td class="num">227</td>
+        <td class="num">29</td>
+        <td class="num">198</td>
+        <td class="num">28</td>
+        <td class="num">6.8</td>
+        <td class="num">96.6%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">2</td>
+        <td>医師B</td>
+        <td class="num">115</td>
+        <td class="num">1</td>
+        <td class="num">114</td>
+        <td class="num">1</td>
+        <td class="num">114.0</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">3</td>
+        <td>医師C</td>
+        <td class="num">104</td>
+        <td class="num">12</td>
+        <td class="num">92</td>
+        <td class="num">10</td>
+        <td class="num">7.7</td>
+        <td class="num">83.3%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">4</td>
+        <td>医師D</td>
+        <td class="num">98</td>
+        <td class="num">12</td>
+        <td class="num">86</td>
+        <td class="num">12</td>
+        <td class="num">7.2</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">5</td>
+        <td>医師E</td>
+        <td class="num">86</td>
+        <td class="num">9</td>
+        <td class="num">77</td>
+        <td class="num">9</td>
+        <td class="num">8.6</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">6</td>
+        <td>医師F</td>
+        <td class="num">80</td>
+        <td class="num">12</td>
+        <td class="num">68</td>
+        <td class="num">12</td>
+        <td class="num">5.7</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">7</td>
+        <td>医師G</td>
+        <td class="num">78</td>
+        <td class="num">14</td>
+        <td class="num">64</td>
+        <td class="num">12</td>
+        <td class="num">4.6</td>
+        <td class="num">85.7%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">8</td>
+        <td>医師H</td>
+        <td class="num">78</td>
+        <td class="num">0</td>
+        <td class="num">78</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">9</td>
+        <td>医師I</td>
+        <td class="num">65</td>
+        <td class="num">10</td>
+        <td class="num">55</td>
+        <td class="num">10</td>
+        <td class="num">5.5</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">10</td>
+        <td>医師J</td>
+        <td class="num">61</td>
+        <td class="num">15</td>
+        <td class="num">46</td>
+        <td class="num">13</td>
+        <td class="num">3.1</td>
+        <td class="num">86.7%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">11</td>
+        <td>医師K</td>
+        <td class="num">53</td>
+        <td class="num">6</td>
+        <td class="num">47</td>
+        <td class="num">6</td>
+        <td class="num">7.8</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">12</td>
+        <td>医師L</td>
+        <td class="num">51</td>
+        <td class="num">9</td>
+        <td class="num">42</td>
+        <td class="num">9</td>
+        <td class="num">4.7</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">13</td>
+        <td>医師M</td>
+        <td class="num">47</td>
+        <td class="num">5</td>
+        <td class="num">42</td>
+        <td class="num">4</td>
+        <td class="num">8.4</td>
+        <td class="num">80.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">14</td>
+        <td>医師N</td>
+        <td class="num">36</td>
+        <td class="num">1</td>
+        <td class="num">35</td>
+        <td class="num">1</td>
+        <td class="num">35.0</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">15</td>
+        <td>医師O</td>
+        <td class="num">35</td>
+        <td class="num">6</td>
+        <td class="num">29</td>
+        <td class="num">6</td>
+        <td class="num">4.8</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">16</td>
+        <td>医師P</td>
+        <td class="num">34</td>
+        <td class="num">4</td>
+        <td class="num">30</td>
+        <td class="num">4</td>
+        <td class="num">7.5</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">17</td>
+        <td>医師Q</td>
+        <td class="num">34</td>
+        <td class="num">4</td>
+        <td class="num">30</td>
+        <td class="num">4</td>
+        <td class="num">7.5</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">18</td>
+        <td>医師R</td>
+        <td class="num">31</td>
+        <td class="num">9</td>
+        <td class="num">22</td>
+        <td class="num">9</td>
+        <td class="num">2.4</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">19</td>
+        <td>医師S</td>
+        <td class="num">23</td>
+        <td class="num">0</td>
+        <td class="num">23</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">20</td>
+        <td>医師T</td>
+        <td class="num">19</td>
+        <td class="num">11</td>
+        <td class="num">8</td>
+        <td class="num">5</td>
+        <td class="num">0.7</td>
+        <td class="num">45.5%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">21</td>
+        <td>医師U</td>
+        <td class="num">12</td>
+        <td class="num">1</td>
+        <td class="num">11</td>
+        <td class="num">1</td>
+        <td class="num">11.0</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">22</td>
+        <td>医師V</td>
+        <td class="num">11</td>
+        <td class="num">0</td>
+        <td class="num">11</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">23</td>
+        <td>医師W</td>
+        <td class="num">9</td>
+        <td class="num">0</td>
+        <td class="num">9</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">24</td>
+        <td>医師X</td>
+        <td class="num">6</td>
+        <td class="num">0</td>
+        <td class="num">6</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">25</td>
+        <td>医師Y</td>
+        <td class="num">4</td>
+        <td class="num">0</td>
+        <td class="num">4</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">26</td>
+        <td>医師Z</td>
+        <td class="num">3</td>
+        <td class="num">0</td>
+        <td class="num">3</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">27</td>
+        <td>医師27</td>
+        <td class="num">1</td>
+        <td class="num">0</td>
+        <td class="num">1</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">28</td>
+        <td>医師28</td>
+        <td class="num">1</td>
+        <td class="num">0</td>
+        <td class="num">1</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">29</td>
+        <td>医師29</td>
+        <td class="num">1</td>
+        <td class="num">0</td>
+        <td class="num">1</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+    </tbody>
+  </table>
+</div>
+
+<div class="card" id="dept-ENT">
+  <h2>耳鼻咽喉科 <span class="type-badge">外科</span></h2>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>医師</th>
+        <th class="num">総件数</th>
+        <th class="num">初診</th>
+        <th class="num">再診</th>
+        <th class="num">紹介状あり初診</th>
+        <th class="num">sps</th>
+        <th class="num">紹介率</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+      <tr>
+        <td class="num">1</td>
+        <td>医師A</td>
+        <td class="num">233</td>
+        <td class="num">45</td>
+        <td class="num">188</td>
+        <td class="num">37</td>
+        <td class="num">4.2</td>
+        <td class="num">82.2%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">2</td>
+        <td>医師B</td>
+        <td class="num">217</td>
+        <td class="num">0</td>
+        <td class="num">217</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">3</td>
+        <td>医師C</td>
+        <td class="num">199</td>
+        <td class="num">10</td>
+        <td class="num">189</td>
+        <td class="num">6</td>
+        <td class="num">18.9</td>
+        <td class="num">60.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">4</td>
+        <td>医師D</td>
+        <td class="num">155</td>
+        <td class="num">36</td>
+        <td class="num">119</td>
+        <td class="num">31</td>
+        <td class="num">3.3</td>
+        <td class="num">86.1%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">5</td>
+        <td>医師E</td>
+        <td class="num">77</td>
+        <td class="num">0</td>
+        <td class="num">77</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">6</td>
+        <td>医師F</td>
+        <td class="num">69</td>
+        <td class="num">2</td>
+        <td class="num">67</td>
+        <td class="num">1</td>
+        <td class="num">33.5</td>
+        <td class="num">50.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">7</td>
+        <td>医師G</td>
+        <td class="num">65</td>
+        <td class="num">0</td>
+        <td class="num">65</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">8</td>
+        <td>医師H</td>
+        <td class="num">64</td>
+        <td class="num">0</td>
+        <td class="num">64</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">9</td>
+        <td>医師I</td>
+        <td class="num">47</td>
+        <td class="num">4</td>
+        <td class="num">43</td>
+        <td class="num">3</td>
+        <td class="num">10.8</td>
+        <td class="num">75.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">10</td>
+        <td>医師J</td>
+        <td class="num">45</td>
+        <td class="num">0</td>
+        <td class="num">45</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">11</td>
+        <td>医師K</td>
+        <td class="num">42</td>
+        <td class="num">14</td>
+        <td class="num">28</td>
+        <td class="num">11</td>
+        <td class="num">2.0</td>
+        <td class="num">78.6%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">12</td>
+        <td>医師L</td>
+        <td class="num">15</td>
+        <td class="num">9</td>
+        <td class="num">6</td>
+        <td class="num">0</td>
+        <td class="num">0.7</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">13</td>
+        <td>医師M</td>
+        <td class="num">14</td>
+        <td class="num">3</td>
+        <td class="num">11</td>
+        <td class="num">2</td>
+        <td class="num">3.7</td>
+        <td class="num">66.7%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">14</td>
+        <td>医師N</td>
+        <td class="num">7</td>
+        <td class="num">0</td>
+        <td class="num">7</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">15</td>
+        <td>医師O</td>
+        <td class="num">6</td>
+        <td class="num">0</td>
+        <td class="num">6</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">16</td>
+        <td>医師P</td>
+        <td class="num">6</td>
+        <td class="num">0</td>
+        <td class="num">6</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">17</td>
+        <td>医師Q</td>
+        <td class="num">5</td>
+        <td class="num">0</td>
+        <td class="num">5</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">18</td>
+        <td>医師R</td>
+        <td class="num">2</td>
+        <td class="num">0</td>
+        <td class="num">2</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+    </tbody>
+  </table>
+</div>
+
+<div class="card" id="dept-GI">
+  <h2>消化器内科 <span class="type-badge">内科</span></h2>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>医師</th>
+        <th class="num">総件数</th>
+        <th class="num">初診</th>
+        <th class="num">再診</th>
+        <th class="num">紹介状あり初診</th>
+        <th class="num">sps</th>
+        <th class="num">紹介率</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+      <tr>
+        <td class="num">1</td>
+        <td>医師A</td>
+        <td class="num">234</td>
+        <td class="num">25</td>
+        <td class="num">209</td>
+        <td class="num">23</td>
+        <td class="num">8.4</td>
+        <td class="num">92.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">2</td>
+        <td>医師B</td>
+        <td class="num">232</td>
+        <td class="num">17</td>
+        <td class="num">215</td>
+        <td class="num">13</td>
+        <td class="num">12.6</td>
+        <td class="num">76.5%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">3</td>
+        <td>医師C</td>
+        <td class="num">186</td>
+        <td class="num">16</td>
+        <td class="num">170</td>
+        <td class="num">15</td>
+        <td class="num">10.6</td>
+        <td class="num">93.8%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">4</td>
+        <td>医師D</td>
+        <td class="num">164</td>
+        <td class="num">16</td>
+        <td class="num">148</td>
+        <td class="num">15</td>
+        <td class="num">9.2</td>
+        <td class="num">93.8%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">5</td>
+        <td>医師E</td>
+        <td class="num">158</td>
+        <td class="num">25</td>
+        <td class="num">133</td>
+        <td class="num">22</td>
+        <td class="num">5.3</td>
+        <td class="num">88.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">6</td>
+        <td>医師F</td>
+        <td class="num">118</td>
+        <td class="num">6</td>
+        <td class="num">112</td>
+        <td class="num">5</td>
+        <td class="num">18.7</td>
+        <td class="num">83.3%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">7</td>
+        <td>医師G</td>
+        <td class="num">24</td>
+        <td class="num">5</td>
+        <td class="num">19</td>
+        <td class="num">4</td>
+        <td class="num">3.8</td>
+        <td class="num">80.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">8</td>
+        <td>医師H</td>
+        <td class="num">22</td>
+        <td class="num">0</td>
+        <td class="num">22</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">9</td>
+        <td>医師I</td>
+        <td class="num">21</td>
+        <td class="num">3</td>
+        <td class="num">18</td>
+        <td class="num">3</td>
+        <td class="num">6.0</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">10</td>
+        <td>医師J</td>
+        <td class="num">11</td>
+        <td class="num">0</td>
+        <td class="num">11</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">11</td>
+        <td>医師K</td>
+        <td class="num">11</td>
+        <td class="num">4</td>
+        <td class="num">7</td>
+        <td class="num">2</td>
+        <td class="num">1.8</td>
+        <td class="num">50.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">12</td>
+        <td>医師L</td>
+        <td class="num">3</td>
+        <td class="num">0</td>
+        <td class="num">3</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">13</td>
+        <td>医師M</td>
+        <td class="num">2</td>
+        <td class="num">0</td>
+        <td class="num">2</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+    </tbody>
+  </table>
+</div>
+
+<div class="card" id="dept-BR">
+  <h2>乳腺外科 <span class="type-badge">外科</span></h2>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>医師</th>
+        <th class="num">総件数</th>
+        <th class="num">初診</th>
+        <th class="num">再診</th>
+        <th class="num">紹介状あり初診</th>
+        <th class="num">sps</th>
+        <th class="num">紹介率</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+      <tr>
+        <td class="num">1</td>
+        <td>医師A</td>
+        <td class="num">310</td>
+        <td class="num">23</td>
+        <td class="num">287</td>
+        <td class="num">20</td>
+        <td class="num">12.5</td>
+        <td class="num">87.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">2</td>
+        <td>医師B</td>
+        <td class="num">250</td>
+        <td class="num">10</td>
+        <td class="num">240</td>
+        <td class="num">9</td>
+        <td class="num">24.0</td>
+        <td class="num">90.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">3</td>
+        <td>医師C</td>
+        <td class="num">209</td>
+        <td class="num">1</td>
+        <td class="num">208</td>
+        <td class="num">0</td>
+        <td class="num">208.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">4</td>
+        <td>医師D</td>
+        <td class="num">84</td>
+        <td class="num">6</td>
+        <td class="num">78</td>
+        <td class="num">6</td>
+        <td class="num">13.0</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">5</td>
+        <td>医師E</td>
+        <td class="num">81</td>
+        <td class="num">5</td>
+        <td class="num">76</td>
+        <td class="num">5</td>
+        <td class="num">15.2</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">6</td>
+        <td>医師F</td>
+        <td class="num">76</td>
+        <td class="num">2</td>
+        <td class="num">74</td>
+        <td class="num">2</td>
+        <td class="num">37.0</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">7</td>
+        <td>医師G</td>
+        <td class="num">21</td>
+        <td class="num">0</td>
+        <td class="num">21</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">8</td>
+        <td>医師H</td>
+        <td class="num">13</td>
+        <td class="num">0</td>
+        <td class="num">13</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">9</td>
+        <td>医師I</td>
+        <td class="num">9</td>
+        <td class="num">4</td>
+        <td class="num">5</td>
+        <td class="num">0</td>
+        <td class="num">1.2</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">10</td>
+        <td>医師J</td>
+        <td class="num">4</td>
+        <td class="num">0</td>
+        <td class="num">4</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">11</td>
+        <td>医師K</td>
+        <td class="num">4</td>
+        <td class="num">0</td>
+        <td class="num">4</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">12</td>
+        <td>医師L</td>
+        <td class="num">3</td>
+        <td class="num">0</td>
+        <td class="num">3</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">13</td>
+        <td>医師M</td>
+        <td class="num">2</td>
+        <td class="num">0</td>
+        <td class="num">2</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+    </tbody>
+  </table>
+</div>
+
+<div class="card" id="dept-CV">
+  <h2>循環器内科 <span class="type-badge">内科</span></h2>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>医師</th>
+        <th class="num">総件数</th>
+        <th class="num">初診</th>
+        <th class="num">再診</th>
+        <th class="num">紹介状あり初診</th>
+        <th class="num">sps</th>
+        <th class="num">紹介率</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+      <tr>
+        <td class="num">1</td>
+        <td>医師A</td>
+        <td class="num">209</td>
+        <td class="num">33</td>
+        <td class="num">176</td>
+        <td class="num">33</td>
+        <td class="num">5.3</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">2</td>
+        <td>医師B</td>
+        <td class="num">200</td>
+        <td class="num">11</td>
+        <td class="num">189</td>
+        <td class="num">11</td>
+        <td class="num">17.2</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">3</td>
+        <td>医師C</td>
+        <td class="num">150</td>
+        <td class="num">11</td>
+        <td class="num">139</td>
+        <td class="num">10</td>
+        <td class="num">12.6</td>
+        <td class="num">90.9%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">4</td>
+        <td>医師D</td>
+        <td class="num">123</td>
+        <td class="num">6</td>
+        <td class="num">117</td>
+        <td class="num">6</td>
+        <td class="num">19.5</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">5</td>
+        <td>医師E</td>
+        <td class="num">114</td>
+        <td class="num">10</td>
+        <td class="num">104</td>
+        <td class="num">9</td>
+        <td class="num">10.4</td>
+        <td class="num">90.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">6</td>
+        <td>医師F</td>
+        <td class="num">99</td>
+        <td class="num">4</td>
+        <td class="num">95</td>
+        <td class="num">4</td>
+        <td class="num">23.8</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">7</td>
+        <td>医師G</td>
+        <td class="num">89</td>
+        <td class="num">0</td>
+        <td class="num">89</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">8</td>
+        <td>医師H</td>
+        <td class="num">85</td>
+        <td class="num">7</td>
+        <td class="num">78</td>
+        <td class="num">4</td>
+        <td class="num">11.1</td>
+        <td class="num">57.1%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">9</td>
+        <td>医師I</td>
+        <td class="num">61</td>
+        <td class="num">0</td>
+        <td class="num">61</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">10</td>
+        <td>医師J</td>
+        <td class="num">55</td>
+        <td class="num">9</td>
+        <td class="num">46</td>
+        <td class="num">9</td>
+        <td class="num">5.1</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">11</td>
+        <td>医師K</td>
+        <td class="num">38</td>
+        <td class="num">22</td>
+        <td class="num">16</td>
+        <td class="num">10</td>
+        <td class="num">0.7</td>
+        <td class="num">45.5%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">12</td>
+        <td>医師L</td>
+        <td class="num">13</td>
+        <td class="num">5</td>
+        <td class="num">8</td>
+        <td class="num">5</td>
+        <td class="num">1.6</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">13</td>
+        <td>医師M</td>
+        <td class="num">7</td>
+        <td class="num">0</td>
+        <td class="num">7</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">14</td>
+        <td>医師N</td>
+        <td class="num">6</td>
+        <td class="num">0</td>
+        <td class="num">6</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">15</td>
+        <td>医師O</td>
+        <td class="num">2</td>
+        <td class="num">2</td>
+        <td class="num">0</td>
+        <td class="num">2</td>
+        <td class="num">0.0</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">16</td>
+        <td>医師P</td>
+        <td class="num">2</td>
+        <td class="num">0</td>
+        <td class="num">2</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">17</td>
+        <td>医師Q</td>
+        <td class="num">1</td>
+        <td class="num">0</td>
+        <td class="num">1</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+    </tbody>
+  </table>
+</div>
+
+<div class="card" id="dept-RS">
+  <h2>呼吸器内科 <span class="type-badge">内科</span></h2>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>医師</th>
+        <th class="num">総件数</th>
+        <th class="num">初診</th>
+        <th class="num">再診</th>
+        <th class="num">紹介状あり初診</th>
+        <th class="num">sps</th>
+        <th class="num">紹介率</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+      <tr>
+        <td class="num">1</td>
+        <td>医師A</td>
+        <td class="num">210</td>
+        <td class="num">0</td>
+        <td class="num">210</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">2</td>
+        <td>医師B</td>
+        <td class="num">136</td>
+        <td class="num">14</td>
+        <td class="num">122</td>
+        <td class="num">11</td>
+        <td class="num">8.7</td>
+        <td class="num">78.6%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">3</td>
+        <td>医師C</td>
+        <td class="num">126</td>
+        <td class="num">5</td>
+        <td class="num">121</td>
+        <td class="num">4</td>
+        <td class="num">24.2</td>
+        <td class="num">80.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">4</td>
+        <td>医師D</td>
+        <td class="num">101</td>
+        <td class="num">2</td>
+        <td class="num">99</td>
+        <td class="num">2</td>
+        <td class="num">49.5</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">5</td>
+        <td>医師E</td>
+        <td class="num">95</td>
+        <td class="num">4</td>
+        <td class="num">91</td>
+        <td class="num">4</td>
+        <td class="num">22.8</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">6</td>
+        <td>医師F</td>
+        <td class="num">90</td>
+        <td class="num">10</td>
+        <td class="num">80</td>
+        <td class="num">9</td>
+        <td class="num">8.0</td>
+        <td class="num">90.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">7</td>
+        <td>医師G</td>
+        <td class="num">82</td>
+        <td class="num">8</td>
+        <td class="num">74</td>
+        <td class="num">5</td>
+        <td class="num">9.2</td>
+        <td class="num">62.5%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">8</td>
+        <td>医師H</td>
+        <td class="num">55</td>
+        <td class="num">6</td>
+        <td class="num">49</td>
+        <td class="num">5</td>
+        <td class="num">8.2</td>
+        <td class="num">83.3%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">9</td>
+        <td>医師I</td>
+        <td class="num">46</td>
+        <td class="num">8</td>
+        <td class="num">38</td>
+        <td class="num">8</td>
+        <td class="num">4.8</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">10</td>
+        <td>医師J</td>
+        <td class="num">17</td>
+        <td class="num">0</td>
+        <td class="num">17</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">11</td>
+        <td>医師K</td>
+        <td class="num">16</td>
+        <td class="num">0</td>
+        <td class="num">16</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">12</td>
+        <td>医師L</td>
+        <td class="num">14</td>
+        <td class="num">0</td>
+        <td class="num">14</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">13</td>
+        <td>医師M</td>
+        <td class="num">7</td>
+        <td class="num">3</td>
+        <td class="num">4</td>
+        <td class="num">3</td>
+        <td class="num">1.3</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">14</td>
+        <td>医師N</td>
+        <td class="num">3</td>
+        <td class="num">0</td>
+        <td class="num">3</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+    </tbody>
+  </table>
+</div>
+
+<div class="card" id="dept-GM">
+  <h2>総合内科 <span class="type-badge">内科</span></h2>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>医師</th>
+        <th class="num">総件数</th>
+        <th class="num">初診</th>
+        <th class="num">再診</th>
+        <th class="num">紹介状あり初診</th>
+        <th class="num">sps</th>
+        <th class="num">紹介率</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+      <tr>
+        <td class="num">1</td>
+        <td>医師A</td>
+        <td class="num">296</td>
+        <td class="num">133</td>
+        <td class="num">163</td>
+        <td class="num">87</td>
+        <td class="num">1.2</td>
+        <td class="num">65.4%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">2</td>
+        <td>医師B</td>
+        <td class="num">112</td>
+        <td class="num">0</td>
+        <td class="num">112</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">3</td>
+        <td>医師C</td>
+        <td class="num">54</td>
+        <td class="num">0</td>
+        <td class="num">54</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">4</td>
+        <td>医師D</td>
+        <td class="num">53</td>
+        <td class="num">10</td>
+        <td class="num">43</td>
+        <td class="num">2</td>
+        <td class="num">4.3</td>
+        <td class="num">20.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">5</td>
+        <td>医師E</td>
+        <td class="num">49</td>
+        <td class="num">0</td>
+        <td class="num">49</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">6</td>
+        <td>医師F</td>
+        <td class="num">46</td>
+        <td class="num">0</td>
+        <td class="num">46</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">7</td>
+        <td>医師G</td>
+        <td class="num">36</td>
+        <td class="num">0</td>
+        <td class="num">36</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">8</td>
+        <td>医師H</td>
+        <td class="num">29</td>
+        <td class="num">0</td>
+        <td class="num">29</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">9</td>
+        <td>医師I</td>
+        <td class="num">27</td>
+        <td class="num">0</td>
+        <td class="num">27</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">10</td>
+        <td>医師J</td>
+        <td class="num">26</td>
+        <td class="num">0</td>
+        <td class="num">26</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">11</td>
+        <td>医師K</td>
+        <td class="num">25</td>
+        <td class="num">0</td>
+        <td class="num">25</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">12</td>
+        <td>医師L</td>
+        <td class="num">20</td>
+        <td class="num">0</td>
+        <td class="num">20</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">13</td>
+        <td>医師M</td>
+        <td class="num">20</td>
+        <td class="num">0</td>
+        <td class="num">20</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">14</td>
+        <td>医師N</td>
+        <td class="num">11</td>
+        <td class="num">0</td>
+        <td class="num">11</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">15</td>
+        <td>医師O</td>
+        <td class="num">11</td>
+        <td class="num">0</td>
+        <td class="num">11</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">16</td>
+        <td>医師P</td>
+        <td class="num">10</td>
+        <td class="num">0</td>
+        <td class="num">10</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">17</td>
+        <td>医師Q</td>
+        <td class="num">10</td>
+        <td class="num">0</td>
+        <td class="num">10</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">18</td>
+        <td>医師R</td>
+        <td class="num">9</td>
+        <td class="num">0</td>
+        <td class="num">9</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">19</td>
+        <td>医師S</td>
+        <td class="num">8</td>
+        <td class="num">0</td>
+        <td class="num">8</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">20</td>
+        <td>医師T</td>
+        <td class="num">7</td>
+        <td class="num">0</td>
+        <td class="num">7</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">21</td>
+        <td>医師U</td>
+        <td class="num">6</td>
+        <td class="num">0</td>
+        <td class="num">6</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">22</td>
+        <td>医師V</td>
+        <td class="num">3</td>
+        <td class="num">0</td>
+        <td class="num">3</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">23</td>
+        <td>医師W</td>
+        <td class="num">1</td>
+        <td class="num">0</td>
+        <td class="num">1</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+    </tbody>
+  </table>
+</div>
+
+<div class="card" id="dept-DM">
+  <h2>皮膚科 <span class="type-badge">外科</span></h2>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>医師</th>
+        <th class="num">総件数</th>
+        <th class="num">初診</th>
+        <th class="num">再診</th>
+        <th class="num">紹介状あり初診</th>
+        <th class="num">sps</th>
+        <th class="num">紹介率</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+      <tr>
+        <td class="num">1</td>
+        <td>医師A</td>
+        <td class="num">185</td>
+        <td class="num">28</td>
+        <td class="num">157</td>
+        <td class="num">24</td>
+        <td class="num">5.6</td>
+        <td class="num">85.7%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">2</td>
+        <td>医師B</td>
+        <td class="num">178</td>
+        <td class="num">15</td>
+        <td class="num">163</td>
+        <td class="num">11</td>
+        <td class="num">10.9</td>
+        <td class="num">73.3%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">3</td>
+        <td>医師C</td>
+        <td class="num">159</td>
+        <td class="num">10</td>
+        <td class="num">149</td>
+        <td class="num">9</td>
+        <td class="num">14.9</td>
+        <td class="num">90.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">4</td>
+        <td>医師D</td>
+        <td class="num">152</td>
+        <td class="num">16</td>
+        <td class="num">136</td>
+        <td class="num">12</td>
+        <td class="num">8.5</td>
+        <td class="num">75.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">5</td>
+        <td>医師E</td>
+        <td class="num">86</td>
+        <td class="num">1</td>
+        <td class="num">85</td>
+        <td class="num">0</td>
+        <td class="num">85.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">6</td>
+        <td>医師F</td>
+        <td class="num">53</td>
+        <td class="num">0</td>
+        <td class="num">53</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">7</td>
+        <td>医師G</td>
+        <td class="num">47</td>
+        <td class="num">10</td>
+        <td class="num">37</td>
+        <td class="num">7</td>
+        <td class="num">3.7</td>
+        <td class="num">70.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">8</td>
+        <td>医師H</td>
+        <td class="num">37</td>
+        <td class="num">0</td>
+        <td class="num">37</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">9</td>
+        <td>医師I</td>
+        <td class="num">26</td>
+        <td class="num">0</td>
+        <td class="num">26</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">10</td>
+        <td>医師J</td>
+        <td class="num">9</td>
+        <td class="num">1</td>
+        <td class="num">8</td>
+        <td class="num">1</td>
+        <td class="num">8.0</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">11</td>
+        <td>医師K</td>
+        <td class="num">1</td>
+        <td class="num">0</td>
+        <td class="num">1</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">12</td>
+        <td>医師L</td>
+        <td class="num">1</td>
+        <td class="num">1</td>
+        <td class="num">0</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+    </tbody>
+  </table>
+</div>
+
+<div class="card" id="dept-GS">
+  <h2>一般消化器外科 <span class="type-badge">外科</span></h2>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>医師</th>
+        <th class="num">総件数</th>
+        <th class="num">初診</th>
+        <th class="num">再診</th>
+        <th class="num">紹介状あり初診</th>
+        <th class="num">sps</th>
+        <th class="num">紹介率</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+      <tr>
+        <td class="num">1</td>
+        <td>医師A</td>
+        <td class="num">169</td>
+        <td class="num">3</td>
+        <td class="num">166</td>
+        <td class="num">3</td>
+        <td class="num">55.3</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">2</td>
+        <td>医師B</td>
+        <td class="num">165</td>
+        <td class="num">16</td>
+        <td class="num">149</td>
+        <td class="num">16</td>
+        <td class="num">9.3</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">3</td>
+        <td>医師C</td>
+        <td class="num">83</td>
+        <td class="num">2</td>
+        <td class="num">81</td>
+        <td class="num">2</td>
+        <td class="num">40.5</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">4</td>
+        <td>医師D</td>
+        <td class="num">75</td>
+        <td class="num">4</td>
+        <td class="num">71</td>
+        <td class="num">4</td>
+        <td class="num">17.8</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">5</td>
+        <td>医師E</td>
+        <td class="num">71</td>
+        <td class="num">1</td>
+        <td class="num">70</td>
+        <td class="num">1</td>
+        <td class="num">70.0</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">6</td>
+        <td>医師F</td>
+        <td class="num">55</td>
+        <td class="num">4</td>
+        <td class="num">51</td>
+        <td class="num">1</td>
+        <td class="num">12.8</td>
+        <td class="num">25.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">7</td>
+        <td>医師G</td>
+        <td class="num">39</td>
+        <td class="num">0</td>
+        <td class="num">39</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">8</td>
+        <td>医師H</td>
+        <td class="num">38</td>
+        <td class="num">1</td>
+        <td class="num">37</td>
+        <td class="num">1</td>
+        <td class="num">37.0</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">9</td>
+        <td>医師I</td>
+        <td class="num">35</td>
+        <td class="num">5</td>
+        <td class="num">30</td>
+        <td class="num">3</td>
+        <td class="num">6.0</td>
+        <td class="num">60.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">10</td>
+        <td>医師J</td>
+        <td class="num">31</td>
+        <td class="num">0</td>
+        <td class="num">31</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">11</td>
+        <td>医師K</td>
+        <td class="num">25</td>
+        <td class="num">1</td>
+        <td class="num">24</td>
+        <td class="num">1</td>
+        <td class="num">24.0</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">12</td>
+        <td>医師L</td>
+        <td class="num">12</td>
+        <td class="num">0</td>
+        <td class="num">12</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">13</td>
+        <td>医師M</td>
+        <td class="num">7</td>
+        <td class="num">5</td>
+        <td class="num">2</td>
+        <td class="num">2</td>
+        <td class="num">0.4</td>
+        <td class="num">40.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">14</td>
+        <td>医師N</td>
+        <td class="num">6</td>
+        <td class="num">0</td>
+        <td class="num">6</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">15</td>
+        <td>医師O</td>
+        <td class="num">5</td>
+        <td class="num">0</td>
+        <td class="num">5</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+    </tbody>
+  </table>
+</div>
+
+<div class="card" id="dept-RH">
+  <h2>リウマチ膠原病内科 <span class="type-badge">内科</span></h2>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>医師</th>
+        <th class="num">総件数</th>
+        <th class="num">初診</th>
+        <th class="num">再診</th>
+        <th class="num">紹介状あり初診</th>
+        <th class="num">sps</th>
+        <th class="num">紹介率</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+      <tr>
+        <td class="num">1</td>
+        <td>医師A</td>
+        <td class="num">222</td>
+        <td class="num">5</td>
+        <td class="num">217</td>
+        <td class="num">5</td>
+        <td class="num">43.4</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">2</td>
+        <td>医師B</td>
+        <td class="num">127</td>
+        <td class="num">2</td>
+        <td class="num">125</td>
+        <td class="num">2</td>
+        <td class="num">62.5</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">3</td>
+        <td>医師C</td>
+        <td class="num">124</td>
+        <td class="num">3</td>
+        <td class="num">121</td>
+        <td class="num">3</td>
+        <td class="num">40.3</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">4</td>
+        <td>医師D</td>
+        <td class="num">78</td>
+        <td class="num">2</td>
+        <td class="num">76</td>
+        <td class="num">2</td>
+        <td class="num">38.0</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">5</td>
+        <td>医師E</td>
+        <td class="num">72</td>
+        <td class="num">0</td>
+        <td class="num">72</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">6</td>
+        <td>医師F</td>
+        <td class="num">63</td>
+        <td class="num">3</td>
+        <td class="num">60</td>
+        <td class="num">3</td>
+        <td class="num">20.0</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">7</td>
+        <td>医師G</td>
+        <td class="num">43</td>
+        <td class="num">3</td>
+        <td class="num">40</td>
+        <td class="num">2</td>
+        <td class="num">13.3</td>
+        <td class="num">66.7%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">8</td>
+        <td>医師H</td>
+        <td class="num">40</td>
+        <td class="num">0</td>
+        <td class="num">40</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">9</td>
+        <td>医師I</td>
+        <td class="num">34</td>
+        <td class="num">0</td>
+        <td class="num">34</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">10</td>
+        <td>医師J</td>
+        <td class="num">18</td>
+        <td class="num">0</td>
+        <td class="num">18</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">11</td>
+        <td>医師K</td>
+        <td class="num">8</td>
+        <td class="num">0</td>
+        <td class="num">8</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">12</td>
+        <td>医師L</td>
+        <td class="num">5</td>
+        <td class="num">0</td>
+        <td class="num">5</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">13</td>
+        <td>医師M</td>
+        <td class="num">3</td>
+        <td class="num">0</td>
+        <td class="num">3</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+    </tbody>
+  </table>
+</div>
+
+<div class="card" id="dept-OS">
+  <h2>歯科口腔外科 <span class="type-badge">外科</span></h2>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>医師</th>
+        <th class="num">総件数</th>
+        <th class="num">初診</th>
+        <th class="num">再診</th>
+        <th class="num">紹介状あり初診</th>
+        <th class="num">sps</th>
+        <th class="num">紹介率</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+      <tr>
+        <td class="num">1</td>
+        <td>医師A</td>
+        <td class="num">148</td>
+        <td class="num">27</td>
+        <td class="num">121</td>
+        <td class="num">23</td>
+        <td class="num">4.5</td>
+        <td class="num">85.2%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">2</td>
+        <td>医師B</td>
+        <td class="num">145</td>
+        <td class="num">22</td>
+        <td class="num">123</td>
+        <td class="num">18</td>
+        <td class="num">5.6</td>
+        <td class="num">81.8%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">3</td>
+        <td>医師C</td>
+        <td class="num">86</td>
+        <td class="num">15</td>
+        <td class="num">71</td>
+        <td class="num">14</td>
+        <td class="num">4.7</td>
+        <td class="num">93.3%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">4</td>
+        <td>医師D</td>
+        <td class="num">76</td>
+        <td class="num">15</td>
+        <td class="num">61</td>
+        <td class="num">14</td>
+        <td class="num">4.1</td>
+        <td class="num">93.3%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">5</td>
+        <td>医師E</td>
+        <td class="num">41</td>
+        <td class="num">15</td>
+        <td class="num">26</td>
+        <td class="num">14</td>
+        <td class="num">1.7</td>
+        <td class="num">93.3%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">6</td>
+        <td>医師F</td>
+        <td class="num">37</td>
+        <td class="num">17</td>
+        <td class="num">20</td>
+        <td class="num">11</td>
+        <td class="num">1.2</td>
+        <td class="num">64.7%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">7</td>
+        <td>医師G</td>
+        <td class="num">36</td>
+        <td class="num">14</td>
+        <td class="num">22</td>
+        <td class="num">0</td>
+        <td class="num">1.6</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">8</td>
+        <td>医師H</td>
+        <td class="num">35</td>
+        <td class="num">13</td>
+        <td class="num">22</td>
+        <td class="num">13</td>
+        <td class="num">1.7</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">9</td>
+        <td>医師I</td>
+        <td class="num">21</td>
+        <td class="num">7</td>
+        <td class="num">14</td>
+        <td class="num">4</td>
+        <td class="num">2.0</td>
+        <td class="num">57.1%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">10</td>
+        <td>医師J</td>
+        <td class="num">18</td>
+        <td class="num">0</td>
+        <td class="num">18</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">11</td>
+        <td>医師K</td>
+        <td class="num">18</td>
+        <td class="num">5</td>
+        <td class="num">13</td>
+        <td class="num">0</td>
+        <td class="num">2.6</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">12</td>
+        <td>医師L</td>
+        <td class="num">14</td>
+        <td class="num">0</td>
+        <td class="num">14</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">13</td>
+        <td>医師M</td>
+        <td class="num">12</td>
+        <td class="num">0</td>
+        <td class="num">12</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">14</td>
+        <td>医師N</td>
+        <td class="num">12</td>
+        <td class="num">1</td>
+        <td class="num">11</td>
+        <td class="num">0</td>
+        <td class="num">11.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">15</td>
+        <td>医師O</td>
+        <td class="num">10</td>
+        <td class="num">2</td>
+        <td class="num">8</td>
+        <td class="num">2</td>
+        <td class="num">4.0</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">16</td>
+        <td>医師P</td>
+        <td class="num">9</td>
+        <td class="num">0</td>
+        <td class="num">9</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">17</td>
+        <td>医師Q</td>
+        <td class="num">8</td>
+        <td class="num">3</td>
+        <td class="num">5</td>
+        <td class="num">0</td>
+        <td class="num">1.7</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">18</td>
+        <td>医師R</td>
+        <td class="num">4</td>
+        <td class="num">0</td>
+        <td class="num">4</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">19</td>
+        <td>医師S</td>
+        <td class="num">2</td>
+        <td class="num">0</td>
+        <td class="num">2</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+    </tbody>
+  </table>
+</div>
+
+<div class="card" id="dept-RT">
+  <h2>放射線治療科 <span class="type-badge">その他</span></h2>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>医師</th>
+        <th class="num">総件数</th>
+        <th class="num">初診</th>
+        <th class="num">再診</th>
+        <th class="num">紹介状あり初診</th>
+        <th class="num">sps</th>
+        <th class="num">紹介率</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+      <tr>
+        <td class="num">1</td>
+        <td>医師A</td>
+        <td class="num">436</td>
+        <td class="num">6</td>
+        <td class="num">430</td>
+        <td class="num">5</td>
+        <td class="num">71.7</td>
+        <td class="num">83.3%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">2</td>
+        <td>医師B</td>
+        <td class="num">156</td>
+        <td class="num">0</td>
+        <td class="num">156</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">3</td>
+        <td>医師C</td>
+        <td class="num">48</td>
+        <td class="num">0</td>
+        <td class="num">48</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">4</td>
+        <td>医師D</td>
+        <td class="num">33</td>
+        <td class="num">0</td>
+        <td class="num">33</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">5</td>
+        <td>医師E</td>
+        <td class="num">27</td>
+        <td class="num">0</td>
+        <td class="num">27</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">6</td>
+        <td>医師F</td>
+        <td class="num">21</td>
+        <td class="num">0</td>
+        <td class="num">21</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">7</td>
+        <td>医師G</td>
+        <td class="num">8</td>
+        <td class="num">0</td>
+        <td class="num">8</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">8</td>
+        <td>医師H</td>
+        <td class="num">7</td>
+        <td class="num">0</td>
+        <td class="num">7</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">9</td>
+        <td>医師I</td>
+        <td class="num">6</td>
+        <td class="num">0</td>
+        <td class="num">6</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">10</td>
+        <td>医師J</td>
+        <td class="num">5</td>
+        <td class="num">0</td>
+        <td class="num">5</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">11</td>
+        <td>医師K</td>
+        <td class="num">3</td>
+        <td class="num">3</td>
+        <td class="num">0</td>
+        <td class="num">3</td>
+        <td class="num">0.0</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+    </tbody>
+  </table>
+</div>
+
+<div class="card" id="dept-HE">
+  <h2>血液内科 <span class="type-badge">内科</span></h2>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>医師</th>
+        <th class="num">総件数</th>
+        <th class="num">初診</th>
+        <th class="num">再診</th>
+        <th class="num">紹介状あり初診</th>
+        <th class="num">sps</th>
+        <th class="num">紹介率</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+      <tr>
+        <td class="num">1</td>
+        <td>医師A</td>
+        <td class="num">143</td>
+        <td class="num">4</td>
+        <td class="num">139</td>
+        <td class="num">4</td>
+        <td class="num">34.8</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">2</td>
+        <td>医師B</td>
+        <td class="num">126</td>
+        <td class="num">5</td>
+        <td class="num">121</td>
+        <td class="num">5</td>
+        <td class="num">24.2</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">3</td>
+        <td>医師C</td>
+        <td class="num">114</td>
+        <td class="num">3</td>
+        <td class="num">111</td>
+        <td class="num">3</td>
+        <td class="num">37.0</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">4</td>
+        <td>医師D</td>
+        <td class="num">67</td>
+        <td class="num">0</td>
+        <td class="num">67</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">5</td>
+        <td>医師E</td>
+        <td class="num">62</td>
+        <td class="num">2</td>
+        <td class="num">60</td>
+        <td class="num">2</td>
+        <td class="num">30.0</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">6</td>
+        <td>医師F</td>
+        <td class="num">48</td>
+        <td class="num">0</td>
+        <td class="num">48</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">7</td>
+        <td>医師G</td>
+        <td class="num">30</td>
+        <td class="num">0</td>
+        <td class="num">30</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">8</td>
+        <td>医師H</td>
+        <td class="num">28</td>
+        <td class="num">0</td>
+        <td class="num">28</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">9</td>
+        <td>医師I</td>
+        <td class="num">27</td>
+        <td class="num">0</td>
+        <td class="num">27</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">10</td>
+        <td>医師J</td>
+        <td class="num">20</td>
+        <td class="num">0</td>
+        <td class="num">20</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">11</td>
+        <td>医師K</td>
+        <td class="num">20</td>
+        <td class="num">0</td>
+        <td class="num">20</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">12</td>
+        <td>医師L</td>
+        <td class="num">18</td>
+        <td class="num">0</td>
+        <td class="num">18</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+    </tbody>
+  </table>
+</div>
+
+<div class="card" id="dept-NE">
+  <h2>腎内科 <span class="type-badge">内科</span></h2>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>医師</th>
+        <th class="num">総件数</th>
+        <th class="num">初診</th>
+        <th class="num">再診</th>
+        <th class="num">紹介状あり初診</th>
+        <th class="num">sps</th>
+        <th class="num">紹介率</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+      <tr>
+        <td class="num">1</td>
+        <td>医師A</td>
+        <td class="num">242</td>
+        <td class="num">8</td>
+        <td class="num">234</td>
+        <td class="num">7</td>
+        <td class="num">29.2</td>
+        <td class="num">87.5%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">2</td>
+        <td>医師B</td>
+        <td class="num">186</td>
+        <td class="num">5</td>
+        <td class="num">181</td>
+        <td class="num">5</td>
+        <td class="num">36.2</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">3</td>
+        <td>医師C</td>
+        <td class="num">62</td>
+        <td class="num">1</td>
+        <td class="num">61</td>
+        <td class="num">0</td>
+        <td class="num">61.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">4</td>
+        <td>医師D</td>
+        <td class="num">36</td>
+        <td class="num">1</td>
+        <td class="num">35</td>
+        <td class="num">1</td>
+        <td class="num">35.0</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">5</td>
+        <td>医師E</td>
+        <td class="num">30</td>
+        <td class="num">0</td>
+        <td class="num">30</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">6</td>
+        <td>医師F</td>
+        <td class="num">18</td>
+        <td class="num">3</td>
+        <td class="num">15</td>
+        <td class="num">3</td>
+        <td class="num">5.0</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">7</td>
+        <td>医師G</td>
+        <td class="num">5</td>
+        <td class="num">1</td>
+        <td class="num">4</td>
+        <td class="num">0</td>
+        <td class="num">4.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">8</td>
+        <td>医師H</td>
+        <td class="num">4</td>
+        <td class="num">0</td>
+        <td class="num">4</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">9</td>
+        <td>医師I</td>
+        <td class="num">3</td>
+        <td class="num">0</td>
+        <td class="num">3</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+    </tbody>
+  </table>
+</div>
+
+<div class="card" id="dept-PD">
+  <h2>小児科 <span class="type-badge">内科</span></h2>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>医師</th>
+        <th class="num">総件数</th>
+        <th class="num">初診</th>
+        <th class="num">再診</th>
+        <th class="num">紹介状あり初診</th>
+        <th class="num">sps</th>
+        <th class="num">紹介率</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+      <tr>
+        <td class="num">1</td>
+        <td>医師A</td>
+        <td class="num">58</td>
+        <td class="num">13</td>
+        <td class="num">45</td>
+        <td class="num">9</td>
+        <td class="num">3.5</td>
+        <td class="num">69.2%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">2</td>
+        <td>医師B</td>
+        <td class="num">52</td>
+        <td class="num">7</td>
+        <td class="num">45</td>
+        <td class="num">7</td>
+        <td class="num">6.4</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">3</td>
+        <td>医師C</td>
+        <td class="num">51</td>
+        <td class="num">6</td>
+        <td class="num">45</td>
+        <td class="num">5</td>
+        <td class="num">7.5</td>
+        <td class="num">83.3%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">4</td>
+        <td>医師D</td>
+        <td class="num">43</td>
+        <td class="num">1</td>
+        <td class="num">42</td>
+        <td class="num">1</td>
+        <td class="num">42.0</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">5</td>
+        <td>医師E</td>
+        <td class="num">39</td>
+        <td class="num">5</td>
+        <td class="num">34</td>
+        <td class="num">4</td>
+        <td class="num">6.8</td>
+        <td class="num">80.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">6</td>
+        <td>医師F</td>
+        <td class="num">37</td>
+        <td class="num">4</td>
+        <td class="num">33</td>
+        <td class="num">3</td>
+        <td class="num">8.2</td>
+        <td class="num">75.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">7</td>
+        <td>医師G</td>
+        <td class="num">34</td>
+        <td class="num">1</td>
+        <td class="num">33</td>
+        <td class="num">1</td>
+        <td class="num">33.0</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">8</td>
+        <td>医師H</td>
+        <td class="num">34</td>
+        <td class="num">31</td>
+        <td class="num">3</td>
+        <td class="num">5</td>
+        <td class="num">0.1</td>
+        <td class="num">16.1%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">9</td>
+        <td>医師I</td>
+        <td class="num">29</td>
+        <td class="num">15</td>
+        <td class="num">14</td>
+        <td class="num">9</td>
+        <td class="num">0.9</td>
+        <td class="num">60.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">10</td>
+        <td>医師J</td>
+        <td class="num">18</td>
+        <td class="num">2</td>
+        <td class="num">16</td>
+        <td class="num">1</td>
+        <td class="num">8.0</td>
+        <td class="num">50.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">11</td>
+        <td>医師K</td>
+        <td class="num">17</td>
+        <td class="num">1</td>
+        <td class="num">16</td>
+        <td class="num">1</td>
+        <td class="num">16.0</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">12</td>
+        <td>医師L</td>
+        <td class="num">15</td>
+        <td class="num">1</td>
+        <td class="num">14</td>
+        <td class="num">1</td>
+        <td class="num">14.0</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">13</td>
+        <td>医師M</td>
+        <td class="num">15</td>
+        <td class="num">3</td>
+        <td class="num">12</td>
+        <td class="num">3</td>
+        <td class="num">4.0</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">14</td>
+        <td>医師N</td>
+        <td class="num">7</td>
+        <td class="num">0</td>
+        <td class="num">7</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">15</td>
+        <td>医師O</td>
+        <td class="num">4</td>
+        <td class="num">0</td>
+        <td class="num">4</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">16</td>
+        <td>医師P</td>
+        <td class="num">3</td>
+        <td class="num">0</td>
+        <td class="num">3</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+    </tbody>
+  </table>
+</div>
+
+<div class="card" id="dept-NR">
+  <h2>脳神経内科 <span class="type-badge">内科</span></h2>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>医師</th>
+        <th class="num">総件数</th>
+        <th class="num">初診</th>
+        <th class="num">再診</th>
+        <th class="num">紹介状あり初診</th>
+        <th class="num">sps</th>
+        <th class="num">紹介率</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+      <tr>
+        <td class="num">1</td>
+        <td>医師A</td>
+        <td class="num">185</td>
+        <td class="num">22</td>
+        <td class="num">163</td>
+        <td class="num">21</td>
+        <td class="num">7.4</td>
+        <td class="num">95.5%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">2</td>
+        <td>医師B</td>
+        <td class="num">83</td>
+        <td class="num">9</td>
+        <td class="num">74</td>
+        <td class="num">8</td>
+        <td class="num">8.2</td>
+        <td class="num">88.9%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">3</td>
+        <td>医師C</td>
+        <td class="num">53</td>
+        <td class="num">1</td>
+        <td class="num">52</td>
+        <td class="num">1</td>
+        <td class="num">52.0</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">4</td>
+        <td>医師D</td>
+        <td class="num">43</td>
+        <td class="num">2</td>
+        <td class="num">41</td>
+        <td class="num">2</td>
+        <td class="num">20.5</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">5</td>
+        <td>医師E</td>
+        <td class="num">9</td>
+        <td class="num">3</td>
+        <td class="num">6</td>
+        <td class="num">3</td>
+        <td class="num">2.0</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">6</td>
+        <td>医師F</td>
+        <td class="num">5</td>
+        <td class="num">0</td>
+        <td class="num">5</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">7</td>
+        <td>医師G</td>
+        <td class="num">2</td>
+        <td class="num">2</td>
+        <td class="num">0</td>
+        <td class="num">2</td>
+        <td class="num">0.0</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">8</td>
+        <td>医師H</td>
+        <td class="num">1</td>
+        <td class="num">1</td>
+        <td class="num">0</td>
+        <td class="num">1</td>
+        <td class="num">0.0</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+    </tbody>
+  </table>
+</div>
+
+<div class="card" id="dept-PS">
+  <h2>形成外科 <span class="type-badge">外科</span></h2>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>医師</th>
+        <th class="num">総件数</th>
+        <th class="num">初診</th>
+        <th class="num">再診</th>
+        <th class="num">紹介状あり初診</th>
+        <th class="num">sps</th>
+        <th class="num">紹介率</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+      <tr>
+        <td class="num">1</td>
+        <td>医師A</td>
+        <td class="num">116</td>
+        <td class="num">8</td>
+        <td class="num">108</td>
+        <td class="num">8</td>
+        <td class="num">13.5</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">2</td>
+        <td>医師B</td>
+        <td class="num">92</td>
+        <td class="num">5</td>
+        <td class="num">87</td>
+        <td class="num">4</td>
+        <td class="num">17.4</td>
+        <td class="num">80.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">3</td>
+        <td>医師C</td>
+        <td class="num">67</td>
+        <td class="num">1</td>
+        <td class="num">66</td>
+        <td class="num">1</td>
+        <td class="num">66.0</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">4</td>
+        <td>医師D</td>
+        <td class="num">19</td>
+        <td class="num">1</td>
+        <td class="num">18</td>
+        <td class="num">1</td>
+        <td class="num">18.0</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">5</td>
+        <td>医師E</td>
+        <td class="num">17</td>
+        <td class="num">0</td>
+        <td class="num">17</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">6</td>
+        <td>医師F</td>
+        <td class="num">15</td>
+        <td class="num">0</td>
+        <td class="num">15</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">7</td>
+        <td>医師G</td>
+        <td class="num">12</td>
+        <td class="num">4</td>
+        <td class="num">8</td>
+        <td class="num">2</td>
+        <td class="num">2.0</td>
+        <td class="num">50.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">8</td>
+        <td>医師H</td>
+        <td class="num">10</td>
+        <td class="num">0</td>
+        <td class="num">10</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">9</td>
+        <td>医師I</td>
+        <td class="num">9</td>
+        <td class="num">0</td>
+        <td class="num">9</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">10</td>
+        <td>医師J</td>
+        <td class="num">9</td>
+        <td class="num">0</td>
+        <td class="num">9</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">11</td>
+        <td>医師K</td>
+        <td class="num">4</td>
+        <td class="num">0</td>
+        <td class="num">4</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">12</td>
+        <td>医師L</td>
+        <td class="num">3</td>
+        <td class="num">1</td>
+        <td class="num">2</td>
+        <td class="num">0</td>
+        <td class="num">2.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">13</td>
+        <td>医師M</td>
+        <td class="num">2</td>
+        <td class="num">0</td>
+        <td class="num">2</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">14</td>
+        <td>医師N</td>
+        <td class="num">1</td>
+        <td class="num">0</td>
+        <td class="num">1</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">15</td>
+        <td>医師O</td>
+        <td class="num">1</td>
+        <td class="num">0</td>
+        <td class="num">1</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+    </tbody>
+  </table>
+</div>
+
+<div class="card" id="dept-ER">
+  <h2>救急科 <span class="type-badge">その他</span></h2>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>医師</th>
+        <th class="num">総件数</th>
+        <th class="num">初診</th>
+        <th class="num">再診</th>
+        <th class="num">紹介状あり初診</th>
+        <th class="num">sps</th>
+        <th class="num">紹介率</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+      <tr>
+        <td class="num">1</td>
+        <td>医師A</td>
+        <td class="num">239</td>
+        <td class="num">166</td>
+        <td class="num">73</td>
+        <td class="num">8</td>
+        <td class="num">0.4</td>
+        <td class="num">4.8%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">2</td>
+        <td>医師B</td>
+        <td class="num">13</td>
+        <td class="num">0</td>
+        <td class="num">13</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+    </tbody>
+  </table>
+</div>
+
+<div class="card" id="dept-IM">
+  <h2>内科 <span class="type-badge">内科</span></h2>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>医師</th>
+        <th class="num">総件数</th>
+        <th class="num">初診</th>
+        <th class="num">再診</th>
+        <th class="num">紹介状あり初診</th>
+        <th class="num">sps</th>
+        <th class="num">紹介率</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+      <tr>
+        <td class="num">1</td>
+        <td>医師A</td>
+        <td class="num">251</td>
+        <td class="num">139</td>
+        <td class="num">112</td>
+        <td class="num">18</td>
+        <td class="num">0.8</td>
+        <td class="num">12.9%</td>
+      </tr>
+      
+    </tbody>
+  </table>
+</div>
+
+<div class="card" id="dept-MN">
+  <h2>メンタルケア科 <span class="type-badge">内科</span></h2>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>医師</th>
+        <th class="num">総件数</th>
+        <th class="num">初診</th>
+        <th class="num">再診</th>
+        <th class="num">紹介状あり初診</th>
+        <th class="num">sps</th>
+        <th class="num">紹介率</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+      <tr>
+        <td class="num">1</td>
+        <td>医師A</td>
+        <td class="num">132</td>
+        <td class="num">0</td>
+        <td class="num">132</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">2</td>
+        <td>医師B</td>
+        <td class="num">79</td>
+        <td class="num">0</td>
+        <td class="num">79</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">3</td>
+        <td>医師C</td>
+        <td class="num">42</td>
+        <td class="num">0</td>
+        <td class="num">42</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">4</td>
+        <td>医師D</td>
+        <td class="num">41</td>
+        <td class="num">0</td>
+        <td class="num">41</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">5</td>
+        <td>医師E</td>
+        <td class="num">4</td>
+        <td class="num">0</td>
+        <td class="num">4</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">6</td>
+        <td>医師F</td>
+        <td class="num">2</td>
+        <td class="num">0</td>
+        <td class="num">2</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">7</td>
+        <td>医師G</td>
+        <td class="num">1</td>
+        <td class="num">0</td>
+        <td class="num">1</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">8</td>
+        <td>医師H</td>
+        <td class="num">1</td>
+        <td class="num">0</td>
+        <td class="num">1</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+    </tbody>
+  </table>
+</div>
+
+<div class="card" id="dept-NS">
+  <h2>脳神経外科 <span class="type-badge">外科</span></h2>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>医師</th>
+        <th class="num">総件数</th>
+        <th class="num">初診</th>
+        <th class="num">再診</th>
+        <th class="num">紹介状あり初診</th>
+        <th class="num">sps</th>
+        <th class="num">紹介率</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+      <tr>
+        <td class="num">1</td>
+        <td>医師A</td>
+        <td class="num">52</td>
+        <td class="num">5</td>
+        <td class="num">47</td>
+        <td class="num">3</td>
+        <td class="num">9.4</td>
+        <td class="num">60.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">2</td>
+        <td>医師B</td>
+        <td class="num">49</td>
+        <td class="num">5</td>
+        <td class="num">44</td>
+        <td class="num">5</td>
+        <td class="num">8.8</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">3</td>
+        <td>医師C</td>
+        <td class="num">48</td>
+        <td class="num">3</td>
+        <td class="num">45</td>
+        <td class="num">2</td>
+        <td class="num">15.0</td>
+        <td class="num">66.7%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">4</td>
+        <td>医師D</td>
+        <td class="num">16</td>
+        <td class="num">5</td>
+        <td class="num">11</td>
+        <td class="num">2</td>
+        <td class="num">2.2</td>
+        <td class="num">40.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">5</td>
+        <td>医師E</td>
+        <td class="num">7</td>
+        <td class="num">5</td>
+        <td class="num">2</td>
+        <td class="num">1</td>
+        <td class="num">0.4</td>
+        <td class="num">20.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">6</td>
+        <td>医師F</td>
+        <td class="num">7</td>
+        <td class="num">1</td>
+        <td class="num">6</td>
+        <td class="num">1</td>
+        <td class="num">6.0</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">7</td>
+        <td>医師G</td>
+        <td class="num">4</td>
+        <td class="num">0</td>
+        <td class="num">4</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">8</td>
+        <td>医師H</td>
+        <td class="num">3</td>
+        <td class="num">1</td>
+        <td class="num">2</td>
+        <td class="num">1</td>
+        <td class="num">2.0</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">9</td>
+        <td>医師I</td>
+        <td class="num">2</td>
+        <td class="num">0</td>
+        <td class="num">2</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+    </tbody>
+  </table>
+</div>
+
+<div class="card" id="dept-CS">
+  <h2>心臓血管外科 <span class="type-badge">外科</span></h2>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>医師</th>
+        <th class="num">総件数</th>
+        <th class="num">初診</th>
+        <th class="num">再診</th>
+        <th class="num">紹介状あり初診</th>
+        <th class="num">sps</th>
+        <th class="num">紹介率</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+      <tr>
+        <td class="num">1</td>
+        <td>医師A</td>
+        <td class="num">40</td>
+        <td class="num">3</td>
+        <td class="num">37</td>
+        <td class="num">2</td>
+        <td class="num">12.3</td>
+        <td class="num">66.7%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">2</td>
+        <td>医師B</td>
+        <td class="num">34</td>
+        <td class="num">0</td>
+        <td class="num">34</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">3</td>
+        <td>医師C</td>
+        <td class="num">11</td>
+        <td class="num">0</td>
+        <td class="num">11</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">4</td>
+        <td>医師D</td>
+        <td class="num">4</td>
+        <td class="num">0</td>
+        <td class="num">4</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">5</td>
+        <td>医師E</td>
+        <td class="num">1</td>
+        <td class="num">1</td>
+        <td class="num">0</td>
+        <td class="num">1</td>
+        <td class="num">0.0</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+    </tbody>
+  </table>
+</div>
+
+<div class="card" id="dept-RS2">
+  <h2>呼吸器外科 <span class="type-badge">外科</span></h2>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>医師</th>
+        <th class="num">総件数</th>
+        <th class="num">初診</th>
+        <th class="num">再診</th>
+        <th class="num">紹介状あり初診</th>
+        <th class="num">sps</th>
+        <th class="num">紹介率</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+      <tr>
+        <td class="num">1</td>
+        <td>医師A</td>
+        <td class="num">78</td>
+        <td class="num">2</td>
+        <td class="num">76</td>
+        <td class="num">2</td>
+        <td class="num">38.0</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">2</td>
+        <td>医師B</td>
+        <td class="num">64</td>
+        <td class="num">1</td>
+        <td class="num">63</td>
+        <td class="num">1</td>
+        <td class="num">63.0</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">3</td>
+        <td>医師C</td>
+        <td class="num">5</td>
+        <td class="num">0</td>
+        <td class="num">5</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">4</td>
+        <td>医師D</td>
+        <td class="num">3</td>
+        <td class="num">0</td>
+        <td class="num">3</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">5</td>
+        <td>医師E</td>
+        <td class="num">1</td>
+        <td class="num">0</td>
+        <td class="num">1</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+    </tbody>
+  </table>
+</div>
+
+<div class="card" id="dept-ON">
+  <h2>臨床腫瘍科 <span class="type-badge">内科</span></h2>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>医師</th>
+        <th class="num">総件数</th>
+        <th class="num">初診</th>
+        <th class="num">再診</th>
+        <th class="num">紹介状あり初診</th>
+        <th class="num">sps</th>
+        <th class="num">紹介率</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+      <tr>
+        <td class="num">1</td>
+        <td>医師A</td>
+        <td class="num">114</td>
+        <td class="num">0</td>
+        <td class="num">114</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">2</td>
+        <td>医師B</td>
+        <td class="num">3</td>
+        <td class="num">0</td>
+        <td class="num">3</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">3</td>
+        <td>医師C</td>
+        <td class="num">3</td>
+        <td class="num">0</td>
+        <td class="num">3</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">4</td>
+        <td>医師D</td>
+        <td class="num">1</td>
+        <td class="num">0</td>
+        <td class="num">1</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+    </tbody>
+  </table>
+</div>
+
+<div class="card" id="dept-AL">
+  <h2>アレルギー科 <span class="type-badge">内科</span></h2>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>医師</th>
+        <th class="num">総件数</th>
+        <th class="num">初診</th>
+        <th class="num">再診</th>
+        <th class="num">紹介状あり初診</th>
+        <th class="num">sps</th>
+        <th class="num">紹介率</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+      <tr>
+        <td class="num">1</td>
+        <td>医師A</td>
+        <td class="num">49</td>
+        <td class="num">1</td>
+        <td class="num">48</td>
+        <td class="num">1</td>
+        <td class="num">48.0</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">2</td>
+        <td>医師B</td>
+        <td class="num">49</td>
+        <td class="num">0</td>
+        <td class="num">49</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">3</td>
+        <td>医師C</td>
+        <td class="num">31</td>
+        <td class="num">0</td>
+        <td class="num">31</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">4</td>
+        <td>医師D</td>
+        <td class="num">25</td>
+        <td class="num">0</td>
+        <td class="num">25</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+    </tbody>
+  </table>
+</div>
+
+<div class="card" id="dept-DB">
+  <h2>糖尿病内分泌内科 <span class="type-badge">内科</span></h2>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>医師</th>
+        <th class="num">総件数</th>
+        <th class="num">初診</th>
+        <th class="num">再診</th>
+        <th class="num">紹介状あり初診</th>
+        <th class="num">sps</th>
+        <th class="num">紹介率</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+      <tr>
+        <td class="num">1</td>
+        <td>医師A</td>
+        <td class="num">37</td>
+        <td class="num">0</td>
+        <td class="num">37</td>
+        <td class="num">0</td>
+        <td class="num">0.0</td>
+        <td class="num">0.0%</td>
+      </tr>
+      
+      <tr>
+        <td class="num">2</td>
+        <td>医師B</td>
+        <td class="num">35</td>
+        <td class="num">7</td>
+        <td class="num">28</td>
+        <td class="num">7</td>
+        <td class="num">4.0</td>
+        <td class="num">100.0%</td>
+      </tr>
+      
+    </tbody>
+  </table>
+</div>
+
+
+<p><a href="../index.html">← ハブへ戻る</a></p>
+
+<script>// 共通ユーティリティ（Chart.js のデフォルト、数値整形、評価バッジ生成など）
+
+const OutpatientCommon = (() => {
+  const palette = {
+    naika: '#5b8a72',
+    geka: '#b25c2e',
+    other: '#9a7c4e',
+    primary: '#b25c2e',
+    accent: '#3d6b7d',
+    muted: '#6b6660',
+  };
+
+  function formatInt(n) {
+    if (n == null || Number.isNaN(n)) return '-';
+    return Math.round(n).toLocaleString('ja-JP');
+  }
+
+  function formatPct(n, digits = 1) {
+    if (n == null || Number.isNaN(n)) return '-';
+    return `${n.toFixed(digits)}%`;
+  }
+
+  function gradeFromPct(pct, inverse = false) {
+    if (pct == null || Number.isNaN(pct)) return 'D';
+    if (inverse) {
+      if (pct <= 90) return 'S';
+      if (pct <= 100) return 'A';
+      if (pct <= 110) return 'B';
+      if (pct <= 125) return 'C';
+      return 'D';
+    }
+    if (pct >= 110) return 'S';
+    if (pct >= 100) return 'A';
+    if (pct >= 90) return 'B';
+    if (pct >= 75) return 'C';
+    return 'D';
+  }
+
+  function gradeBadge(grade) {
+    const el = document.createElement('span');
+    el.className = `grade grade-${grade}`;
+    el.textContent = grade;
+    return el.outerHTML;
+  }
+
+  function typeBadge(type) {
+    const label = { naika: '内科', geka: '外科', other: 'その他' }[type] || type;
+    return `<span class="type-badge type-${type}">${label}</span>`;
+  }
+
+  if (typeof window !== 'undefined' && window.Chart) {
+    Chart.defaults.font.family =
+      '-apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif';
+    Chart.defaults.font.size = 12;
+    Chart.defaults.color = '#2d2a26';
+  }
+
+  return { palette, formatInt, formatPct, gradeFromPct, gradeBadge, typeBadge };
+})();
+</script>
+</main>
+
+<footer class="site-footer">
+  外来効率化ダッシュボード
+</footer>
+
+
+</body>
+</html>

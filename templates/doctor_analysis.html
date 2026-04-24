@@ -1,0 +1,57 @@
+<div class="card">
+  <h2>医師別 分析 — {{ month }}</h2>
+  <p class="site-meta">
+    匿名ID は診療科内の件数順で「医師A, 医師B, ...」の表示名に付け替えています。
+    <br>sps = 再診件数 / 初診件数（低いほど新規依存度が高い）。
+  </p>
+</div>
+
+<div class="card">
+  <h2>診療科ナビ</h2>
+  <ul class="nav-list">
+    {% for s in sections %}
+    <li><a href="#{{ s.anchor }}">{{ s.name }}（{{ s.doctor_count }}名 / {{ s.total }}件）</a></li>
+    {% endfor %}
+    {% if not sections %}
+    <li class="site-meta">対象データがありません。</li>
+    {% endif %}
+  </ul>
+</div>
+
+{% for s in sections %}
+<div class="card" id="{{ s.anchor }}">
+  <h2>{{ s.name }} <span class="type-badge">{{ s.type_label }}</span></h2>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>医師</th>
+        <th class="num">総件数</th>
+        <th class="num">初診</th>
+        <th class="num">再診</th>
+        <th class="num">紹介状あり初診</th>
+        <th class="num">sps</th>
+        <th class="num">紹介率</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in s.rows %}
+      <tr>
+        <td class="num">{{ loop.index }}</td>
+        <td>{{ r.display_name }}</td>
+        <td class="num">{{ r.total }}</td>
+        <td class="num">{{ r.sho }}</td>
+        <td class="num">{{ r.sai }}</td>
+        <td class="num">{{ r.shokai_sho }}</td>
+        <td class="num">{{ r.sps }}</td>
+        <td class="num">{{ r.shokai_rate }}%</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endfor %}
+
+<p><a href="../index.html">← ハブへ戻る</a></p>
+
+<script>{{ common_js | safe }}</script>

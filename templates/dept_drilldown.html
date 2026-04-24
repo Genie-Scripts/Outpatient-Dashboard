@@ -1,0 +1,109 @@
+<div class="card">
+  <h2>{{ dept_name }} {{ type_badge | safe }} — {{ month }} 深掘り</h2>
+  <div class="grid">
+    <div>
+      <h3>当月サマリ</h3>
+      <table>
+        <tbody>
+          <tr><th>総件数</th><td class="num">{{ summary.total }}</td></tr>
+          <tr><th>初診</th><td class="num">{{ summary.sho }}</td></tr>
+          <tr><th>再診</th><td class="num">{{ summary.sai }}</td></tr>
+          <tr><th>紹介状あり初診</th><td class="num">{{ summary.shokai_sho }}</td></tr>
+          <tr><th>未来院</th><td class="num">{{ summary.mirain }}</td></tr>
+          <tr><th>初診率</th><td class="num">{{ summary.sho_rate }}%</td></tr>
+          <tr><th>紹介率（初診）</th><td class="num">{{ summary.shokai_rate }}%</td></tr>
+          <tr><th>未来院率</th><td class="num">{{ summary.mirain_rate }}%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <h3>KPI 評価</h3>
+      <table>
+        <thead><tr><th>指標</th><th class="num">実績</th><th class="num">目標</th><th>評価</th></tr></thead>
+        <tbody>
+          {% for k in kpis %}
+          <tr>
+            <td>{{ k.label }}</td>
+            <td class="num">{{ k.actual }}</td>
+            <td class="num">{{ k.target }}</td>
+            <td>{{ k.grade_badge | safe }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>時間帯別（曜日×時間帯ゾーン）件数</h2>
+  <div class="chart-wrap"><canvas id="chartTimezone"></canvas></div>
+</div>
+
+<div class="card">
+  <h2>医師別 当月内訳（上位{{ doctor_limit }}名）</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th><th>医師</th>
+        <th class="num">総件数</th><th class="num">初診</th><th class="num">再診</th>
+        <th class="num">紹介状あり初診</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for d in doctors %}
+      <tr>
+        <td class="num">{{ loop.index }}</td>
+        <td>{{ d.display_name }}</td>
+        <td class="num">{{ d.total }}</td>
+        <td class="num">{{ d.sho }}</td>
+        <td class="num">{{ d.sai }}</td>
+        <td class="num">{{ d.shokai_sho }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<div class="card">
+  <h2>逆紹介候補（薬のみ・短時間・紹介状なし・併科なし 再診）</h2>
+  <p class="site-meta">抽出条件：初再診=再診、紹介状無し、併科無、診察時間 9分以下、診察前検査なし</p>
+  <table>
+    <thead><tr><th>診察時間階級</th><th class="num">件数</th></tr></thead>
+    <tbody>
+      {% for r in reverse_referral %}
+      <tr><td>{{ r.bucket }}</td><td class="num">{{ r.count }}</td></tr>
+      {% endfor %}
+      <tr><th>合計</th><th class="num">{{ reverse_referral_total }}</th></tr>
+    </tbody>
+  </table>
+</div>
+
+<p><a href="../../index.html">← ハブへ戻る</a></p>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>{{ common_js | safe }}</script>
+<script>
+const TZ_DATA = {{ timezone_data_json | safe }};
+new Chart(document.getElementById('chartTimezone'), {
+  type: 'bar',
+  data: {
+    labels: TZ_DATA.labels,
+    datasets: TZ_DATA.datasets.map((ds, i) => ({
+      label: ds.label,
+      data: ds.data,
+      backgroundColor: [
+        OutpatientCommon.palette.primary,
+        OutpatientCommon.palette.accent,
+        OutpatientCommon.palette.naika,
+        OutpatientCommon.palette.other,
+      ][i % 4],
+    })),
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } },
+  },
+});
+</script>

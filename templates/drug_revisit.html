@@ -1,0 +1,159 @@
+<div class="card">
+  <h2>薬再診候補スコア</h2>
+  <p class="site-meta">
+    スコアは「短時間再診比率（診察時間≤{{ short_exam_threshold }}分）」「紹介状なし再診比率」「診察時間中央値（短いほど加点）」
+    の3指標を全データでMin-Max正規化した等配分平均（0-100）。
+    ノイズ抑制のため再診件数 ≥ {{ min_records }} の医師×枠のみ採点。
+    各科 上位{{ top_n }}件を表示。
+  </p>
+  <div class="drev-controls">
+    <label>評価月：
+      <select id="drev-month">
+        {% for m in months %}
+        <option value="{{ m }}" {% if m == default_month %}selected{% endif %}>{{ m }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <button id="export-csv-btn" class="btn-export">逆紹介候補CSVをダウンロード</button>
+    <span class="site-meta"> ※ 地域連携室への提出用一次リスト。医師匿名ID→実名は master_key.csv を参照。</span>
+  </div>
+</div>
+
+{% for md in months_data %}
+<div class="month-block" data-month="{{ md.month }}" {% if md.month != default_month %}style="display:none"{% endif %}>
+  <div class="card">
+    <h2>診療科別 サマリ（{{ md.month }}／高スコア件数の多い順）</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>診療科</th>
+          <th>タイプ</th>
+          <th class="num">再診件数</th>
+          <th class="num">短時間再診比率</th>
+          <th class="num">紹介状なし再診比率</th>
+          <th class="num">スコア≥60</th>
+          <th>詳細</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for o in md.overview %}
+        <tr>
+          <td>{{ o.name }}</td>
+          <td>{{ o.type_label }}</td>
+          <td class="num">{{ o.sai_total }}</td>
+          <td class="num">{{ o.short_ratio }}%</td>
+          <td class="num">{{ o.no_shokai_ratio }}%</td>
+          <td class="num">{{ o.high_score_count }}</td>
+          <td><a href="#{{ md.month }}-{{ o.anchor }}">&darr;</a></td>
+        </tr>
+        {% endfor %}
+        {% if not md.overview %}
+        <tr><td colspan="7" class="site-meta">対象データがありません。</td></tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+
+  {% for s in md.sections %}
+  <div class="card" id="{{ md.month }}-{{ s.anchor }}">
+    <h2>{{ s.name }} <span class="type-badge">{{ s.type_label }}</span></h2>
+    <p class="site-meta">
+      再診 {{ s.sai_total }} 件 / 短時間再診 {{ s.short_ratio }}% / 紹介状なし再診 {{ s.no_shokai_ratio }}%
+      / 採点済み医師×枠 {{ s.scoreable_count }}（うちスコア≥60: {{ s.high_score_count }}）
+    </p>
+    <table>
+      <thead>
+        <tr>
+          <th>医師匿名ID</th>
+          <th>予約名称</th>
+          <th class="num">再診件数</th>
+          <th class="num">短時間再診比率</th>
+          <th class="num">紹介状なし再診比率</th>
+          <th class="num">診察時間中央値(分)</th>
+          <th class="num">スコア</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in s.rows %}
+        <tr>
+          <td>{{ r.medic }}</td>
+          <td>{{ r.slot }}</td>
+          <td class="num">{{ r.sai }}</td>
+          <td class="num">{{ r.short_ratio }}%</td>
+          <td class="num">{{ r.no_shokai_ratio }}%</td>
+          <td class="num">{% if r.median_exam is not none %}{{ "%.1f"|format(r.median_exam) }}{% else %}-{% endif %}</td>
+          <td class="num">
+            {% if r.score is not none %}
+              <span class="score-badge
+                {% if r.score >= 70 %}score-high
+                {% elif r.score >= 50 %}score-mid
+                {% else %}score-low{% endif %}
+              ">{{ r.score }}</span>
+            {% else %}-{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+        {% if not s.rows %}
+        <tr><td colspan="7" class="site-meta">採点対象の医師×枠がありません。</td></tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+  {% endfor %}
+</div>
+{% endfor %}
+
+<p><a href="index.html">← ハブへ戻る</a></p>
+
+<style>
+.drev-controls { display: flex; gap: 16px; align-items: center; margin: 12px 0; flex-wrap: wrap; }
+.drev-controls select { padding: 4px 8px; }
+.btn-export {
+  background: #0284c7; color: #fff; border: none; padding: 8px 16px;
+  border-radius: 6px; cursor: pointer; font-size: 13px;
+}
+.btn-export:hover { background: #0369a1; }
+.score-badge {
+  display: inline-block; min-width: 40px; padding: 2px 6px;
+  border-radius: 4px; font-weight: 600; text-align: center;
+}
+.score-high { background: #dc2626; color: #fff; }
+.score-mid { background: #f59e0b; color: #fff; }
+.score-low { background: #e4e4e7; color: #3f3f46; }
+</style>
+
+<script id="export-csv-data" type="application/json">{{ export_csv_by_month_json | safe }}</script>
+<script>
+(function() {
+  const monthSel = document.getElementById("drev-month");
+  const btn = document.getElementById("export-csv-btn");
+  const csvByMonth = JSON.parse(document.getElementById("export-csv-data").textContent);
+  const blocks = document.querySelectorAll(".month-block");
+
+  function toggle(month) {
+    blocks.forEach(b => {
+      b.style.display = (b.dataset.month === month) ? "" : "none";
+    });
+  }
+
+  monthSel.addEventListener("change", function() {
+    toggle(monthSel.value);
+  });
+
+  btn.addEventListener("click", function() {
+    const month = monthSel.value;
+    const csv = "\ufeff" + (csvByMonth[month] || "");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "drug_revisit_candidates_" + month + ".csv";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+})();
+</script>
+
+{% if common_js %}<script>{{ common_js | safe }}</script>{% endif %}
