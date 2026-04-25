@@ -116,11 +116,38 @@ def _write(df: pd.DataFrame, path: Path) -> None:
     df.to_csv(path, index=False, encoding="utf-8-sig")
 
 
+def _count_weekdays(start: pd.Timestamp, end: pd.Timestamp) -> int:
+    """期間内の月〜金（曜日 0-4）の暦日数を返す。祝日は考慮しない。"""
+    if pd.isna(start) or pd.isna(end):
+        return 0
+    days = pd.date_range(start.normalize(), end.normalize(), freq="D")
+    return int((days.dayofweek < 5).sum())
+
+
 def _agg_summary(df: pd.DataFrame) -> pd.DataFrame:
+    """月次サマリ。30日換算用に期間日数も併記する。
+
+    - 期間_暦日数:   期間_開始から期間_終了までの暦日数（含む両端）
+    - 期間_営業日数: 同期間の月〜金の日数（祝日は考慮しない）
+
+    換算例: 30日換算 = 件数 × (22 / 期間_営業日数)
+    """
+    has_date = df["予約日"].notna().any()
+    start = df["予約日"].min() if has_date else pd.NaT
+    end = df["予約日"].max() if has_date else pd.NaT
+    if has_date:
+        cal_days = int((end.normalize() - start.normalize()).days) + 1
+        biz_days = _count_weekdays(start, end)
+    else:
+        cal_days = 0
+        biz_days = 0
+
     return pd.DataFrame([{
         "総件数": len(df),
-        "期間_開始": df["予約日"].min().strftime("%Y-%m-%d") if df["予約日"].notna().any() else "",
-        "期間_終了": df["予約日"].max().strftime("%Y-%m-%d") if df["予約日"].notna().any() else "",
+        "期間_開始": start.strftime("%Y-%m-%d") if has_date else "",
+        "期間_終了": end.strftime("%Y-%m-%d") if has_date else "",
+        "期間_暦日数": cal_days,
+        "期間_営業日数": biz_days,
         "診療科数": df["診療科名"].nunique(),
         "医師数": df[DOCTOR_ID_COLUMN].nunique(),
         "部屋数": df["部屋番号"].nunique(),
