@@ -116,31 +116,82 @@ def _write(df: pd.DataFrame, path: Path) -> None:
     df.to_csv(path, index=False, encoding="utf-8-sig")
 
 
-def _count_weekdays(start: pd.Timestamp, end: pd.Timestamp) -> int:
-    """期間内の月〜金（曜日 0-4）の暦日数を返す。祝日は考慮しない。"""
+def _load_non_business_days(path: Path | None) -> set[pd.Timestamp]:
+    """非営業日CSVを読み込み、日付の集合を返す。
+
+    CSVが None / 存在しない / 列不足 の場合は空集合（祝日無視モード）。
+    CSV 形式: 日付（YYYY-MM-DD）, 区分（法定祝日／病院休／その他）, 備考
+    """
+    if path is None or not path.exists():
+        logger.warning("非営業日CSV未検出: %s（祝日無視モードで集計）", path)
+        return set()
+    df = pd.read_csv(path, encoding="utf-8-sig")
+    if "日付" not in df.columns:
+        logger.warning("非営業日CSV に '日付' 列がありません: %s", path)
+        return set()
+    return set(pd.to_datetime(df["日付"], errors="coerce").dropna())
+
+
+def _count_weekdays(
+    start: pd.Timestamp,
+    end: pd.Timestamp,
+    non_business: set[pd.Timestamp] | None = None,
+) -> int:
+    """期間内の月〜金日数を返す。non_business に含まれる日は除外する。
+
+    Args:
+        start: 期間開始（含む）
+        end:   期間終了（含む）
+        non_business: 除外する日付集合（祝日 + 病院休等）
+
+    Returns:
+        営業日数（月〜金 のうち非営業日を除いた日数）
+    """
     if pd.isna(start) or pd.isna(end):
         return 0
     days = pd.date_range(start.normalize(), end.normalize(), freq="D")
-    return int((days.dayofweek < 5).sum())
+    weekdays = days[days.dayofweek < 5]
+    if non_business:
+        weekdays = weekdays[~weekdays.isin(non_business)]
+    return int(len(weekdays))
 
 
-def _agg_summary(df: pd.DataFrame) -> pd.DataFrame:
+def _count_non_business_in_range(
+    start: pd.Timestamp,
+    end: pd.Timestamp,
+    non_business: set[pd.Timestamp],
+) -> int:
+    """期間内（月〜金のみ）に該当する非営業日の数を返す（情報用）。"""
+    if pd.isna(start) or pd.isna(end) or not non_business:
+        return 0
+    days = pd.date_range(start.normalize(), end.normalize(), freq="D")
+    weekdays = days[days.dayofweek < 5]
+    return int(weekdays.isin(non_business).sum())
+
+
+def _agg_summary(
+    df: pd.DataFrame, non_business: set[pd.Timestamp] | None = None
+) -> pd.DataFrame:
     """月次サマリ。30日換算用に期間日数も併記する。
 
-    - 期間_暦日数:   期間_開始から期間_終了までの暦日数（含む両端）
-    - 期間_営業日数: 同期間の月〜金の日数（祝日は考慮しない）
+    - 期間_暦日数:    期間_開始から期間_終了までの暦日数（含む両端）
+    - 期間_営業日数:   月〜金 から「祝日 + 病院休」を除いた日数
+    - 期間_除外日数:  上記から差し引いた非営業日の数（祝日・病院休の総数）
 
-    換算例: 30日換算 = 件数 × (22 / 期間_営業日数)
+    換算例: 22営業日換算 = 件数 × (22 / 期間_営業日数)
     """
     has_date = df["予約日"].notna().any()
     start = df["予約日"].min() if has_date else pd.NaT
     end = df["予約日"].max() if has_date else pd.NaT
+    nb = non_business or set()
     if has_date:
         cal_days = int((end.normalize() - start.normalize()).days) + 1
-        biz_days = _count_weekdays(start, end)
+        biz_days = _count_weekdays(start, end, nb)
+        excluded = _count_non_business_in_range(start, end, nb)
     else:
         cal_days = 0
         biz_days = 0
+        excluded = 0
 
     return pd.DataFrame([{
         "総件数": len(df),
@@ -148,6 +199,7 @@ def _agg_summary(df: pd.DataFrame) -> pd.DataFrame:
         "期間_終了": end.strftime("%Y-%m-%d") if has_date else "",
         "期間_暦日数": cal_days,
         "期間_営業日数": biz_days,
+        "期間_除外日数": excluded,
         "診療科数": df["診療科名"].nunique(),
         "医師数": df[DOCTOR_ID_COLUMN].nunique(),
         "部屋数": df["部屋番号"].nunique(),
@@ -602,6 +654,7 @@ def aggregate_monthly_data(
     input_path: Path,
     output_dir: Path,
     month: str,
+    non_business_days_path: Path | None = None,
 ) -> AggregationResult:
     """匿名化済み月次データを12種の集計CSVに変換する。
 
@@ -609,6 +662,7 @@ def aggregate_monthly_data(
         input_path: 匿名化済みCSV（data/raw/anonymized/raw_data_YYYY-MM.csv）
         output_dir: 出力ベースディレクトリ（data/aggregated/）
         month: 対象月（"YYYY-MM" 形式）
+        non_business_days_path: 非営業日CSV（祝日+病院休）。None の場合は祝日無視
 
     Returns:
         AggregationResult: 集計サマリ。
@@ -616,13 +670,16 @@ def aggregate_monthly_data(
     logger.info("集計開始: %s (月=%s)", input_path, month)
     df = _read_csv_auto_encoding(input_path)
     df = _preprocess(df)
+    non_business = _load_non_business_days(non_business_days_path)
+    if non_business:
+        logger.info("非営業日CSV読込: %d 日（祝日+病院休）", len(non_business))
 
     out = output_dir / month
     out.mkdir(parents=True, exist_ok=True)
 
     generated: list[str] = []
 
-    _write(_agg_summary(df), out / "00_summary.csv")
+    _write(_agg_summary(df, non_business), out / "00_summary.csv")
     generated.append("00_summary.csv")
 
     agg01 = (
@@ -740,6 +797,7 @@ def aggregate_monthly_data(
 def aggregate_all_months(
     anon_dir: Path,
     output_dir: Path,
+    non_business_days_path: Path | None = None,
 ) -> list[AggregationResult]:
     """匿名化済みディレクトリ内の全月CSVを集計する。
 
@@ -748,6 +806,7 @@ def aggregate_all_months(
     Args:
         anon_dir: 匿名化済みCSVのディレクトリ（data/raw/anonymized/）
         output_dir: 集計CSV出力先（data/aggregated/）
+        non_business_days_path: 非営業日CSV（祝日+病院休）。None の場合は祝日無視
 
     Returns:
         月ごとの AggregationResult リスト（月順）。
@@ -763,6 +822,8 @@ def aggregate_all_months(
     for f in files:
         m = _ANON_FILE_RE.match(f.name)
         month = m.group(1) if m else f.stem
-        results.append(aggregate_monthly_data(f, output_dir, month))
+        results.append(
+            aggregate_monthly_data(f, output_dir, month, non_business_days_path)
+        )
 
     return results

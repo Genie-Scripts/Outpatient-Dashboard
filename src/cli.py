@@ -58,6 +58,7 @@ DEFAULT_PATHS: dict[str, Path] = {
     "dept_classification": REPO_ROOT / "config" / "dept_classification.csv",
     "dept_targets": REPO_ROOT / "config" / "dept_targets.csv",
     "llm_config": REPO_ROOT / "config" / "llm_config.yaml",
+    "non_business_days": REPO_ROOT / "config" / "non_business_days.csv",
 }
 
 # ローカル専用パス（実名表示モード、Gitコミット不可）
@@ -153,12 +154,14 @@ def _cmd_anonymize(
 
 def _cmd_aggregate(month: str | None, paths: dict[str, Path] = DEFAULT_PATHS) -> list[str]:
     """集計して処理済み月リストを返す。"""
+    nb_path = paths.get("non_business_days")
     if month:
         input_path = paths["anon_dir"] / f"raw_data_{month}.csv"
         result = aggregate_monthly_data(
             input_path=input_path,
             output_dir=paths["agg_root"],
             month=month,
+            non_business_days_path=nb_path,
         )
         print(f"✓ 集計完了: {result.output_dir}")
         print(f"  総行数: {result.total_rows:,}  /  生成ファイル: {len(result.generated_files)}")
@@ -167,6 +170,7 @@ def _cmd_aggregate(month: str | None, paths: dict[str, Path] = DEFAULT_PATHS) ->
         results = aggregate_all_months(
             anon_dir=paths["anon_dir"],
             output_dir=paths["agg_root"],
+            non_business_days_path=nb_path,
         )
         months = [r.month for r in results]
         total = sum(r.total_rows for r in results)
