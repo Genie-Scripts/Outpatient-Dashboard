@@ -63,14 +63,20 @@ pip install -e ".[dev]"
 # 1. 電子カルテからエクスポートしたCSVを data/raw/ に置く
 cp 外来データ_2026-05.csv data/raw/
 
-# 2. 一括実行（これだけでOK）
-python -m src.cli run-all --no-llm
+# 2-A. このリポだけ更新（commit/push まで自動）
+./scripts/deploy.sh                # 月引数なしで自動検出
+./scripts/deploy.sh 2026-05        # 月指定
 
-# 3. docs/ 以下の HTML を確認 → git push で公開
-#    ※ data/aggregated/ 配下も commit 必須（Restructuring が読む）
+# 2-B. Restructuring も同時に更新（推奨）
+~/dev/ai-apps/deploy_all.sh        # 両サイト一括 push
+~/dev/ai-apps/deploy_all.sh 2026-05
 ```
 
-`--no-llm` を外すと LM Studio（ローカルLLM）でハイライト文章を自動生成します（要起動）。
+`deploy.sh` が `data/aggregated/` を git に含めて push するので、
+後段の Restructuring 側は `fetch_upstream.sh` で自動的に最新版を取得できます。
+
+`--no-llm` を外すと LM Studio / Ollama（ローカルLLM）でハイライト文章を自動生成します（要起動）。
+LLMの利用フラグは `run-all` のコマンド引数として渡してください。
 
 ---
 

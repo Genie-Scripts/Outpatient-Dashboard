@@ -93,9 +93,11 @@ git add \
   src/ \
   scripts/ \
   tests/ \
+  data/aggregated/ \
   config/dept_classification.csv \
   config/dept_targets.csv \
   config/llm_config.yaml \
+  config/non_business_days.csv \
   pyproject.toml \
   .gitignore \
   README.md \
