@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Any
 
 import pandas as pd
+from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from src.core.classify import DeptClassifier
 from src.core.data_loader import AggregatedData, load_aggregated_data, load_last_n_months
@@ -277,27 +278,35 @@ def _build_dashboard_data(
 
 
 def _render(
-    template_path: Path,
+    templates_dir: Path,
     output_path: Path,
+    month: str,
     data: dict[str, Any],
     highlights: dict[str, Any],
+    all_months: list[str],
 ) -> None:
-    """テンプレートのプレースホルダに data/highlights/メタ情報を埋め込む。"""
-    html = template_path.read_text(encoding="utf-8")
-    html = html.replace(
-        "{{DASHBOARD_DATA_JSON}}",
-        json.dumps(data, ensure_ascii=False, separators=(",", ":")),
+    """月次テンプレを Jinja で描画して出力する。"""
+    env = Environment(
+        loader=FileSystemLoader(str(templates_dir)),
+        autoescape=select_autoescape(["html"]),
     )
-    html = html.replace(
-        "{{HIGHLIGHTS_JSON}}",
-        json.dumps(highlights, ensure_ascii=False, separators=(",", ":")),
+    sorted_desc = sorted(all_months, reverse=True)
+    latest = sorted_desc[0] if sorted_desc else month
+    html = env.get_template("monthly.html").render(
+        # ===== グローバルレイアウト共通コンテキスト =====
+        title=f"月次 {month}",
+        active="monthly",
+        current_month=month,
+        latest_month=latest,
+        current_code=None,
+        all_months=sorted_desc,
+        root_prefix="../",
+        breadcrumb=None,
+        generated_at=datetime.now().strftime("%Y-%m-%d %H:%M"),
+        # ===== ページ固有 =====
+        dashboard_data_json=json.dumps(data, ensure_ascii=False, separators=(",", ":")),
+        highlights_json=json.dumps(highlights, ensure_ascii=False, separators=(",", ":")),
     )
-    html = html.replace(
-        "{{GENERATED_AT}}",
-        datetime.now().strftime("%Y-%m-%d %H:%M"),
-    )
-    html = html.replace("{{CURRENT_MONTH}}", data["monthLabels"][-1])
-
     output_path.parent.mkdir(parents=True, exist_ok=True)
     output_path.write_text(html, encoding="utf-8")
     logger.info("HTML出力: %s (%d chars)", output_path, len(html))
@@ -307,10 +316,11 @@ def build_monthly_dashboard(
     month: str,
     output_path: Path,
     aggregated_root: Path,
-    template_path: Path,
+    templates_dir: Path,
     classification_path: Path,
     targets_path: Path,
     llm_config_path: Path,
+    all_months: list[str],
     use_llm: bool = True,
     use_real_names: bool = False,
 ) -> None:
@@ -320,10 +330,11 @@ def build_monthly_dashboard(
         month: "YYYY-MM" 形式
         output_path: 出力HTMLパス
         aggregated_root: data/aggregated/ のパス
-        template_path: templates/monthly.html のパス
+        templates_dir: templates/ ディレクトリ
         classification_path: config/dept_classification.csv
         targets_path: config/dept_targets.csv
         llm_config_path: config/llm_config.yaml
+        all_months: グローバルヘッダ月セレクタに表示する全月リスト
         use_llm: FalseならLLMを呼ばず定型文で生成
         use_real_names: Trueなら医師実名を表示（ローカル専用）
     """
@@ -336,4 +347,4 @@ def build_monthly_dashboard(
     llm = LLMClient(llm_config_path, enabled=use_llm)
     highlights = llm.generate_highlights(candidates)
 
-    _render(template_path, output_path, data, highlights)
+    _render(templates_dir, output_path, month, data, highlights, all_months)

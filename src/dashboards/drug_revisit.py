@@ -117,8 +117,7 @@ def build_drug_revisit(
     templates_dir: Path,
     output_path: Path,
     classification_path: Path,
-    theme_css: str,
-    common_js: str,
+    all_months: list[str],
     default_month: str | None = None,
 ) -> Path:
     """薬再診候補スコア ダッシュボードHTMLを1枚生成する（全月埋め込み）。"""
@@ -146,7 +145,21 @@ def build_drug_revisit(
         loader=FileSystemLoader(str(templates_dir)),
         autoescape=select_autoescape(["html"]),
     )
-    body = env.get_template("drug_revisit.html").render(
+    sorted_desc = sorted(all_months, reverse=True)
+    latest = sorted_desc[0] if sorted_desc else default_month
+
+    html = env.get_template("drug_revisit.html").render(
+        # ===== グローバルレイアウト共通コンテキスト =====
+        title=f"薬再診候補スコア {default_month}",
+        active="drug",
+        current_month=None,
+        latest_month=latest,
+        current_code=None,
+        all_months=sorted_desc,
+        root_prefix="",
+        breadcrumb=None,
+        generated_at=datetime.now().strftime("%Y-%m-%d %H:%M"),
+        # ===== ページ固有 =====
         months=sorted_months,
         default_month=default_month,
         months_data=months_data,
@@ -154,15 +167,6 @@ def build_drug_revisit(
         short_exam_threshold=DRUG_REVISIT_SHORT_EXAM_MIN,
         min_records=DRUG_REVISIT_MIN_RECORDS,
         top_n=TOP_N_PER_DEPT,
-        common_js=common_js,
-    )
-    html = env.get_template("base.html").render(
-        title=f"薬再診候補スコア {default_month}",
-        site_title=f"薬再診候補スコア ({sorted_months[0]} 〜 {sorted_months[-1]})",
-        generated_at=datetime.now().strftime("%Y-%m-%d %H:%M"),
-        theme_css=theme_css,
-        content=body,
-        scripts="",
     )
 
     output_path.parent.mkdir(parents=True, exist_ok=True)

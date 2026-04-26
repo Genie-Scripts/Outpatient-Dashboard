@@ -254,11 +254,12 @@ def _build_context(
     dept_map = _load_dept_map(classification_path)
     monthly_months = _list_monthly(docs_dir)
     dept_months = _list_dept_months(docs_dir)
-    all_months = sorted(set(monthly_months) | set(dept_months))
-    latest = all_months[-1] if all_months else None
-    prev_month = all_months[-2] if len(all_months) >= 2 else None
+    all_months = sorted(set(monthly_months) | set(dept_months), reverse=True)  # 新→旧
+    latest = all_months[0] if all_months else None
+    prev_month = all_months[1] if len(all_months) >= 2 else None
 
-    trend = _load_trend(aggregated_root, all_months) if all_months else []
+    trend_months = list(reversed(all_months))  # 旧→新でトレンド構築
+    trend = _load_trend(aggregated_root, trend_months) if trend_months else []
     kpis = _build_kpis(trend)
 
     dept_groups: list[dict[str, Any]] = []
@@ -273,12 +274,23 @@ def _build_context(
     ]
 
     past_dept_by_month = _build_past_dept(docs_dir, dept_months, latest, dept_map)
-    data_period = {"from": all_months[0], "to": all_months[-1]} if all_months else None
+    data_period = (
+        {"from": trend_months[0], "to": trend_months[-1]} if trend_months else None
+    )
 
     return {
-        "generated_at": datetime.now().strftime("%Y-%m-%d %H:%M"),
-        "data_period": data_period,
+        # ===== グローバルレイアウト共通コンテキスト =====
+        "title": "ホーム",
+        "active": "home",
+        "current_month": latest,
         "latest_month": latest,
+        "current_code": None,
+        "all_months": all_months,
+        "root_prefix": "",
+        "breadcrumb": None,
+        "generated_at": datetime.now().strftime("%Y-%m-%d %H:%M"),
+        # ===== ページ固有 =====
+        "data_period": data_period,
         "monthly_links": monthly_links,
         "monthly_count": len(monthly_links),
         "dept_groups": dept_groups,
@@ -295,7 +307,6 @@ def build_hub_page(
     templates_dir: Path,
     aggregated_root: Path,
     classification_path: Path,
-    theme_css: str = "",
 ) -> Path:
     """docs/index.html を生成する。
 
@@ -304,7 +315,6 @@ def build_hub_page(
         templates_dir: Jinja2テンプレ格納ディレクトリ
         aggregated_root: data/aggregated/ のパス
         classification_path: config/dept_classification.csv
-        theme_css: 互換性のため残置。標準テンプレは未使用（インラインCSS）
 
     Returns:
         書き出した index.html の Path

@@ -1,137 +1,184 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>薬再診候補スコア 2026-04</title>
-<style>/* 外来効率化ダッシュボード 共通テーマ（ウォームライト） */
-:root {
-  --color-bg: #fdfaf4;
-  --color-surface: #ffffff;
-  --color-surface-alt: #f5f0e6;
-  --color-text: #2d2a26;
-  --color-text-muted: #6b6660;
-  --color-border: #e5dfd2;
-  --color-primary: #b25c2e;
-  --color-primary-weak: #f0d8c5;
-  --color-accent: #3d6b7d;
-  --color-naika: #5b8a72;
-  --color-geka: #b25c2e;
-  --color-other: #9a7c4e;
-  --color-good: #3d7a4d;
-  --color-warn: #c98a2a;
-  --color-bad: #b8413c;
-  --radius: 6px;
-  --shadow-card: 0 1px 3px rgba(45, 42, 38, 0.08);
-  --font-sans: -apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN",
-               "Yu Gothic", Meiryo, sans-serif;
-}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>薬再診候補スコア 2026-04 | 外来ダッシュボード</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&family=DM+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F5F3EF; --surface:#FFFFFF; --surface2:#FAF9F6; --surface3:#F0EDE8;
+    --border:#E5E3DF; --border-strong:#D6D3CC;
+    --text:#2C2A28; --text-soft:#5A5651; --dim:#8A847C; --muted:#B0ABA3;
+    --header:#3D3A35; --header-line:#4F4B45;
+    --blue:#3F7FC1; --blue-light:#E7F0FA;
+    --naika:#2B9DB8; --naika-bg:#E4F3F6;
+    --geka:#D08620;  --geka-bg:#FAEEDB;
+    --other:#8B6FB6; --other-bg:#EFEAF5;
+    --up:#2F7A4B; --up-bg:#E5F1E9;
+    --down:#A33838; --down-bg:#F5E4E4;
+    --flat:#8A847C; --flat-bg:#EDEBE7;
+    --warn:#8A6D1A; --warn-bg:#FAF3E0; --warn-border:#D4B860;
+    --grade-s-bg:#C89020;  --grade-s-fg:#FFFFFF;
+    --grade-a-bg:#2F7A4B;  --grade-a-fg:#FFFFFF;
+    --grade-b-bg:#2E5F85;  --grade-b-fg:#FFFFFF;
+    --grade-c-bg:#7A746B;  --grade-c-fg:#FFFFFF;
+    --grade-d-bg:#A33838;  --grade-d-fg:#FFFFFF;
+    --grade-na-bg:#E5E3DF; --grade-na-fg:#8A847C;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.55;}
+  a{color:inherit;text-decoration:none;}
 
-* { box-sizing: border-box; }
-html, body { margin: 0; padding: 0; }
-body {
-  font-family: var(--font-sans);
-  color: var(--color-text);
-  background: var(--color-bg);
-  font-size: 14px;
-  line-height: 1.6;
-}
+  /* ===== Global header (sticky) ===== */
+  header.site{position:sticky;top:0;z-index:30;background:var(--header);color:#fff;
+              border-bottom:3px solid var(--geka);box-shadow:0 2px 8px rgba(0,0,0,.06);}
+  .gh-row1{display:flex;align-items:center;gap:14px;padding:12px 28px;
+           border-bottom:1px solid var(--header-line);flex-wrap:wrap;}
+  .gh-logo{width:34px;height:34px;background:var(--geka);border-radius:8px;
+           display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;
+           font-family:'DM Mono',monospace;flex-shrink:0;}
+  .gh-title h1{font-size:16px;font-weight:700;color:#fff;margin:0;line-height:1.2;}
+  .gh-title .sub{font-size:11px;color:rgba(255,255,255,.65);font-family:'DM Mono',monospace;}
+  .gh-meta{margin-left:auto;display:flex;gap:14px;align-items:center;font-size:11px;
+           color:rgba(255,255,255,.65);font-family:'DM Mono',monospace;flex-wrap:wrap;}
 
-.container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+  .gh-row2{display:flex;align-items:center;gap:18px;padding:8px 28px;
+           background:rgba(0,0,0,.12);flex-wrap:wrap;}
+  .gh-views{display:flex;gap:4px;flex-wrap:wrap;}
+  .gh-views a, .gh-views button.gh-view-btn{font-size:12px;color:rgba(255,255,255,.85);padding:6px 14px;border-radius:6px;
+              transition:background .15s, color .15s;font-weight:500;white-space:nowrap;
+              background:none;border:none;cursor:pointer;font-family:inherit;}
+  .gh-views a:hover, .gh-views button.gh-view-btn:hover{background:rgba(255,255,255,.12);color:#fff;}
+  .gh-views a.active, .gh-views button.gh-view-btn.active{background:#fff;color:var(--header);font-weight:700;}
+  .gh-views a.disabled{color:rgba(255,255,255,.35);cursor:not-allowed;}
 
-/* Header */
-.site-header {
-  background: var(--color-surface);
-  border-bottom: 1px solid var(--color-border);
-  padding: 16px 24px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-.site-title { font-size: 18px; font-weight: 600; margin: 0; }
-.site-meta { color: var(--color-text-muted); font-size: 12px; }
+  .gh-month{margin-left:auto;display:flex;gap:8px;align-items:center;font-size:12px;color:rgba(255,255,255,.85);flex-wrap:nowrap;}
+  .gh-month label{color:rgba(255,255,255,.6);font-size:11px;letter-spacing:.04em;text-transform:uppercase;font-weight:700;}
+  .gh-month select{background:rgba(255,255,255,.95);color:var(--text);
+                   border:none;padding:5px 10px;border-radius:6px;
+                   font-family:'DM Mono',monospace;font-size:13px;font-weight:600;cursor:pointer;
+                   min-width:110px;}
+  .gh-month button{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2);
+                   padding:4px 10px;border-radius:5px;font-size:12px;cursor:pointer;
+                   font-family:'DM Mono',monospace;}
+  .gh-month button:hover:not(:disabled){background:rgba(255,255,255,.2);}
+  .gh-month button:disabled{opacity:.35;cursor:not-allowed;}
 
-/* Cards */
-.card {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius);
-  padding: 20px;
-  box-shadow: var(--shadow-card);
-  margin-bottom: 16px;
-}
-.card h2 { margin-top: 0; font-size: 16px; }
-.card h3 { font-size: 14px; margin-top: 16px; margin-bottom: 8px; }
+  @media (max-width: 760px){
+    .gh-row1, .gh-row2{padding-left:14px;padding-right:14px;}
+    .gh-meta{margin-left:0;flex-basis:100%;}
+    .gh-month{margin-left:0;width:100%;justify-content:flex-end;}
+    .gh-views{flex-basis:100%;justify-content:flex-start;}
+    .container{padding:16px 14px 30px;}
+    .breadcrumb{padding:8px 14px;}
+  }
 
-.grid {
-  display: grid;
-  gap: 16px;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-}
+  .breadcrumb{background:var(--surface2);border-bottom:1px solid var(--border);
+              padding:8px 28px;font-size:12px;color:var(--text-soft);
+              display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+  .breadcrumb a{color:var(--blue);}
+  .breadcrumb a:hover{text-decoration:underline;}
+  .breadcrumb .sep{color:var(--dim);}
+  .breadcrumb .current{color:var(--text);font-weight:600;}
 
-/* Tables */
-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-th, td { padding: 6px 8px; text-align: left; border-bottom: 1px solid var(--color-border); }
-th { background: var(--color-surface-alt); font-weight: 600; }
-td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  .container{max-width:1400px;margin:0 auto;padding:24px 28px 40px;}
 
-/* Grades */
-.grade {
-  display: inline-block;
-  min-width: 22px;
-  padding: 2px 6px;
-  border-radius: 3px;
-  font-weight: 600;
-  text-align: center;
-  color: #fff;
-  font-size: 12px;
-}
-.grade-S { background: var(--color-good); }
-.grade-A { background: #6ba074; }
-.grade-B { background: var(--color-warn); }
-.grade-C { background: #d87f3e; }
-.grade-D { background: var(--color-bad); }
+  footer.site{padding:18px 28px;text-align:center;color:var(--dim);font-size:11px;
+              border-top:1px solid var(--border);margin-top:20px;}
 
-/* Type badges */
-.type-badge {
-  display: inline-block;
-  padding: 2px 6px;
-  border-radius: 3px;
-  font-size: 11px;
-  color: #fff;
-}
-.type-naika { background: var(--color-naika); }
-.type-geka { background: var(--color-geka); }
-.type-other { background: var(--color-other); }
-
-/* Nav links */
-.nav-list { list-style: none; padding: 0; margin: 0; }
-.nav-list li { margin-bottom: 6px; }
-.nav-list a {
-  color: var(--color-accent);
-  text-decoration: none;
-}
-.nav-list a:hover { text-decoration: underline; }
-
-/* Chart wrappers */
-.chart-wrap { position: relative; height: 280px; }
-.chart-wrap-sm { position: relative; height: 180px; }
-
-footer.site-footer {
-  color: var(--color-text-muted);
-  font-size: 11px;
-  padding: 16px 24px;
-  text-align: center;
-}
+  /* テーマ/補助分析ドロップダウン（JS クリックトグル） */
+  .gh-dropdown{position:relative;}
+  .gh-dropdown-menu{
+    display:none;position:absolute;top:calc(100% + 6px);left:0;
+    background:var(--header);border:1px solid var(--header-line);
+    border-radius:8px;min-width:220px;z-index:100;padding:6px 0;
+    box-shadow:0 4px 16px rgba(0,0,0,.2);
+  }
+  .gh-dropdown-menu.open{ display:block; }
+  .gh-dropdown-menu a{
+    display:block;padding:8px 16px;font-size:12px;
+    color:rgba(255,255,255,.85);white-space:nowrap;
+  }
+  .gh-dropdown-menu a:hover{background:rgba(255,255,255,.12);color:#fff;}
+  .gh-dropdown-menu a.active{background:rgba(255,255,255,.15);color:#fff;font-weight:700;}
+  .gh-dropdown-menu a .ext{font-size:9px;margin-left:4px;opacity:.7;}
 </style>
+
+<style>
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;
+        padding:22px 26px;margin-bottom:20px;box-shadow:0 1px 3px rgba(0,0,0,.03);}
+  .card h2{font-size:16px;font-weight:700;color:var(--text);margin-bottom:14px;
+           padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .site-meta{font-size:12px;color:var(--text-soft);line-height:1.7;}
+
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  table th, table td{padding:8px 10px;border-bottom:1px solid var(--border);text-align:left;}
+  table th{background:var(--surface2);font-weight:700;font-size:11px;color:var(--text-soft);
+           text-transform:uppercase;letter-spacing:.04em;}
+  table td.num, table th.num{text-align:right;font-family:'DM Mono',monospace;}
+
+  .type-badge{display:inline-block;padding:1px 8px;border-radius:4px;font-size:10px;
+              font-weight:700;letter-spacing:.04em;margin-left:6px;vertical-align:middle;
+              background:var(--surface3);color:var(--text-soft);}
+
+  .drev-controls{display:flex;gap:16px;align-items:center;margin:12px 0;flex-wrap:wrap;}
+  .drev-controls select{padding:6px 10px;font-size:13px;border:1px solid var(--border-strong);
+                        border-radius:6px;background:var(--surface);color:var(--text);
+                        font-family:'Noto Sans JP',sans-serif;}
+  .btn-export{background:var(--blue);color:#fff;border:none;padding:8px 16px;
+              border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;}
+  .btn-export:hover{background:#2E6BAA;}
+
+  .score-badge{display:inline-block;min-width:40px;padding:2px 8px;
+               border-radius:4px;font-weight:700;text-align:center;
+               font-family:'DM Mono',monospace;font-size:12px;}
+  .score-high{background:var(--down);color:#fff;}
+  .score-mid{background:var(--grade-s-bg);color:#fff;}
+  .score-low{background:var(--surface3);color:var(--text-soft);}
+</style>
+
 </head>
-<body>
-<header class="site-header">
-  <h1 class="site-title">薬再診候補スコア (2025-11 〜 2026-04)</h1>
-  <div class="site-meta">生成: 2026-04-26 14:47</div>
+<body data-view="drug" data-month="2026-04">
+
+<header class="site">
+  <div class="gh-row1">
+    <div class="gh-logo">OD</div>
+    <div class="gh-title">
+      <h1>外来ダッシュボード</h1>
+      <div class="sub">Outpatient Dashboard</div>
+    </div>
+    <div class="gh-meta">
+      <div>更新 2026-04-26 20:21</div>
+    </div>
+  </div>
+  <div class="gh-row2">
+    <div class="gh-views">
+      <a href="index.html">ホーム</a>
+      
+      <a href="monthly/2026-04.html">月次経営サマリ</a>
+      <a href="dept/2026-04/index.html">診療科ドリルダウン</a>
+      
+      <div class="gh-dropdown">
+        <button type="button" class="gh-view-btn active" id="gh-extras-btn">
+          補助分析 <span style="font-size:9px;">▾</span>
+        </button>
+        <div class="gh-dropdown-menu">
+          <a href="doctor_analysis.html">医師別 深掘り分析</a>
+          <a href="drug_revisit.html" class="active">薬再診候補スコア</a>
+          <a href="https://genie-scripts.github.io/Outpatient-Restructuring/" target="_blank" rel="noopener">外来再編分析サイト<span class="ext">↗</span></a>
+        </div>
+      </div>
+    </div>
+    
+  </div>
 </header>
 
+
+
 <main class="container">
+
 <div class="card">
   <h2>薬再診候補スコア</h2>
   <p class="site-meta">
@@ -35119,24 +35166,114 @@ footer.site-footer {
 </div>
 
 
-<p><a href="index.html">← ハブへ戻る</a></p>
+</main>
 
-<style>
-.drev-controls { display: flex; gap: 16px; align-items: center; margin: 12px 0; flex-wrap: wrap; }
-.drev-controls select { padding: 4px 8px; }
-.btn-export {
-  background: #0284c7; color: #fff; border: none; padding: 8px 16px;
-  border-radius: 6px; cursor: pointer; font-size: 13px;
-}
-.btn-export:hover { background: #0369a1; }
-.score-badge {
-  display: inline-block; min-width: 40px; padding: 2px 6px;
-  border-radius: 4px; font-weight: 600; text-align: center;
-}
-.score-high { background: #dc2626; color: #fff; }
-.score-mid { background: #f59e0b; color: #fff; }
-.score-low { background: #e4e4e7; color: #3f3f46; }
-</style>
+<footer class="site">
+  外来ダッシュボード
+</footer>
+
+<script>
+/* グローバルヘッダ：月セレクタとビュー切替の連動。
+   現在のビュー（data-view）と現在の科コード（data-code）を保ったまま
+   月だけを切り替える。ホームの場合はその月の monthly に遷移する。 */
+(function(){
+  const body = document.body;
+  const view = body.getAttribute('data-view');
+  const code = body.getAttribute('data-code');
+  const sel = document.getElementById('gh-month-select');
+  const prevBtn = document.getElementById('gh-prev-month');
+  const nextBtn = document.getElementById('gh-next-month');
+  if (!sel) return;
+
+  function rootPrefix(){
+    const a = document.querySelector('header.site .gh-views a');
+    if (!a) return '';
+    const href = a.getAttribute('href') || '';
+    return href.replace(/index\.html$/, '');
+  }
+
+  function targetUrl(month, view, code){
+    const root = rootPrefix();
+    if (view === 'monthly' || view === 'home') {
+      return root + 'monthly/' + month + '.html';
+    }
+    if (view === 'dept' || view === 'dept-detail') {
+      const filename = code ? (code + '.html') : 'index.html';
+      return root + 'dept/' + month + '/' + filename;
+    }
+    return root + 'index.html';
+  }
+
+  sel.addEventListener('change', () => {
+    location.href = targetUrl(sel.value, view, code);
+  });
+
+  function shiftMonth(delta){
+    /* sel.options は新→旧。delta=-1 で前月（idx 増）、+1 で翌月（idx 減）。 */
+    const idx = sel.selectedIndex;
+    const newIdx = idx - delta;
+    if (newIdx < 0 || newIdx >= sel.options.length) return;
+    sel.selectedIndex = newIdx;
+    sel.dispatchEvent(new Event('change'));
+  }
+  if (prevBtn) prevBtn.addEventListener('click', () => shiftMonth(-1));
+  if (nextBtn) nextBtn.addEventListener('click', () => shiftMonth(+1));
+
+  function refreshBtns(){
+    const idx = sel.selectedIndex;
+    if (prevBtn) prevBtn.disabled = (idx >= sel.options.length - 1);
+    if (nextBtn) nextBtn.disabled = (idx <= 0);
+  }
+  refreshBtns();
+  sel.addEventListener('change', refreshBtns);
+})();
+
+/* 補助分析ドロップダウン：クリックトグル */
+(function(){
+  const btn  = document.getElementById('gh-extras-btn');
+  const menu = btn && btn.parentElement.querySelector('.gh-dropdown-menu');
+  if (!btn || !menu) return;
+
+  btn.addEventListener('click', function(e){
+    e.stopPropagation();
+    menu.classList.toggle('open');
+  });
+  menu.addEventListener('click', function(){ menu.classList.remove('open'); });
+  document.addEventListener('click', function(){ menu.classList.remove('open'); });
+})();
+
+/* 共通ユーティリティ（チャート色・整形・評価バッジ）。
+   各ダッシュボードの個別 <script> から OutpatientCommon を参照する。 */
+window.OutpatientCommon = (function(){
+  const palette = {
+    naika:'#2B9DB8', geka:'#D08620', other:'#8B6FB6',
+    primary:'#D08620', accent:'#3F7FC1', muted:'#8A847C',
+  };
+  function formatInt(n){ return (n==null||Number.isNaN(n))?'-':Math.round(n).toLocaleString('ja-JP'); }
+  function formatPct(n, d=1){ return (n==null||Number.isNaN(n))?'-':(n.toFixed(d)+'%'); }
+  function gradeFromPct(pct, inverse=false){
+    if (pct==null||Number.isNaN(pct)) return 'D';
+    if (inverse){
+      if (pct<=90) return 'S'; if (pct<=100) return 'A';
+      if (pct<=110) return 'B'; if (pct<=125) return 'C'; return 'D';
+    }
+    if (pct>=110) return 'S'; if (pct>=100) return 'A';
+    if (pct>=90) return 'B'; if (pct>=75) return 'C'; return 'D';
+  }
+  function gradeBadge(g){ return '<span class="grade grade-'+g+'">'+g+'</span>'; }
+  function typeBadge(t){
+    const label = {naika:'内科', geka:'外科', other:'その他'}[t] || t;
+    return '<span class="type-badge '+t+'">'+label+'</span>';
+  }
+  if (window.Chart){
+    Chart.defaults.font.family = "'Noto Sans JP', sans-serif";
+    Chart.defaults.font.size = 12;
+    Chart.defaults.color = '#2C2A28';
+  }
+  return { palette, formatInt, formatPct, gradeFromPct, gradeBadge, typeBadge };
+})();
+</script>
+
 
 <script id="export-csv-data" type="application/json">{"2025-11": "診療科,医師匿名ID,予約名称,再診件数,短時間再診比率(%),紹介状なし再診比率(%),診察時間中央値(分),スコア\n眼科,DR_E021,SL_0200,54,100.0,100.0,0.0,100.0\n眼科,DR_E021,SL_0218,15,100.0,100.0,0.0,100.0\n眼科,DR_E032,SL_0447,10,100.0,100.0,0.0,100.0\n眼科,DR_E003,SL_0035,150,92.7,100.0,0.0,97.6\n眼科,DR_E020,SL_0009,53,92.5,100.0,0.0,97.5\n眼科,DR_E005,SL_0054,147,91.8,100.0,0.0,97.3\n眼科,DR_E020,SL_0400,45,91.1,100.0,0.0,97.0\n眼科,DR_E018,SL_0170,276,84.8,100.0,0.0,94.9\n眼科,DR_E002,SL_0136,159,85.5,100.0,2.0,93.5\n眼科,DR_E023,SL_0009,16,75.0,100.0,1.0,90.8\n眼科,DR_E014,SL_0138,17,70.6,100.0,0.0,90.2\n眼科,DR_E016,SL_0151,89,64.0,100.0,1.0,87.1\n眼科,DR_E016,SL_0009,11,63.6,100.0,2.0,86.2\n眼科,DR_E002,SL_0221,19,68.4,100.0,4.0,86.0\n眼科,DR_E025,SL_0363,39,61.5,100.0,4.0,83.7\n整形外科,DR_OR009,SL_0009,25,100.0,100.0,0.0,100.0\n整形外科,DR_OR009,SL_0165,47,100.0,100.0,0.0,100.0\n整形外科,DR_OR012,SL_0009,23,82.6,100.0,0.0,94.2\n整形外科,DR_OR003,SL_0440,29,75.9,100.0,2.0,90.3\n整形外科,DR_OR016,SL_0252,18,72.2,100.0,2.0,89.0\n整形外科,DR_OR005,SL_0009,62,66.1,100.0,0.0,88.7\n整形外科,DR_OR011,SL_0206,28,57.1,100.0,4.0,82.3\n整形外科,DR_OR034,SL_0735,58,55.2,100.0,4.0,81.6\n整形外科,DR_OR003,SL_0038,163,54.0,100.0,4.0,81.2\n整形外科,DR_OR033,SL_0725,50,50.0,100.0,4.0,79.9\n整形外科,DR_OR004,SL_0069,70,45.7,98.6,4.0,76.1\n整形外科,DR_OR007,SL_0261,39,41.0,100.0,5.0,76.1\n整形外科,DR_OR022,SL_0421,40,37.5,100.0,6.0,74.0\n整形外科,DR_OR006,SL_0081,44,25.0,100.0,7.0,69.0\n整形外科,DR_OR029,SL_0635,42,26.2,100.0,9.0,67.7\n泌尿器科,DR_U013,SL_0137,75,100.0,100.0,0.0,100.0\n泌尿器科,DR_U011,SL_0009,47,97.9,100.0,0.0,99.3\n泌尿器科,DR_U002,SL_0009,238,97.5,100.0,0.0,99.2\n泌尿器科,DR_U005,SL_0009,218,95.4,100.0,0.0,98.5\n泌尿器科,DR_U006,SL_0009,13,84.6,100.0,0.0,94.9\n泌尿器科,DR_U003,SL_0009,22,86.4,100.0,1.0,94.6\n泌尿器科,DR_U008,SL_0009,35,77.1,100.0,0.0,92.4\n泌尿器科,DR_U001,SL_0006,359,67.7,100.0,3.0,86.7\n泌尿器科,DR_U018,SL_0009,114,64.9,100.0,2.0,86.6\n泌尿器科,DR_U010,SL_0128,356,67.1,100.0,3.0,86.5\n泌尿器科,DR_U023,SL_0415,13,69.2,100.0,4.0,86.3\n泌尿器科,DR_U004,SL_0005,73,49.3,100.0,0.0,83.1\n泌尿器科,DR_U003,SL_0019,363,59.2,100.0,4.0,83.0\n泌尿器科,DR_U008,SL_0112,293,53.9,100.0,4.0,81.2\n泌尿器科,DR_U022,SL_0009,15,40.0,100.0,0.0,80.0\n産婦人科,DR_G010,SL_0331,36,97.2,100.0,0.0,99.1\n産婦人科,DR_G012,SL_0358,35,97.1,100.0,0.0,99.0\n産婦人科,DR_G006,SL_0208,93,79.6,100.0,0.0,93.2\n産婦人科,DR_G011,SL_0009,69,55.1,100.0,2.5,82.9\n産婦人科,DR_G004,SL_0124,143,59.4,99.3,3.0,82.7\n産婦人科,DR_G009,SL_0166,11,54.5,100.0,3.0,82.3\n産婦人科,DR_G003,SL_0028,214,51.9,100.0,4.0,80.5\n産婦人科,DR_G003,SL_0287,18,44.4,100.0,6.5,75.9\n産婦人科,DR_G004,SL_0029,68,41.2,100.0,6.0,75.3\n産婦人科,DR_G005,SL_0049,150,38.7,100.0,6.0,74.4\n産婦人科,DR_G006,SL_0068,65,38.5,100.0,6.0,74.4\n産婦人科,DR_G005,SL_0371,40,35.0,100.0,5.5,73.6\n産婦人科,DR_G018,SL_0706,30,40.0,100.0,8.5,72.7\n産婦人科,DR_G013,SL_0369,27,22.2,100.0,2.5,71.9\n産婦人科,DR_G018,SL_0754,33,30.3,100.0,10.0,68.2\n耳鼻咽喉科,DR_ENT005,SL_0099,55,96.4,100.0,0.0,98.8\n耳鼻咽喉科,DR_ENT022,SL_0716,85,96.5,100.0,0.0,98.8\n耳鼻咽喉科,DR_ENT003,SL_0063,23,95.7,100.0,0.0,98.6\n耳鼻咽喉科,DR_ENT003,SL_0064,183,93.4,100.0,0.0,97.8\n耳鼻咽喉科,DR_ENT004,SL_0009,86,60.5,100.0,3.0,84.3\n耳鼻咽喉科,DR_ENT011,SL_0232,10,60.0,100.0,4.0,83.2\n耳鼻咽喉科,DR_ENT004,SL_0181,136,53.7,100.0,4.0,81.1\n耳鼻咽喉科,DR_ENT004,SL_0242,15,46.7,100.0,5.0,78.0\n耳鼻咽喉科,DR_ENT008,SL_0155,156,46.8,100.0,5.0,78.0\n耳鼻咽喉科,DR_ENT002,SL_0048,62,45.2,100.0,5.0,77.5\n耳鼻咽喉科,DR_ENT001,SL_0009,71,42.3,100.0,5.0,76.5\n耳鼻咽喉科,DR_ENT002,SL_0009,12,41.7,100.0,7.0,74.6\n耳鼻咽喉科,DR_ENT013,SL_0009,20,40.0,100.0,8.5,72.7\n耳鼻咽喉科,DR_ENT019,SL_0700,79,31.6,100.0,6.0,72.1\n耳鼻咽喉科,DR_ENT010,SL_0225,10,20.0,100.0,5.0,69.1\n消化器内科,DR_GI001,SL_0009,172,65.7,100.0,0.0,88.6\n消化器内科,DR_GI005,SL_0009,11,63.6,100.0,0.0,87.9\n消化器内科,DR_GI006,SL_0120,154,70.8,100.0,3.0,87.7\n消化器内科,DR_GI005,SL_0152,249,50.6,99.6,4.0,79.4\n消化器内科,DR_GI002,SL_0730,21,47.6,100.0,4.0,79.1\n消化器内科,DR_GI008,SL_0315,14,35.7,100.0,5.0,74.3\n消化器内科,DR_GI002,SL_0046,213,34.7,100.0,5.0,74.0\n消化器内科,DR_GI008,SL_0214,184,33.7,100.0,6.0,72.8\n消化器内科,DR_GI006,SL_0320,13,30.8,100.0,7.0,71.0\n消化器内科,DR_GI004,SL_0086,28,28.6,100.0,8.5,68.9\n消化器内科,DR_GI003,SL_0083,134,14.9,100.0,7.0,65.7\n消化器内科,DR_GI005,SL_0554,16,43.8,93.8,7.0,65.0\n消化器内科,DR_GI006,SL_0258,12,16.7,100.0,9.0,64.5\n消化器内科,DR_GI005,SL_0362,12,16.7,100.0,9.5,64.1\n消化器内科,DR_GI002,SL_0423,12,8.3,100.0,11.0,60.0\n呼吸器内科,DR_RS2009,SL_0009,71,81.7,100.0,0.0,93.9\n呼吸器内科,DR_RS2004,SL_0009,51,51.0,100.0,4.0,80.2\n呼吸器内科,DR_RS2010,SL_0167,82,37.8,100.0,6.0,74.1\n呼吸器内科,DR_RS2003,SL_0061,131,33.6,100.0,6.0,72.7\n呼吸器内科,DR_AL002,SL_0189,156,32.7,100.0,6.0,72.4\n呼吸器内科,DR_RS2013,SL_0005,15,13.3,100.0,0.0,71.1\n呼吸器内科,DR_AL001,SL_0033,53,22.6,100.0,6.5,68.6\n呼吸器内科,DR_RS2005,SL_0100,116,23.3,100.0,7.0,68.5\n呼吸器内科,DR_RS2004,SL_0082,225,24.4,100.0,8.0,68.0\n呼吸器内科,DR_RS2002,SL_0030,11,27.3,100.0,10.0,67.2\n呼吸器内科,DR_RS2007,SL_0126,11,27.3,100.0,10.5,66.8\n呼吸器内科,DR_RS2003,SL_0213,15,13.3,100.0,6.0,66.0\n呼吸器内科,DR_RS2009,SL_0366,10,10.0,100.0,9.0,62.3\n呼吸器内科,DR_RS2008,SL_0127,46,13.0,100.0,12.0,60.7\n呼吸器内科,DR_RS2006,SL_0106,70,5.7,100.0,10.0,60.0\n総合内科,DR_GM004,SL_0009,145,63.4,100.0,1.0,86.9\n総合内科,DR_GM001,SL_0016,23,73.9,95.7,2.0,82.4\n総合内科,DR_GM001,SL_0009,23,43.5,100.0,5.0,76.9\n総合内科,DR_GM019,SL_0471,10,40.0,100.0,8.0,73.2\n総合内科,DR_GM017,SL_0330,21,33.3,100.0,6.5,72.2\n総合内科,DR_GM004,SL_0157,40,37.5,100.0,8.5,71.9\n総合内科,DR_GM012,SL_0009,64,37.5,98.4,8.0,69.7\n総合内科,DR_GM016,SL_0289,53,20.8,100.0,7.0,67.6\n総合内科,DR_GM024,SL_0717,14,21.4,100.0,9.5,65.7\n総合内科,DR_GM013,SL_0247,21,23.8,100.0,10.5,65.6\n総合内科,DR_GM003,SL_0071,46,15.2,100.0,8.0,64.9\n総合内科,DR_GM008,SL_0149,17,17.6,100.0,10.0,64.0\n総合内科,DR_GM012,SL_0238,87,17.2,100.0,12.0,62.1\n総合内科,DR_GM007,SL_0148,19,10.5,100.0,10.5,61.2\n総合内科,DR_GM018,SL_0337,21,19.0,100.0,14.0,61.0\n一般消化器外科,DR_BR005,SL_0516,14,85.7,100.0,0.0,95.2\n一般消化器外科,DR_BR005,SL_0009,44,81.8,100.0,0.0,93.9\n一般消化器外科,DR_GS011,SL_0009,18,66.7,100.0,0.0,88.9\n一般消化器外科,DR_GS006,SL_0202,91,56.0,100.0,4.0,81.9\n一般消化器外科,DR_GS001,SL_0022,149,45.6,100.0,5.0,77.6\n一般消化器外科,DR_GS002,SL_0085,99,45.5,99.0,5.0,75.9\n一般消化器外科,DR_GS004,SL_0109,42,42.9,100.0,6.0,75.8\n一般消化器外科,DR_GS016,SL_0770,14,35.7,100.0,8.0,71.7\n一般消化器外科,DR_GS008,SL_0229,39,28.2,100.0,7.0,70.1\n一般消化器外科,DR_GS009,SL_0374,45,26.7,100.0,10.0,67.0\n一般消化器外科,DR_GS005,SL_0194,49,14.3,100.0,8.0,64.6\n一般消化器外科,DR_GS003,SL_0103,182,10.4,99.5,9.0,61.6\n一般消化器外科,DR_GS003,SL_0280,10,10.0,100.0,12.0,59.7\n一般消化器外科,DR_GS015,SL_0715,38,0.0,100.0,10.0,58.1\n皮膚科,DR_DM005,SL_0009,31,77.4,100.0,0.0,92.5\n皮膚科,DR_DM003,SL_0009,23,73.9,100.0,0.0,91.3\n皮膚科,DR_DM002,SL_0009,32,71.9,100.0,0.0,90.6\n皮膚科,DR_DM001,SL_0009,10,50.0,100.0,2.0,81.6\n皮膚科,DR_DM006,SL_0009,47,53.2,100.0,3.5,81.4\n皮膚科,DR_DM002,SL_0056,108,25.0,100.0,7.0,69.0\n皮膚科,DR_DM005,SL_0101,121,14.9,100.0,8.5,64.4\n皮膚科,DR_DM006,SL_0161,148,13.5,100.0,8.0,64.3\n皮膚科,DR_DM003,SL_0091,133,15.0,100.0,9.0,64.0\n皮膚科,DR_DM008,SL_0009,58,19.0,100.0,11.0,63.6\n皮膚科,DR_DM009,SL_0292,39,12.8,100.0,9.0,63.2\n皮膚科,DR_DM001,SL_0173,162,9.3,100.0,11.0,60.4\n皮膚科,DR_DM007,SL_0197,43,0.0,100.0,12.0,56.4\n血液内科,DR_HE005,SL_0216,45,82.2,100.0,2.0,92.4\n血液内科,DR_HE006,SL_0009,32,75.0,100.0,0.0,91.7\n血液内科,DR_HE009,SL_0383,18,66.7,100.0,0.0,88.9\n血液内科,DR_RH005,SL_0156,34,67.6,100.0,2.0,87.5\n血液内科,DR_HE007,SL_0005,18,61.1,100.0,0.0,87.0\n血液内科,DR_HE004,SL_0169,98,65.3,100.0,3.0,85.9\n血液内科,DR_HE004,SL_0009,11,54.5,100.0,3.0,82.3\n血液内科,DR_HE001,SL_0012,129,42.6,100.0,5.0,76.6\n血液内科,DR_HE003,SL_0096,124,31.5,100.0,7.0,71.2\n血液内科,DR_HE002,SL_0089,67,20.9,100.0,7.0,67.7\n血液内科,DR_HE010,SL_0439,59,11.9,100.0,9.0,62.9\n血液内科,DR_HE008,SL_0339,19,5.3,100.0,13.0,57.3\n血液内科,DR_GM018,SL_0389,20,5.0,100.0,14.0,56.4\nリウマチ膠原病内科,DR_RH007,SL_0009,35,68.6,100.0,1.0,88.7\nリウマチ膠原病内科,DR_RH005,SL_0156,49,51.0,100.0,0.0,83.7\nリウマチ膠原病内科,DR_RH003,SL_0009,24,50.0,100.0,4.5,79.5\nリウマチ膠原病内科,DR_RH004,SL_0139,95,43.2,100.0,5.0,76.8\nリウマチ膠原病内科,DR_RH010,SL_0222,120,33.3,100.0,5.0,73.5\nリウマチ膠原病内科,DR_RH009,SL_0210,228,33.3,100.0,6.0,72.6\nリウマチ膠原病内科,DR_RH003,SL_0066,110,24.5,100.0,7.0,68.9\nリウマチ膠原病内科,DR_RH006,SL_0174,146,11.6,100.0,10.0,62.0\nリウマチ膠原病内科,DR_RH002,SL_0009,14,14.3,100.0,11.5,61.6\nリウマチ膠原病内科,DR_RH001,SL_0008,39,5.1,100.0,8.0,61.5\nリウマチ膠原病内科,DR_RH002,SL_0014,34,8.8,100.0,10.0,61.1\nリウマチ膠原病内科,DR_RH008,SL_0201,11,9.1,100.0,13.0,58.6\nリウマチ膠原病内科,DR_RH009,SL_0340,11,0.0,100.0,17.0,52.1\n歯科口腔外科,DR_OS015,SL_0009,15,73.3,100.0,0.0,91.1\n歯科口腔外科,DR_OS005,SL_0133,16,68.8,100.0,0.5,89.2\n歯科口腔外科,DR_OS011,SL_0322,11,54.5,100.0,0.0,84.8\n歯科口腔外科,DR_OS010,SL_0009,10,40.0,100.0,2.5,77.9\n歯科口腔外科,DR_OS003,SL_0009,16,50.0,100.0,7.5,76.9\n歯科口腔外科,DR_OS005,SL_0009,23,34.8,100.0,9.0,70.6\n歯科口腔外科,DR_OS002,SL_0009,17,35.3,100.0,13.0,67.3\n歯科口腔外科,DR_OS007,SL_0009,17,17.6,100.0,9.0,64.8\n歯科口腔外科,DR_OS004,SL_0009,34,20.6,100.0,11.0,64.1\n歯科口腔外科,DR_OS020,SL_0703,101,10.9,100.0,11.0,60.9\n歯科口腔外科,DR_OS022,SL_0009,18,5.6,100.0,11.0,59.1\n歯科口腔外科,DR_OS004,SL_0123,118,6.8,100.0,12.0,58.7\n歯科口腔外科,DR_OS007,SL_0141,36,5.6,100.0,11.5,58.7\n歯科口腔外科,DR_OS014,SL_0372,10,10.0,100.0,13.5,58.5\n歯科口腔外科,DR_OS003,SL_0080,54,5.6,100.0,15.5,55.3\n循環器内科,DR_CV002,SL_0009,118,63.6,100.0,1.0,87.0\n循環器内科,DR_CV008,SL_0150,187,47.1,100.0,5.0,78.1\n循環器内科,DR_CV004,SL_0034,72,45.8,100.0,5.0,77.7\n循環器内科,DR_CV001,SL_0044,117,21.4,100.0,7.0,67.8\n循環器内科,DR_CV016,SL_0616,59,23.7,100.0,8.0,67.7\n循環器内科,DR_CV010,SL_0193,139,10.8,100.0,8.0,63.4\n循環器内科,DR_CV002,SL_0118,23,56.5,87.0,3.0,61.3\n循環器内科,DR_CV007,SL_0078,40,5.0,100.0,9.5,60.2\n循環器内科,DR_CV009,SL_0153,95,8.4,100.0,11.0,60.1\n循環器内科,DR_CV003,SL_0031,88,6.8,100.0,11.0,59.5\n循環器内科,DR_CV011,SL_0196,88,3.4,100.0,11.0,58.4\n循環器内科,DR_CV006,SL_0067,117,1.7,100.0,11.5,57.4\n循環器内科,DR_CV001,SL_0228,10,10.0,100.0,15.0,57.2\n循環器内科,DR_CV005,SL_0058,26,57.7,80.8,2.0,52.2\n形成外科,DR_PS005,SL_0009,15,53.3,100.0,2.0,82.7\n形成外科,DR_PS005,SL_0265,25,36.0,100.0,7.0,72.7\n形成外科,DR_PS015,SL_0009,19,36.8,100.0,7.5,72.5\n形成外科,DR_PS013,SL_0009,20,30.0,100.0,9.0,69.0\n形成外科,DR_PS016,SL_0729,35,28.6,100.0,9.0,68.5\n形成外科,DR_PS009,SL_0359,10,20.0,100.0,7.0,67.4\n形成外科,DR_PS005,SL_0707,46,21.7,100.0,9.0,66.2\n形成外科,DR_PS013,SL_0701,59,16.9,100.0,9.0,64.6\n形成外科,DR_PS015,SL_0709,69,14.5,100.0,9.0,63.8\n形成外科,DR_PS006,SL_0288,16,12.5,100.0,13.0,59.7\n形成外科,DR_PS018,SL_0895,22,13.6,100.0,15.0,58.4\n形成外科,DR_PS016,SL_0009,11,0.0,100.0,27.0,43.6\n乳腺外科,DR_BR013,SL_0481,10,70.0,100.0,1.5,88.7\n乳腺外科,DR_BR006,SL_0175,738,71.7,99.9,3.0,87.8\n乳腺外科,DR_BR014,SL_0702,268,62.7,100.0,3.0,85.0\n乳腺外科,DR_BR006,SL_0009,96,61.5,100.0,4.0,83.7\n乳腺外科,DR_BR014,SL_0009,13,53.8,100.0,3.5,81.6\n乳腺外科,DR_BR015,SL_0839,83,34.9,100.0,5.0,74.0\n乳腺外科,DR_BR002,SL_0032,17,23.5,100.0,6.5,68.9\n乳腺外科,DR_BR008,SL_0241,99,13.1,100.0,7.0,65.1\n放射線治療科,DR_U002,SL_0009,21,85.7,100.0,0.0,95.2\n放射線治療科,DR_RT004,SL_0009,70,71.4,100.0,3.0,87.9\n放射線治療科,DR_RT005,SL_0209,47,63.8,100.0,4.0,84.5\n放射線治療科,DR_RT002,SL_0134,335,58.2,100.0,3.0,83.5\n放射線治療科,DR_RT004,SL_0108,128,45.3,100.0,5.0,77.5\n放射線治療科,DR_RT001,SL_0023,21,42.9,100.0,5.0,76.7\n放射線治療科,DR_RT002,SL_0009,42,42.9,100.0,5.0,76.7\n放射線治療科,DR_RT003,SL_0050,30,20.0,100.0,8.5,66.1\n放射線治療科,DR_RT010,SL_0560,13,15.4,100.0,19.0,55.6\n放射線治療科,DR_RT006,SL_0251,27,22.2,100.0,23.0,54.4\n腎内科,DR_NE004,SL_0348,34,91.2,100.0,0.0,97.1\n腎内科,DR_NE005,SL_0009,31,74.2,100.0,0.0,91.4\n腎内科,DR_NE012,SL_0924,16,43.8,100.0,6.0,76.1\n腎内科,DR_NE002,SL_0041,210,35.7,100.0,5.0,74.3\n腎内科,DR_NE001,SL_0027,170,10.6,100.0,8.0,63.4\n腎内科,DR_NE003,SL_0203,97,13.4,99.0,8.0,62.6\n腎内科,DR_DB002,SL_0282,44,4.5,100.0,22.0,49.4\n腎内科,DR_NE001,SL_0009,25,12.0,100.0,32.0,43.3\n脳神経外科,DR_NS001,SL_0009,15,66.7,100.0,0.0,88.9\n脳神経外科,DR_NS004,SL_0302,38,18.4,100.0,8.0,66.0\n脳神経外科,DR_NS003,SL_0184,50,14.0,100.0,9.0,63.6\n脳神経外科,DR_NS006,SL_0352,12,16.7,100.0,11.5,62.4\n脳神経外科,DR_NS005,SL_0343,40,5.0,100.0,8.0,61.5\n小児科,DR_PD014,SL_0005,12,16.7,100.0,0.0,72.2\n小児科,DR_PD002,SL_0070,23,30.4,100.0,6.0,71.7\n小児科,DR_PD011,SL_0009,14,35.7,100.0,11.5,68.7\n小児科,DR_PD009,SL_0257,21,9.5,100.0,8.0,63.0\n小児科,DR_PD016,SL_0780,17,11.8,100.0,11.0,61.2\n小児科,DR_PD007,SL_0351,24,12.5,100.0,14.0,58.9\n小児科,DR_PD018,SL_0837,16,12.5,100.0,14.5,58.4\n小児科,DR_PD022,SL_0877,34,17.6,100.0,17.0,58.0\n小児科,DR_PD004,SL_0177,14,14.3,100.0,16.0,57.8\n小児科,DR_PD001,SL_0020,18,11.1,100.0,15.5,57.1\n小児科,DR_PD003,SL_0098,28,14.3,100.0,21.0,53.5\n小児科,DR_PD001,SL_0313,12,0.0,100.0,16.0,53.0\n小児科,DR_PD007,SL_0239,14,0.0,100.0,16.0,53.0\n小児科,DR_PD008,SL_0250,23,0.0,100.0,16.5,52.6\n小児科,DR_PD006,SL_0272,26,0.0,100.0,17.0,52.1\n脳神経内科,DR_NR002,SL_0009,57,59.6,100.0,0.0,86.5\n脳神経内科,DR_NR003,SL_0160,98,45.9,100.0,5.0,77.7\n脳神経内科,DR_NR001,SL_0013,180,27.8,100.0,6.0,70.8\n脳神経内科,DR_NR005,SL_0291,35,31.4,100.0,8.0,70.3\nメンタルケア科,DR_MN002,SL_0009,75,54.7,100.0,0.5,84.5\nメンタルケア科,DR_MN004,SL_0255,44,29.5,100.0,7.0,70.5\nメンタルケア科,DR_MN001,SL_0043,121,20.7,100.0,8.0,66.7\nメンタルケア科,DR_MN009,SL_0721,39,12.8,100.0,11.0,61.5\n呼吸器外科,DR_RS2012,SL_0188,76,27.6,100.0,7.0,69.9\n呼吸器外科,DR_XX022,SL_0486,10,20.0,100.0,9.0,65.6\n呼吸器外科,DR_RS2001,SL_0024,60,11.7,100.0,7.5,64.2\nアレルギー科,DR_RS2003,SL_0061,40,27.5,100.0,6.0,70.7\nアレルギー科,DR_AL002,SL_0189,36,19.4,100.0,7.0,67.2\nアレルギー科,DR_AL001,SL_0033,34,11.8,100.0,8.0,63.8\nアレルギー科,DR_RS2005,SL_0100,19,5.3,100.0,10.0,59.9\n臨床腫瘍科,DR_ON001,SL_0009,30,16.7,100.0,8.5,65.0\n臨床腫瘍科,DR_ON001,SL_0088,100,14.0,100.0,8.0,64.5\n臨床腫瘍科,DR_ON001,SL_0633,15,0.0,100.0,22.0,47.9\n救急科,DR_ER001,SL_0072,91,42.9,95.6,6.0,68.5\n心臓血管外科,DR_CS002,SL_0168,43,23.3,100.0,6.0,69.3\n心臓血管外科,DR_CS006,SL_0726,116,4.3,100.0,18.0,52.7\n内科,DR_IM001,SL_0015,169,32.0,89.3,9.0,51.8", "2025-12": "診療科,医師匿名ID,予約名称,再診件数,短時間再診比率(%),紹介状なし再診比率(%),診察時間中央値(分),スコア\n眼科,DR_E020,SL_0400,49,100.0,100.0,0.0,100.0\n眼科,DR_E021,SL_0218,19,100.0,100.0,0.0,100.0\n眼科,DR_E032,SL_0447,12,100.0,100.0,0.0,100.0\n眼科,DR_E021,SL_0200,56,98.2,100.0,0.0,99.4\n眼科,DR_E003,SL_0035,159,96.2,100.0,0.0,98.7\n眼科,DR_E005,SL_0054,183,95.6,100.0,0.0,98.5\n眼科,DR_E020,SL_0009,54,94.4,100.0,0.0,98.1\n眼科,DR_E018,SL_0170,287,89.9,100.0,0.0,96.6\n眼科,DR_E002,SL_0136,197,82.7,100.0,2.0,92.7\n眼科,DR_E006,SL_0404,21,81.0,100.0,3.0,91.3\n眼科,DR_E012,SL_0009,15,73.3,100.0,2.0,89.5\n眼科,DR_E016,SL_0151,81,69.1,100.0,1.0,88.9\n眼科,DR_E030,SL_0442,31,64.5,100.0,0.0,88.2\n眼科,DR_E002,SL_0221,17,70.6,100.0,3.0,87.9\n眼科,DR_E023,SL_0009,20,65.0,100.0,1.0,87.6\n整形外科,DR_OR009,SL_0165,46,100.0,100.0,0.0,100.0\n整形外科,DR_OR009,SL_0009,38,97.4,100.0,0.0,99.1\n整形外科,DR_OR003,SL_0440,31,87.1,100.0,2.5,93.8\n整形外科,DR_OR016,SL_0252,12,75.0,100.0,2.0,90.1\n整形外科,DR_OR011,SL_0206,17,70.6,100.0,3.0,87.9\n整形外科,DR_OR012,SL_0009,22,63.6,100.0,0.0,87.9\n整形外科,DR_OR004,SL_0069,65,66.2,100.0,3.0,86.4\n整形外科,DR_OR005,SL_0009,83,59.0,100.0,0.0,86.3\n整形外科,DR_OR003,SL_0038,183,56.8,100.0,4.0,82.5\n整形外科,DR_OR034,SL_0735,28,46.4,100.0,4.0,79.0\n整形外科,DR_OR022,SL_0421,52,44.2,100.0,5.0,77.5\n整形外科,DR_OR003,SL_0053,10,40.0,100.0,5.0,76.1\n整形外科,DR_OR033,SL_0725,49,40.8,100.0,6.0,75.6\n整形外科,DR_OR008,SL_0147,43,32.6,100.0,5.0,73.7\n整形外科,DR_OR007,SL_0261,92,28.3,100.0,6.0,71.4\n泌尿器科,DR_U002,SL_0009,299,96.7,100.0,0.0,98.9\n泌尿器科,DR_U013,SL_0137,68,95.6,100.0,0.0,98.5\n泌尿器科,DR_U005,SL_0009,261,95.0,100.0,0.0,98.3\n泌尿器科,DR_U011,SL_0009,58,94.8,100.0,0.0,98.3\n泌尿器科,DR_U003,SL_0009,24,79.2,100.0,1.0,92.3\n泌尿器科,DR_U018,SL_0009,139,76.3,100.0,0.0,92.1\n泌尿器科,DR_U008,SL_0009,66,71.2,100.0,0.0,90.4\n泌尿器科,DR_U004,SL_0005,68,69.1,100.0,0.0,89.7\n泌尿器科,DR_U020,SL_0009,16,68.8,100.0,0.0,89.6\n泌尿器科,DR_U018,SL_0377,10,70.0,100.0,2.0,88.4\n泌尿器科,DR_U001,SL_0006,441,69.8,99.8,3.0,87.4\n泌尿器科,DR_U010,SL_0128,437,65.0,99.5,3.0,85.4\n泌尿器科,DR_U001,SL_0009,30,60.0,100.0,2.5,84.7\n泌尿器科,DR_U008,SL_0244,27,55.6,100.0,4.0,82.1\n泌尿器科,DR_U008,SL_0112,402,54.0,100.0,4.0,81.6\n産婦人科,DR_G010,SL_0331,22,100.0,100.0,0.0,100.0\n産婦人科,DR_G012,SL_0358,40,100.0,100.0,0.0,100.0\n産婦人科,DR_G006,SL_0208,84,64.3,100.0,2.0,86.5\n産婦人科,DR_G004,SL_0124,301,62.1,100.0,3.0,85.0\n産婦人科,DR_G011,SL_0009,65,56.9,100.0,2.5,83.7\n産婦人科,DR_G003,SL_0287,20,60.0,100.0,4.0,83.6\n産婦人科,DR_G004,SL_0009,16,43.8,100.0,3.0,78.9\n産婦人科,DR_G004,SL_0029,60,48.3,100.0,5.0,78.9\n産婦人科,DR_G003,SL_0028,226,46.0,100.0,5.0,78.1\n産婦人科,DR_G001,SL_0009,15,33.3,100.0,0.0,77.8\n産婦人科,DR_G005,SL_0371,49,42.9,100.0,5.0,77.1\n産婦人科,DR_G003,SL_0009,38,28.9,100.0,0.0,76.3\n産婦人科,DR_G009,SL_0166,12,41.7,100.0,6.5,75.5\n産婦人科,DR_G005,SL_0049,157,39.5,100.0,6.0,75.2\n産婦人科,DR_G006,SL_0068,50,38.0,100.0,6.0,74.7\n耳鼻咽喉科,DR_ENT003,SL_0063,28,100.0,100.0,0.0,100.0\n耳鼻咽喉科,DR_ENT005,SL_0009,14,100.0,100.0,0.0,100.0\n耳鼻咽喉科,DR_ENT005,SL_0099,83,96.4,100.0,0.0,98.8\n耳鼻咽喉科,DR_ENT022,SL_0716,114,95.6,100.0,0.0,98.5\n耳鼻咽喉科,DR_ENT003,SL_0064,218,91.7,100.0,0.0,97.2\n耳鼻咽喉科,DR_ENT004,SL_0009,104,76.0,100.0,3.0,89.7\n耳鼻咽喉科,DR_ENT008,SL_0636,10,70.0,100.0,2.0,88.4\n耳鼻咽喉科,DR_ENT011,SL_0009,10,60.0,100.0,4.0,83.6\n耳鼻咽喉科,DR_ENT004,SL_0181,155,52.3,100.0,4.0,81.0\n耳鼻咽喉科,DR_ENT008,SL_0155,179,49.7,100.0,4.0,80.1\n耳鼻咽喉科,DR_ENT002,SL_0009,19,47.4,100.0,4.0,79.4\n耳鼻咽喉科,DR_ENT004,SL_0242,16,43.8,100.0,5.0,77.4\n耳鼻咽喉科,DR_ENT001,SL_0009,93,36.6,100.0,6.0,74.2\n耳鼻咽喉科,DR_ENT013,SL_0009,28,39.3,100.0,8.5,73.2\n耳鼻咽喉科,DR_ENT007,SL_0117,23,17.4,100.0,2.0,70.9\n総合内科,DR_GM033,SL_0873,19,78.9,100.0,0.0,93.0\n総合内科,DR_GM001,SL_0009,51,68.6,100.0,1.5,88.4\n総合内科,DR_GM004,SL_0009,181,67.4,100.0,1.0,88.4\n総合内科,DR_GM001,SL_0016,27,55.6,92.6,1.0,76.0\n総合内科,DR_GM022,SL_0548,11,36.4,100.0,9.0,71.8\n総合内科,DR_GM034,SL_0879,10,30.0,100.0,6.5,71.6\n総合内科,DR_GM017,SL_0330,33,27.3,100.0,6.5,70.7\n総合内科,DR_GM013,SL_0247,38,28.9,100.0,9.0,69.3\n総合内科,DR_GM012,SL_0009,54,24.1,100.0,8.0,68.5\n総合内科,DR_GM019,SL_0009,15,20.0,100.0,6.5,68.3\n総合内科,DR_GM024,SL_0717,18,27.8,100.0,10.0,68.2\n総合内科,DR_GM004,SL_0157,47,34.0,100.0,13.0,67.9\n総合内科,DR_GM004,SL_0073,10,30.0,100.0,12.0,67.4\n総合内科,DR_GM012,SL_0238,81,19.8,100.0,10.0,65.5\n総合内科,DR_GM028,SL_0748,10,30.0,100.0,15.0,65.0\n消化器内科,DR_GI006,SL_0826,11,81.8,100.0,2.0,92.4\n消化器内科,DR_GI001,SL_0009,167,70.1,100.0,0.0,90.0\n消化器内科,DR_GI006,SL_0120,300,74.0,99.7,3.0,88.7\n消化器内科,DR_GI005,SL_0152,268,50.0,100.0,4.0,80.2\n消化器内科,DR_GI002,SL_0046,229,42.8,100.0,5.0,77.1\n消化器内科,DR_GI008,SL_0315,21,38.1,100.0,6.0,74.7\n消化器内科,DR_GI008,SL_0214,180,33.9,100.0,6.0,73.3\n消化器内科,DR_GI006,SL_0320,18,50.0,94.4,5.5,72.7\n消化器内科,DR_GI005,SL_0362,12,25.0,100.0,6.0,70.3\n消化器内科,DR_PD012,SL_0475,21,28.6,100.0,9.0,69.2\n消化器内科,DR_GI003,SL_0083,148,20.9,100.0,7.0,68.2\n消化器内科,DR_GI003,SL_0451,16,18.8,100.0,8.5,66.3\n消化器内科,DR_GI004,SL_0086,33,15.2,100.0,8.0,65.5\n消化器内科,DR_GI009,SL_0370,15,20.0,100.0,11.0,64.8\n消化器内科,DR_GI008,SL_0409,12,8.3,100.0,8.5,62.8\n一般消化器外科,DR_BR005,SL_0009,35,91.4,100.0,0.0,97.1\n一般消化器外科,DR_BR005,SL_0516,10,80.0,100.0,0.0,93.3\n一般消化器外科,DR_GS011,SL_0009,27,59.3,100.0,0.0,86.4\n一般消化器外科,DR_GS016,SL_0770,20,50.0,100.0,3.0,81.0\n一般消化器外科,DR_GS004,SL_0109,68,48.5,100.0,4.0,79.7\n一般消化器外科,DR_GS006,SL_0202,93,47.3,100.0,4.0,79.3\n一般消化器外科,DR_GS001,SL_0022,131,47.3,100.0,5.0,78.6\n一般消化器外科,DR_GS002,SL_0085,91,45.1,98.9,5.0,76.6\n一般消化器外科,DR_GS003,SL_0280,11,18.2,100.0,10.5,64.6\n一般消化器外科,DR_GS003,SL_0103,230,11.3,100.0,8.0,64.2\n一般消化器外科,DR_GS009,SL_0374,43,16.3,100.0,11.0,63.6\n一般消化器外科,DR_GS005,SL_0194,44,9.1,100.0,8.0,63.5\n一般消化器外科,DR_GS008,SL_0229,49,8.2,100.0,9.0,62.4\n一般消化器外科,DR_GS015,SL_0715,44,4.5,100.0,10.0,60.4\n一般消化器外科,DR_GS014,SL_0523,17,70.6,70.6,2.5,54.9\n歯科口腔外科,DR_OS015,SL_0009,12,66.7,100.0,0.0,88.9\n歯科口腔外科,DR_OS010,SL_0009,12,50.0,100.0,0.0,83.3\n歯科口腔外科,DR_OS002,SL_0009,38,42.1,100.0,8.0,74.5\n歯科口腔外科,DR_OS014,SL_0372,12,41.7,100.0,8.0,74.4\n歯科口腔外科,DR_OS005,SL_0133,19,42.1,100.0,9.0,73.7\n歯科口腔外科,DR_OS005,SL_0009,25,40.0,100.0,13.0,69.9\n歯科口腔外科,DR_OS004,SL_0009,33,30.3,100.0,10.0,69.0\n歯科口腔外科,DR_OS003,SL_0009,13,23.1,100.0,9.0,67.4\n歯科口腔外科,DR_OS011,SL_0322,13,30.8,100.0,15.0,65.3\n歯科口腔外科,DR_OS007,SL_0009,21,14.3,100.0,8.0,65.2\n歯科口腔外科,DR_OS017,SL_0505,16,18.8,100.0,11.5,64.0\n歯科口腔外科,DR_OS007,SL_0141,37,21.6,100.0,13.0,63.8\n歯科口腔外科,DR_OS022,SL_0009,11,9.1,100.0,11.0,61.2\n歯科口腔外科,DR_OS020,SL_0009,13,7.7,100.0,11.0,60.7\n歯科口腔外科,DR_OS020,SL_0703,115,5.2,100.0,13.5,57.9\n皮膚科,DR_DM005,SL_0009,30,86.7,100.0,0.0,95.6\n皮膚科,DR_DM006,SL_0009,34,76.5,100.0,0.0,92.2\n皮膚科,DR_DM003,SL_0009,37,70.3,100.0,0.0,90.1\n皮膚科,DR_DM002,SL_0009,48,66.7,100.0,0.0,88.9\n皮膚科,DR_DM008,SL_0009,64,29.7,100.0,7.0,71.1\n皮膚科,DR_DM002,SL_0056,161,28.6,100.0,8.0,70.0\n皮膚科,DR_DM006,SL_0161,155,20.6,100.0,7.0,68.1\n皮膚科,DR_DM009,SL_0292,45,20.0,100.0,7.0,67.9\n皮膚科,DR_DM010,SL_0009,11,36.4,100.0,16.0,66.4\n皮膚科,DR_DM005,SL_0101,151,11.9,100.0,9.0,63.7\n皮膚科,DR_DM003,SL_0091,145,9.7,100.0,10.0,62.1\n皮膚科,DR_DM001,SL_0173,135,7.4,100.0,10.0,61.4\n皮膚科,DR_DM007,SL_0197,49,6.1,100.0,11.0,60.2\n放射線治療科,DR_U002,SL_0009,14,92.9,100.0,0.0,97.6\n放射線治療科,DR_RT004,SL_0009,98,74.5,100.0,2.0,89.9\n放射線治療科,DR_RT009,SL_0009,11,63.6,100.0,0.0,87.9\n放射線治療科,DR_RT002,SL_0134,419,69.2,100.0,3.0,87.4\n放射線治療科,DR_RT004,SL_0108,145,64.1,100.0,3.0,85.7\n放射線治療科,DR_RT006,SL_0009,21,57.1,100.0,0.0,85.7\n放射線治療科,DR_RT003,SL_0009,10,60.0,100.0,1.5,85.5\n放射線治療科,DR_RT005,SL_0209,65,56.9,100.0,4.0,82.5\n放射線治療科,DR_RT002,SL_0009,74,47.3,100.0,4.5,78.9\n放射線治療科,DR_RT001,SL_0023,22,45.5,100.0,5.0,78.0\n放射線治療科,DR_RT008,SL_0005,16,6.2,100.0,3.0,66.4\n放射線治療科,DR_RT003,SL_0050,22,13.6,100.0,11.0,62.7\n放射線治療科,DR_RT006,SL_0251,28,32.1,100.0,25.5,57.6\n放射線治療科,DR_RT010,SL_0560,16,0.0,100.0,15.0,55.0\n血液内科,DR_HE005,SL_0216,45,80.0,100.0,1.0,92.6\n血液内科,DR_RH005,SL_0156,24,70.8,100.0,1.0,89.5\n血液内科,DR_HE006,SL_0009,25,68.0,100.0,0.0,89.3\n血液内科,DR_HE009,SL_0383,30,66.7,100.0,0.0,88.9\n血液内科,DR_HE007,SL_0005,20,65.0,100.0,0.0,88.3\n血液内科,DR_HE004,SL_0169,149,62.4,100.0,3.0,85.1\n血液内科,DR_HE004,SL_0009,13,53.8,100.0,1.0,83.8\n血液内科,DR_HE001,SL_0012,180,49.4,100.0,4.5,79.6\n血液内科,DR_HE003,SL_0096,140,33.6,100.0,6.0,73.2\n血液内科,DR_HE002,SL_0089,74,25.7,100.0,6.0,70.6\n血液内科,DR_HE010,SL_0439,75,25.3,100.0,6.5,70.1\n血液内科,DR_GM018,SL_0389,30,10.0,100.0,9.0,63.0\n血液内科,DR_HE008,SL_0339,32,9.4,100.0,14.5,58.6\nリウマチ膠原病内科,DR_RH010,SL_0009,16,93.8,100.0,0.5,97.5\nリウマチ膠原病内科,DR_RH004,SL_0139,111,60.4,100.0,4.0,83.7\nリウマチ膠原病内科,DR_RH007,SL_0009,35,57.1,100.0,3.0,83.4\nリウマチ膠原病内科,DR_RH005,SL_0156,57,49.1,100.0,0.0,83.0\nリウマチ膠原病内科,DR_RH010,SL_0222,133,30.1,100.0,6.0,72.0\nリウマチ膠原病内科,DR_RH003,SL_0066,159,28.9,100.0,6.0,71.6\nリウマチ膠原病内科,DR_RH009,SL_0210,217,26.3,100.0,6.0,70.8\nリウマチ膠原病内科,DR_RH003,SL_0009,27,18.5,100.0,8.0,66.6\nリウマチ膠原病内科,DR_RH006,SL_0174,190,13.2,100.0,9.0,64.1\nリウマチ膠原病内科,DR_RH001,SL_0008,38,7.9,100.0,7.0,63.9\nリウマチ膠原病内科,DR_RH008,SL_0201,14,14.3,100.0,10.0,63.7\nリウマチ膠原病内科,DR_RH002,SL_0009,15,13.3,100.0,10.0,63.3\nリウマチ膠原病内科,DR_RH002,SL_0014,40,2.5,100.0,10.0,59.7\n循環器内科,DR_CV002,SL_0009,143,71.3,100.0,1.0,89.7\n循環器内科,DR_CV004,SL_0034,97,44.3,100.0,5.0,77.6\n循環器内科,DR_CV008,SL_0150,206,44.7,99.0,5.0,76.6\n循環器内科,DR_CV016,SL_0616,54,37.0,100.0,5.0,75.1\n循環器内科,DR_CV001,SL_0009,12,25.0,100.0,7.0,69.6\n循環器内科,DR_CV002,SL_0118,28,35.7,96.4,6.5,69.4\n循環器内科,DR_CV001,SL_0044,193,21.8,100.0,7.0,68.5\n循環器内科,DR_CV010,SL_0193,152,12.5,100.0,8.0,64.6\n循環器内科,DR_CV007,SL_0078,67,14.9,100.0,12.0,62.3\n循環器内科,DR_CV003,SL_0031,99,9.1,100.0,10.0,61.9\n循環器内科,DR_CV011,SL_0196,97,5.2,100.0,10.0,60.6\n循環器内科,DR_CV006,SL_0067,130,3.8,100.0,10.0,60.2\n循環器内科,DR_CV009,SL_0153,98,5.1,100.0,12.0,59.1\n循環器内科,DR_CV005,SL_0058,22,54.5,77.3,2.0,57.5\n循環器内科,DR_CV012,SL_0325,12,0.0,100.0,13.0,56.6\n呼吸器内科,DR_RS2009,SL_0009,76,63.2,100.0,0.0,87.7\n呼吸器内科,DR_RS2004,SL_0009,51,43.1,100.0,5.0,77.2\n呼吸器内科,DR_RS2003,SL_0061,157,33.8,100.0,5.0,74.1\n呼吸器内科,DR_RS2010,SL_0167,83,30.1,100.0,6.5,71.7\n呼吸器内科,DR_RS2003,SL_0213,10,30.0,100.0,8.0,70.5\n呼吸器内科,DR_AL002,SL_0189,166,24.1,100.0,6.0,70.0\n呼吸器内科,DR_RS2013,SL_0005,18,5.6,100.0,0.0,68.5\n呼吸器内科,DR_RS2005,SL_0100,113,21.2,100.0,7.0,68.3\n呼吸器内科,DR_AL001,SL_0033,53,20.8,100.0,7.0,68.2\n呼吸器内科,DR_RS2004,SL_0082,264,22.3,100.0,8.0,67.9\n呼吸器内科,DR_RS2006,SL_0106,144,13.9,100.0,9.0,64.3\n呼吸器内科,DR_RS2008,SL_0127,67,4.5,100.0,13.0,58.1\n呼吸器内科,DR_RS2007,SL_0126,19,0.0,100.0,16.0,54.3\n形成外科,DR_PS015,SL_0009,34,44.1,100.0,5.0,77.5\n形成外科,DR_PS001,SL_0009,19,36.8,100.0,6.0,74.3\n形成外科,DR_PS013,SL_0701,77,36.4,100.0,6.0,74.1\n形成外科,DR_PS007,SL_0005,10,20.0,100.0,0.5,72.9\n形成外科,DR_PS005,SL_0009,33,30.3,100.0,8.5,70.2\n形成外科,DR_PS013,SL_0009,35,22.9,100.0,8.0,68.1\n形成外科,DR_PS016,SL_0729,55,23.6,100.0,9.0,67.6\n形成外科,DR_PS005,SL_0707,61,23.0,100.0,9.0,67.4\n形成外科,DR_PS015,SL_0709,87,23.0,100.0,9.0,67.4\n形成外科,DR_PS005,SL_0265,54,20.4,100.0,8.0,67.3\n形成外科,DR_PS018,SL_0895,21,9.5,100.0,7.0,64.4\n形成外科,DR_PS006,SL_0288,17,11.8,100.0,18.0,56.6\n形成外科,DR_PS016,SL_0009,17,0.0,100.0,16.5,53.9\n乳腺外科,DR_BR006,SL_0175,874,68.1,99.9,3.0,86.9\n乳腺外科,DR_BR013,SL_0481,11,63.6,100.0,2.0,86.3\n乳腺外科,DR_BR014,SL_0009,25,60.0,100.0,3.0,84.3\n乳腺外科,DR_BR014,SL_0702,341,58.7,100.0,4.0,83.1\n乳腺外科,DR_BR006,SL_0009,124,51.6,100.0,4.0,80.8\n乳腺外科,DR_BR015,SL_0839,78,43.6,100.0,5.0,77.3\n乳腺外科,DR_BR008,SL_0241,99,21.2,100.0,7.0,68.3\n乳腺外科,DR_BR002,SL_0032,18,22.2,100.0,11.5,65.2\n腎内科,DR_NE004,SL_0348,48,79.2,100.0,0.0,93.1\n腎内科,DR_NE005,SL_0009,43,65.1,100.0,0.0,88.4\n腎内科,DR_NE002,SL_0041,263,31.6,100.0,6.0,72.5\n腎内科,DR_NE002,SL_0749,17,23.5,100.0,9.0,67.5\n腎内科,DR_NE003,SL_0203,81,17.3,100.0,8.0,66.2\n腎内科,DR_NE001,SL_0027,201,7.5,100.0,9.0,62.2\n腎内科,DR_NE001,SL_0009,31,25.8,100.0,20.0,59.8\n腎内科,DR_DB002,SL_0282,53,9.4,100.0,20.0,54.3\n脳神経内科,DR_NR002,SL_0009,60,80.0,100.0,0.0,93.3\n脳神経内科,DR_NR003,SL_0160,127,50.4,100.0,4.0,80.4\n脳神経内科,DR_NR001,SL_0013,239,33.9,100.0,6.0,73.3\n脳神経内科,DR_NR001,SL_0009,24,33.3,95.8,12.0,63.7\n脳神経内科,DR_NR005,SL_0291,55,7.3,100.0,10.0,61.3\n脳神経外科,DR_NS001,SL_0009,15,66.7,100.0,0.0,88.9\n脳神経外科,DR_NS004,SL_0302,48,25.0,100.0,6.0,70.3\n脳神経外科,DR_NS003,SL_0184,43,20.9,100.0,9.0,66.7\n脳神経外科,DR_NS006,SL_0352,13,23.1,100.0,15.0,62.7\n脳神経外科,DR_NS005,SL_0343,57,8.8,100.0,10.0,61.8\nメンタルケア科,DR_MN005,SL_0609,10,100.0,100.0,0.0,100.0\nメンタルケア科,DR_MN002,SL_0009,86,41.9,100.0,4.5,77.1\nメンタルケア科,DR_MN004,SL_0255,66,25.8,100.0,8.5,68.7\nメンタルケア科,DR_MN001,SL_0043,134,17.2,100.0,9.0,65.4\nメンタルケア科,DR_MN009,SL_0721,44,4.5,100.0,12.0,58.9\nアレルギー科,DR_RS2003,SL_0061,43,34.9,100.0,5.0,74.4\nアレルギー科,DR_AL002,SL_0189,44,22.7,100.0,7.0,68.8\nアレルギー科,DR_AL001,SL_0033,40,22.5,100.0,8.0,68.0\nアレルギー科,DR_RS2005,SL_0100,34,17.6,100.0,7.0,67.1\n小児科,DR_PD002,SL_0070,45,35.6,100.0,5.0,74.7\n小児科,DR_PD011,SL_0009,21,33.3,100.0,9.0,70.8\n小児科,DR_PD009,SL_0257,20,10.0,100.0,9.5,62.6\n小児科,DR_PD008,SL_0323,12,16.7,100.0,14.0,61.4\n小児科,DR_PD018,SL_0837,16,6.2,100.0,13.0,58.7\n小児科,DR_PD008,SL_0250,30,6.7,100.0,15.5,56.9\n小児科,DR_PD016,SL_0744,11,9.1,100.0,18.0,55.7\n小児科,DR_PD005,SL_0328,12,0.0,100.0,14.5,55.4\n小児科,DR_PD022,SL_0877,21,9.5,100.0,19.0,55.1\n小児科,DR_PD010,SL_0260,16,25.0,93.8,17.0,54.8\n小児科,DR_PD016,SL_0780,14,0.0,100.0,15.5,54.7\n小児科,DR_PD006,SL_0272,38,7.9,100.0,19.0,54.6\n小児科,DR_PD001,SL_0313,25,4.0,100.0,18.0,54.0\n小児科,DR_PD003,SL_0399,14,7.1,100.0,20.0,53.5\n小児科,DR_PD007,SL_0239,15,0.0,100.0,17.0,53.5\n呼吸器外科,DR_RS2012,SL_0188,94,21.3,100.0,8.0,67.6\n呼吸器外科,DR_RS2001,SL_0024,76,13.2,100.0,7.0,65.6\n呼吸器外科,DR_RS2014,SL_0009,12,25.0,100.0,15.0,63.4\n救急科,DR_ER001,SL_0072,114,40.4,93.9,8.5,66.6\n救急科,DR_ER001,SL_0009,23,4.3,100.0,6.0,63.4\n臨床腫瘍科,DR_ON001,SL_0009,30,16.7,100.0,9.0,65.3\n臨床腫瘍科,DR_ON001,SL_0088,113,9.7,100.0,9.0,62.9\n臨床腫瘍科,DR_ON001,SL_0633,17,5.9,100.0,24.0,50.0\n内科,DR_IM001,SL_0015,161,39.1,90.7,7.0,63.7\n心臓血管外科,DR_CS002,SL_0168,50,4.0,100.0,8.0,61.8\n心臓血管外科,DR_CS006,SL_0726,123,4.9,100.0,21.5,51.6", "2026-01": "診療科,医師匿名ID,予約名称,再診件数,短時間再診比率(%),紹介状なし再診比率(%),診察時間中央値(分),スコア\n眼科,DR_E021,SL_0218,21,100.0,100.0,0.0,100.0\n眼科,DR_E032,SL_0447,11,100.0,100.0,0.0,100.0\n眼科,DR_E020,SL_0009,58,98.3,100.0,0.0,99.4\n眼科,DR_E020,SL_0400,59,98.3,100.0,0.0,99.4\n眼科,DR_E021,SL_0200,58,98.3,100.0,0.0,99.4\n眼科,DR_E005,SL_0054,172,92.4,100.0,0.0,97.5\n眼科,DR_E003,SL_0035,142,91.5,100.0,0.0,97.2\n眼科,DR_E018,SL_0170,284,83.5,100.0,0.0,94.5\n眼科,DR_E006,SL_0404,15,93.3,100.0,3.0,94.4\n眼科,DR_E002,SL_0136,180,87.2,100.0,2.0,93.5\n眼科,DR_E023,SL_0009,12,75.0,100.0,0.0,91.7\n眼科,DR_E016,SL_0151,105,73.3,100.0,1.0,90.0\n眼科,DR_E014,SL_0138,20,60.0,100.0,0.0,86.7\n眼科,DR_E027,SL_0009,10,60.0,100.0,0.5,86.1\n眼科,DR_E030,SL_0442,31,51.6,100.0,1.0,82.8\n産婦人科,DR_G012,SL_0358,35,94.3,100.0,0.0,98.1\n産婦人科,DR_G010,SL_0331,33,90.9,100.0,0.0,97.0\n産婦人科,DR_G014,SL_0488,14,85.7,100.0,0.0,95.2\n産婦人科,DR_G006,SL_0208,86,77.9,100.0,0.0,92.6\n産婦人科,DR_G006,SL_0009,11,54.5,100.0,0.5,84.3\n産婦人科,DR_G004,SL_0124,168,58.3,99.4,3.0,82.3\n産婦人科,DR_G004,SL_0009,12,50.0,100.0,1.0,82.2\n産婦人科,DR_G003,SL_0028,176,51.1,100.0,4.0,79.3\n産婦人科,DR_G003,SL_0287,24,50.0,100.0,4.5,78.3\n産婦人科,DR_G005,SL_0371,51,47.1,100.0,5.0,76.8\n産婦人科,DR_G006,SL_0068,50,48.0,100.0,5.5,76.6\n産婦人科,DR_G009,SL_0166,15,40.0,100.0,5.0,74.4\n産婦人科,DR_G004,SL_0029,83,43.4,97.6,5.0,73.8\n産婦人科,DR_G005,SL_0049,162,41.4,100.0,6.0,73.8\n産婦人科,DR_G013,SL_0369,34,26.5,100.0,2.0,73.3\n整形外科,DR_OR009,SL_0165,45,97.8,100.0,0.0,99.3\n整形外科,DR_OR009,SL_0009,26,96.2,100.0,0.0,98.7\n整形外科,DR_OR003,SL_0440,22,100.0,100.0,2.0,97.8\n整形外科,DR_OR012,SL_0009,13,69.2,100.0,0.0,89.7\n整形外科,DR_OR005,SL_0009,70,61.4,100.0,0.0,87.1\n整形外科,DR_OR011,SL_0206,18,61.1,100.0,3.0,83.7\n整形外科,DR_OR024,SL_0306,14,64.3,92.9,0.0,82.9\n整形外科,DR_OR003,SL_0038,195,56.9,99.5,4.0,80.8\n整形外科,DR_OR004,SL_0069,63,55.6,100.0,4.0,80.8\n整形外科,DR_OR022,SL_0421,64,45.3,100.0,5.0,76.2\n整形外科,DR_OR033,SL_0725,51,43.1,100.0,5.0,75.5\n整形外科,DR_OR034,SL_0735,42,38.1,100.0,7.0,71.6\n整形外科,DR_OR028,SL_0565,10,30.0,100.0,6.0,70.0\n整形外科,DR_OR029,SL_0635,64,31.2,100.0,8.0,68.2\n整形外科,DR_OR008,SL_0147,32,25.0,100.0,7.0,67.2\n耳鼻咽喉科,DR_ENT005,SL_0009,12,100.0,100.0,0.0,100.0\n耳鼻咽喉科,DR_ENT003,SL_0064,217,93.1,100.0,0.0,97.7\n耳鼻咽喉科,DR_ENT003,SL_0063,28,92.9,100.0,0.0,97.6\n耳鼻咽喉科,DR_ENT022,SL_0716,120,92.5,100.0,0.0,97.5\n耳鼻咽喉科,DR_ENT005,SL_0099,89,91.0,100.0,0.0,97.0\n耳鼻咽喉科,DR_ENT003,SL_0009,10,90.0,100.0,0.0,96.7\n耳鼻咽喉科,DR_ENT002,SL_0009,19,63.2,100.0,4.0,83.3\n耳鼻咽喉科,DR_ENT004,SL_0009,105,61.0,100.0,4.0,82.6\n耳鼻咽喉科,DR_ENT004,SL_0181,163,55.8,100.0,4.0,80.8\n耳鼻咽喉科,DR_ENT001,SL_0009,52,51.9,100.0,3.5,80.1\n耳鼻咽喉科,DR_ENT008,SL_0155,141,44.0,100.0,5.0,75.8\n耳鼻咽喉科,DR_ENT004,SL_0242,27,40.7,100.0,5.0,74.7\n耳鼻咽喉科,DR_ENT010,SL_0009,11,45.5,100.0,7.0,74.1\n耳鼻咽喉科,DR_ENT002,SL_0048,78,37.2,100.0,5.5,73.0\n耳鼻咽喉科,DR_ENT011,SL_0232,45,35.6,100.0,6.0,71.9\n泌尿器科,DR_U002,SL_0009,276,97.1,100.0,0.0,99.0\n泌尿器科,DR_U005,SL_0009,247,96.8,100.0,0.0,98.9\n泌尿器科,DR_U011,SL_0009,60,96.7,100.0,0.0,98.9\n泌尿器科,DR_U013,SL_0137,63,95.2,100.0,0.0,98.4\n泌尿器科,DR_U008,SL_0009,46,78.3,100.0,0.0,92.8\n泌尿器科,DR_U018,SL_0009,112,75.0,100.0,0.0,91.7\n泌尿器科,DR_U001,SL_0006,421,68.9,100.0,3.0,86.3\n泌尿器科,DR_U003,SL_0009,26,61.5,100.0,1.0,86.1\n泌尿器科,DR_U010,SL_0128,383,68.1,99.7,3.0,85.8\n泌尿器科,DR_U004,SL_0005,63,57.1,100.0,0.0,85.7\n泌尿器科,DR_U022,SL_0009,13,53.8,100.0,0.0,84.6\n泌尿器科,DR_U003,SL_0019,394,54.6,100.0,4.0,80.4\n泌尿器科,DR_U001,SL_0009,25,52.0,100.0,3.5,80.1\n泌尿器科,DR_U008,SL_0112,351,51.3,100.0,4.0,79.3\n泌尿器科,DR_U006,SL_0037,226,49.6,100.0,4.0,78.8\n消化器内科,DR_GI001,SL_0009,150,81.3,100.0,0.0,93.8\n消化器内科,DR_GI006,SL_0120,222,75.2,100.0,3.0,88.4\n消化器内科,DR_GI005,SL_0152,239,49.8,100.0,4.0,78.8\n消化器内科,DR_GI008,SL_0315,10,50.0,100.0,5.0,77.8\n消化器内科,DR_PD012,SL_0475,19,42.1,100.0,4.0,76.3\n消化器内科,DR_GI002,SL_0046,215,36.7,100.0,5.0,73.3\n消化器内科,DR_GI008,SL_0214,179,36.3,100.0,5.0,73.2\n消化器内科,DR_GI010,SL_0005,15,13.3,100.0,0.0,71.1\n消化器内科,DR_GI009,SL_0370,10,40.0,100.0,9.0,70.0\n消化器内科,DR_GI006,SL_0320,34,29.4,100.0,6.5,69.2\n消化器内科,DR_GI002,SL_0423,12,33.3,100.0,9.0,67.8\n消化器内科,DR_GI003,SL_0083,149,16.8,100.0,7.0,64.5\n消化器内科,DR_GI004,SL_0086,41,22.0,100.0,11.0,61.8\n消化器内科,DR_GI006,SL_0258,12,0.0,100.0,8.5,57.2\n消化器内科,DR_GI005,SL_0362,11,0.0,100.0,12.0,53.3\n血液内科,DR_RH005,SL_0156,31,77.4,100.0,0.5,91.9\n血液内科,DR_HE005,SL_0216,58,75.9,100.0,2.0,89.7\n血液内科,DR_HE009,SL_0383,16,68.8,100.0,0.0,89.6\n血液内科,DR_HE006,SL_0009,21,61.9,100.0,1.0,86.2\n血液内科,DR_HE004,SL_0169,106,66.0,100.0,3.0,85.3\n血液内科,DR_HE004,SL_0009,15,60.0,100.0,3.0,83.3\n血液内科,DR_HE007,SL_0005,20,40.0,100.0,0.0,80.0\n血液内科,DR_HE001,SL_0012,140,45.0,100.0,5.0,76.1\n血液内科,DR_HE003,SL_0096,112,30.4,100.0,7.0,69.0\n血液内科,DR_HE002,SL_0089,79,26.6,100.0,6.0,68.9\n血液内科,DR_HE010,SL_0439,55,12.7,98.2,8.0,60.7\n血液内科,DR_GM018,SL_0389,21,9.5,100.0,13.0,55.4\n血液内科,DR_HE008,SL_0339,26,7.7,100.0,14.5,53.1\n一般消化器外科,DR_BR005,SL_0516,19,89.5,100.0,0.0,96.5\n一般消化器外科,DR_BR005,SL_0009,34,88.2,100.0,0.0,96.1\n一般消化器外科,DR_GS011,SL_0009,25,76.0,100.0,0.0,92.0\n一般消化器外科,DR_GS016,SL_0770,31,54.8,100.0,4.0,80.5\n一般消化器外科,DR_GS001,SL_0022,155,50.3,100.0,4.0,79.0\n一般消化器外科,DR_GS004,SL_0109,67,40.3,100.0,5.5,74.0\n一般消化器外科,DR_GS006,SL_0202,104,36.5,100.0,5.0,73.3\n一般消化器外科,DR_GS002,SL_0085,79,35.4,100.0,7.0,70.7\n一般消化器外科,DR_GS008,SL_0229,30,16.7,100.0,8.0,63.3\n一般消化器外科,DR_GS009,SL_0374,45,22.2,97.8,9.0,62.5\n一般消化器外科,DR_GS003,SL_0103,178,7.3,100.0,8.0,60.2\n一般消化器外科,DR_GS003,SL_0280,10,10.0,100.0,10.0,58.9\n一般消化器外科,DR_GS005,SL_0194,41,4.9,100.0,9.0,58.3\n一般消化器外科,DR_GS015,SL_0715,36,0.0,100.0,10.5,55.0\n一般消化器外科,DR_GS014,SL_0523,11,54.5,54.5,3.5,47.6\n総合内科,DR_GM004,SL_0009,139,66.2,100.0,1.0,87.6\n総合内科,DR_GM001,SL_0009,38,63.2,100.0,1.5,86.1\n総合内科,DR_GM033,SL_0873,19,52.6,100.0,0.0,84.2\n総合内科,DR_GM001,SL_0016,17,35.3,100.0,10.0,67.3\n総合内科,DR_GM024,SL_0717,11,27.3,100.0,8.0,66.9\n総合内科,DR_GM012,SL_0009,66,24.2,100.0,10.0,63.6\n総合内科,DR_GM003,SL_0071,63,15.9,100.0,8.5,62.5\n総合内科,DR_GM013,SL_0247,26,19.2,100.0,9.5,62.5\n総合内科,DR_GM016,SL_0289,62,12.9,100.0,8.0,62.1\n総合内科,DR_GM017,SL_0330,29,20.7,96.6,9.0,61.1\n総合内科,DR_GM012,SL_0238,77,18.2,100.0,11.0,60.5\n総合内科,DR_GM018,SL_0337,27,11.1,100.0,10.0,59.3\n総合内科,DR_GM007,SL_0148,30,10.0,100.0,10.5,58.3\n総合内科,DR_GM034,SL_0879,11,9.1,100.0,11.5,56.9\n総合内科,DR_GM009,SL_0172,106,6.6,100.0,11.0,56.6\n呼吸器内科,DR_RS2009,SL_0009,84,71.4,100.0,0.0,90.5\n呼吸器内科,DR_RS2004,SL_0009,41,51.2,100.0,4.0,79.3\n呼吸器内科,DR_RS2003,SL_0061,139,36.7,100.0,5.0,73.3\n呼吸器内科,DR_AL002,SL_0189,172,33.1,100.0,6.0,71.0\n呼吸器内科,DR_RS2010,SL_0167,68,23.5,100.0,6.0,67.8\n呼吸器内科,DR_RS2003,SL_0213,11,27.3,100.0,8.0,66.9\n呼吸器内科,DR_RS2009,SL_0366,11,27.3,100.0,8.0,66.9\n呼吸器内科,DR_AL001,SL_0033,50,14.0,100.0,7.0,63.6\n呼吸器内科,DR_RS2004,SL_0082,239,20.9,100.0,10.0,62.5\n呼吸器内科,DR_RS2005,SL_0100,99,13.1,100.0,8.0,62.1\n呼吸器内科,DR_RS2006,SL_0106,121,8.3,100.0,10.0,58.3\n呼吸器内科,DR_RS2008,SL_0127,58,3.4,100.0,11.0,55.6\n呼吸器内科,DR_RS2007,SL_0126,13,7.7,100.0,20.0,47.0\n循環器内科,DR_CV002,SL_0009,131,71.8,100.0,1.0,89.5\n循環器内科,DR_CV005,SL_0058,22,45.5,95.5,1.0,77.4\n循環器内科,DR_CV004,SL_0034,84,47.6,100.0,5.0,77.0\n循環器内科,DR_CV008,SL_0150,188,43.6,100.0,5.0,75.6\n循環器内科,DR_CV016,SL_0616,56,33.9,100.0,5.0,72.4\n循環器内科,DR_CV001,SL_0044,138,26.8,99.3,6.0,68.4\n循環器内科,DR_CV002,SL_0118,32,46.9,84.4,5.5,64.8\n循環器内科,DR_CV010,SL_0193,149,12.8,100.0,8.0,62.0\n循環器内科,DR_CV003,SL_0031,101,15.8,100.0,9.0,61.9\n循環器内科,DR_CV001,SL_0009,12,16.7,100.0,9.5,61.7\n循環器内科,DR_CV007,SL_0078,59,11.9,100.0,10.0,59.5\n循環器内科,DR_CV006,SL_0067,122,1.6,100.0,11.0,55.0\n循環器内科,DR_CV009,SL_0153,91,1.1,100.0,13.0,52.6\n循環器内科,DR_CV011,SL_0196,97,1.0,100.0,13.0,52.6\n形成外科,DR_PS001,SL_0009,11,72.7,100.0,0.0,90.9\n形成外科,DR_PS016,SL_0009,14,42.9,100.0,7.0,73.2\n形成外科,DR_PS013,SL_0009,17,29.4,100.0,8.0,67.6\n形成外科,DR_PS015,SL_0009,25,32.0,100.0,10.0,66.2\n形成外科,DR_PS013,SL_0701,79,21.5,100.0,7.0,66.1\n形成外科,DR_PS005,SL_0265,35,22.9,100.0,8.0,65.4\n形成外科,DR_PS016,SL_0729,41,19.5,100.0,8.5,63.7\n形成外科,DR_PS015,SL_0709,71,22.5,100.0,11.0,61.9\n形成外科,DR_PS005,SL_0009,16,31.2,100.0,15.0,60.4\n形成外科,DR_PS005,SL_0707,55,14.5,100.0,10.0,60.4\n形成外科,DR_PS006,SL_0288,24,12.5,100.0,11.0,58.6\nリウマチ膠原病内科,DR_RH005,SL_0156,46,69.6,100.0,0.0,89.9\nリウマチ膠原病内科,DR_RH007,SL_0009,37,56.8,100.0,1.0,84.5\nリウマチ膠原病内科,DR_RH009,SL_0009,10,50.0,100.0,1.0,82.2\nリウマチ膠原病内科,DR_RH004,SL_0139,109,51.4,100.0,4.0,79.4\nリウマチ膠原病内科,DR_RH003,SL_0009,26,42.3,100.0,5.0,75.2\nリウマチ膠原病内科,DR_RH010,SL_0222,101,39.6,100.0,5.0,74.3\nリウマチ膠原病内科,DR_RH003,SL_0066,123,35.8,100.0,6.0,71.9\nリウマチ膠原病内科,DR_RH009,SL_0210,264,28.4,100.0,6.0,69.5\nリウマチ膠原病内科,DR_RH006,SL_0174,170,12.9,100.0,8.0,62.1\nリウマチ膠原病内科,DR_RH001,SL_0008,27,7.4,100.0,9.0,59.1\nリウマチ膠原病内科,DR_RH002,SL_0014,39,5.1,100.0,9.0,58.4\nリウマチ膠原病内科,DR_RH002,SL_0009,15,0.0,100.0,12.0,53.3\nリウマチ膠原病内科,DR_RH008,SL_0201,12,8.3,100.0,16.0,51.7\n皮膚科,DR_DM003,SL_0009,32,71.9,100.0,0.0,90.6\n皮膚科,DR_DM005,SL_0009,26,73.1,100.0,1.0,89.9\n皮膚科,DR_DM002,SL_0009,46,60.9,100.0,0.0,87.0\n皮膚科,DR_DM006,SL_0009,41,58.5,100.0,2.5,83.4\n皮膚科,DR_DM002,SL_0056,150,34.7,100.0,6.0,71.6\n皮膚科,DR_DM006,SL_0161,164,19.5,100.0,7.0,65.4\n皮膚科,DR_DM009,SL_0292,45,20.0,100.0,7.5,65.0\n皮膚科,DR_DM005,SL_0101,141,16.3,100.0,9.0,62.1\n皮膚科,DR_DM003,SL_0091,141,15.6,99.3,9.0,61.4\n皮膚科,DR_DM001,SL_0173,156,9.0,100.0,10.0,58.6\n皮膚科,DR_DM008,SL_0009,62,16.1,100.0,13.0,57.6\n皮膚科,DR_DM007,SL_0197,39,7.7,100.0,11.0,57.0\n歯科口腔外科,DR_OS015,SL_0009,11,81.8,100.0,0.0,93.9\n歯科口腔外科,DR_OS010,SL_0009,10,80.0,100.0,0.0,93.3\n歯科口腔外科,DR_OS011,SL_0322,18,55.6,100.0,0.5,84.6\n歯科口腔外科,DR_OS005,SL_0133,25,60.0,100.0,3.0,83.3\n歯科口腔外科,DR_OS002,SL_0009,29,37.9,100.0,7.0,71.5\n歯科口腔外科,DR_OS005,SL_0009,20,40.0,100.0,9.0,70.0\n歯科口腔外科,DR_OS004,SL_0009,27,44.4,96.3,8.0,69.9\n歯科口腔外科,DR_OS014,SL_0372,13,23.1,100.0,11.0,62.1\n歯科口腔外科,DR_OS007,SL_0141,36,16.7,100.0,10.0,61.1\n歯科口腔外科,DR_OS020,SL_0703,118,12.7,100.0,15.0,54.2\n歯科口腔外科,DR_OS009,SL_0478,36,11.1,100.0,16.0,52.6\n歯科口腔外科,DR_OS004,SL_0123,123,3.3,100.0,14.0,52.2\n歯科口腔外科,DR_OS003,SL_0080,64,6.2,100.0,16.0,51.0\n歯科口腔外科,DR_OS003,SL_0009,13,0.0,100.0,15.0,50.0\n歯科口腔外科,DR_OS002,SL_0060,117,4.3,100.0,18.0,48.1\n放射線治療科,DR_U002,SL_0009,16,87.5,100.0,0.0,95.8\n放射線治療科,DR_RT004,SL_0108,109,67.9,100.0,3.0,86.0\n放射線治療科,DR_RT004,SL_0009,74,64.9,100.0,3.0,85.0\n放射線治療科,DR_RT002,SL_0134,403,63.0,100.0,3.0,84.3\n放射線治療科,DR_RT005,SL_0209,53,49.1,100.0,4.0,78.6\n放射線治療科,DR_RT002,SL_0009,50,44.0,100.0,6.0,74.7\n放射線治療科,DR_RT001,SL_0023,16,37.5,100.0,9.0,69.2\n放射線治療科,DR_RT003,SL_0050,28,7.1,100.0,9.5,58.5\n放射線治療科,DR_RT006,SL_0251,30,26.7,100.0,21.0,52.2\n放射線治療科,DR_RT010,SL_0560,19,5.3,100.0,22.0,44.0\n乳腺外科,DR_BR013,SL_0481,12,66.7,100.0,1.5,87.2\n乳腺外科,DR_BR006,SL_0175,800,66.0,99.9,3.0,85.3\n乳腺外科,DR_BR006,SL_0009,103,55.3,100.0,4.0,80.7\n乳腺外科,DR_BR014,SL_0702,291,51.5,100.0,4.0,79.4\n乳腺外科,DR_BR015,SL_0839,119,43.7,100.0,5.0,75.7\n乳腺外科,DR_BR014,SL_0009,28,35.7,100.0,9.0,68.6\n乳腺外科,DR_BR008,SL_0241,86,14.0,100.0,8.0,62.4\n乳腺外科,DR_BR002,SL_0032,18,22.2,100.0,14.5,58.0\n腎内科,DR_NE004,SL_0348,47,68.1,100.0,0.0,89.4\n腎内科,DR_NE005,SL_0009,42,57.1,100.0,0.5,85.1\n腎内科,DR_NE002,SL_0041,243,30.9,100.0,5.0,71.4\n腎内科,DR_NE002,SL_0749,16,31.2,100.0,8.0,68.2\n腎内科,DR_NE001,SL_0027,200,12.5,100.0,8.0,61.9\n腎内科,DR_NE003,SL_0203,95,11.6,100.0,8.0,61.6\n腎内科,DR_DB002,SL_0282,63,4.8,100.0,17.0,49.4\n腎内科,DR_NE001,SL_0009,35,5.7,100.0,27.0,38.6\n脳神経内科,DR_NR002,SL_0009,60,86.7,100.0,0.0,95.6\n脳神経内科,DR_NR003,SL_0160,102,43.1,100.0,5.0,75.5\n脳神経内科,DR_NR001,SL_0013,226,31.9,100.0,6.0,70.6\n脳神経内科,DR_NR001,SL_0009,15,26.7,100.0,8.0,66.7\n脳神経内科,DR_NR005,SL_0291,51,9.8,100.0,8.0,61.0\nメンタルケア科,DR_MN005,SL_0609,11,100.0,100.0,0.0,100.0\nメンタルケア科,DR_MN002,SL_0009,97,46.4,100.0,0.0,82.1\nメンタルケア科,DR_MN001,SL_0043,130,24.6,100.0,8.0,66.0\nメンタルケア科,DR_MN004,SL_0255,55,14.5,100.0,9.0,61.5\nメンタルケア科,DR_MN009,SL_0721,40,2.5,100.0,10.0,56.4\nアレルギー科,DR_RS2003,SL_0061,42,35.7,100.0,6.0,71.9\nアレルギー科,DR_AL002,SL_0189,40,15.0,100.0,7.0,63.9\nアレルギー科,DR_RS2005,SL_0100,20,15.0,100.0,8.0,62.8\nアレルギー科,DR_AL001,SL_0033,27,11.1,100.0,9.0,60.4\n小児科,DR_PD011,SL_0009,14,42.9,100.0,6.5,73.7\n小児科,DR_PD002,SL_0070,33,36.4,100.0,5.0,73.2\n小児科,DR_PD018,SL_0838,10,40.0,100.0,14.5,63.9\n小児科,DR_PD009,SL_0257,16,6.2,100.0,7.5,60.4\n小児科,DR_PD016,SL_0780,24,12.5,100.0,11.0,58.6\n小児科,DR_PD007,SL_0351,30,10.0,100.0,13.5,55.0\n小児科,DR_PD018,SL_0837,14,21.4,92.9,13.5,53.6\n小児科,DR_PD001,SL_0020,14,0.0,100.0,13.0,52.2\n小児科,DR_PD001,SL_0313,21,4.8,100.0,15.0,51.6\n小児科,DR_PD003,SL_0098,30,6.7,100.0,17.5,49.5\n小児科,DR_PD007,SL_0239,19,0.0,100.0,18.0,46.7\n小児科,DR_PD004,SL_0177,23,4.3,100.0,20.0,45.9\n小児科,DR_PD003,SL_0399,16,0.0,100.0,20.0,44.4\n小児科,DR_PD010,SL_0260,15,0.0,100.0,20.0,44.4\n小児科,DR_PD006,SL_0503,19,0.0,100.0,21.0,43.3\n救急科,DR_ER002,SL_0395,14,7.1,100.0,0.0,69.0\n救急科,DR_ER001,SL_0072,131,35.1,95.4,9.5,64.4\n呼吸器外科,DR_RS2012,SL_0188,78,23.1,100.0,8.0,65.5\n呼吸器外科,DR_RS2001,SL_0024,70,20.0,100.0,9.0,63.3\n脳神経外科,DR_NS001,SL_0009,15,73.3,100.0,0.0,91.1\n脳神経外科,DR_NS003,SL_0184,48,14.6,97.9,8.0,61.1\n脳神経外科,DR_NS004,SL_0302,36,13.9,97.2,9.0,59.2\n脳神経外科,DR_NS005,SL_0343,37,5.4,100.0,10.0,57.4\n脳神経外科,DR_NS006,SL_0352,15,0.0,100.0,16.0,48.9\n内科,DR_IM001,SL_0015,140,39.3,93.6,9.0,65.1\n臨床腫瘍科,DR_ON001,SL_0088,128,14.8,100.0,9.0,61.6\n臨床腫瘍科,DR_ON001,SL_0009,39,10.3,100.0,10.0,59.0\n臨床腫瘍科,DR_ON001,SL_0633,26,3.8,100.0,17.0,49.0\n心臓血管外科,DR_CS002,SL_0168,44,9.1,100.0,8.0,60.8\n心臓血管外科,DR_CS006,SL_0726,122,1.6,100.0,19.0,46.1", "2026-02": "診療科,医師匿名ID,予約名称,再診件数,短時間再診比率(%),紹介状なし再診比率(%),診察時間中央値(分),スコア\n眼科,DR_E020,SL_0400,47,100.0,100.0,0.0,100.0\n眼科,DR_E021,SL_0200,45,100.0,100.0,0.0,100.0\n眼科,DR_E021,SL_0218,18,100.0,100.0,0.0,100.0\n眼科,DR_E032,SL_0447,14,100.0,100.0,0.0,100.0\n眼科,DR_E020,SL_0009,50,98.0,100.0,0.0,99.3\n眼科,DR_E018,SL_0170,293,96.6,100.0,0.0,98.9\n眼科,DR_E003,SL_0035,133,96.2,100.0,0.0,98.7\n眼科,DR_E005,SL_0054,153,88.9,100.0,0.0,96.3\n眼科,DR_E002,SL_0136,170,91.2,100.0,2.0,96.0\n眼科,DR_E023,SL_0009,18,77.8,100.0,1.0,92.0\n眼科,DR_E016,SL_0151,105,68.6,100.0,1.0,89.0\n眼科,DR_E017,SL_0009,37,67.6,100.0,1.0,88.6\n眼科,DR_E025,SL_0363,43,67.4,100.0,3.0,87.5\n眼科,DR_E030,SL_0442,30,60.0,100.0,0.5,86.4\n眼科,DR_E027,SL_0009,11,63.6,100.0,4.0,85.6\n産婦人科,DR_G012,SL_0358,40,97.5,100.0,0.0,99.2\n産婦人科,DR_G010,SL_0331,23,95.7,100.0,0.0,98.6\n産婦人科,DR_G006,SL_0208,82,67.1,100.0,0.0,89.0\n産婦人科,DR_G004,SL_0009,15,60.0,100.0,0.5,86.4\n産婦人科,DR_G003,SL_0028,247,59.9,99.6,3.0,84.6\n産婦人科,DR_G004,SL_0124,216,57.9,100.0,3.0,84.3\n産婦人科,DR_G004,SL_0029,40,57.5,100.0,3.5,83.9\n産婦人科,DR_G009,SL_0166,20,45.0,100.0,5.0,78.9\n産婦人科,DR_G005,SL_0049,113,42.5,100.0,5.0,78.1\n産婦人科,DR_G003,SL_0287,19,42.1,100.0,6.0,77.4\n産婦人科,DR_G011,SL_0009,99,42.4,100.0,7.0,76.9\n産婦人科,DR_G005,SL_0371,58,41.4,100.0,7.0,76.6\n産婦人科,DR_G006,SL_0068,43,39.5,100.0,6.0,76.5\n産婦人科,DR_G013,SL_0369,18,27.8,100.0,2.0,74.8\n産婦人科,DR_G006,SL_0009,12,41.7,100.0,16.0,71.7\n整形外科,DR_OR009,SL_0165,51,98.0,100.0,0.0,99.3\n整形外科,DR_OR009,SL_0009,38,97.4,100.0,0.0,99.1\n整形外科,DR_OR016,SL_0252,16,75.0,100.0,3.0,90.0\n整形外科,DR_OR012,SL_0009,12,66.7,100.0,0.0,88.9\n整形外科,DR_OR005,SL_0009,86,58.1,100.0,0.0,86.0\n整形外科,DR_OR003,SL_0038,133,56.4,100.0,3.0,83.8\n整形外科,DR_OR004,SL_0069,98,49.0,100.0,4.0,80.8\n整形外科,DR_OR022,SL_0421,55,41.8,100.0,5.0,77.8\n整形外科,DR_OR033,SL_0725,46,32.6,100.0,5.0,74.8\n整形外科,DR_OR034,SL_0735,32,31.2,100.0,7.0,73.2\n整形外科,DR_OR011,SL_0206,14,28.6,100.0,6.0,72.9\n整形外科,DR_OR006,SL_0081,61,27.9,100.0,7.0,72.1\n整形外科,DR_OR008,SL_0147,20,25.0,100.0,6.0,71.7\n整形外科,DR_OR020,SL_0279,66,19.7,100.0,7.0,69.3\n整形外科,DR_OR029,SL_0635,48,18.8,100.0,8.0,68.5\n泌尿器科,DR_U005,SL_0009,243,98.4,100.0,0.0,99.5\n泌尿器科,DR_U013,SL_0137,58,98.3,100.0,0.0,99.4\n泌尿器科,DR_U002,SL_0009,235,96.2,100.0,0.0,98.7\n泌尿器科,DR_U008,SL_0009,36,88.9,100.0,0.0,96.3\n泌尿器科,DR_U011,SL_0009,52,82.7,100.0,0.0,94.2\n泌尿器科,DR_U003,SL_0009,28,82.1,100.0,1.0,93.5\n泌尿器科,DR_U018,SL_0009,104,72.1,100.0,0.0,90.7\n泌尿器科,DR_U020,SL_0009,15,66.7,100.0,0.0,88.9\n泌尿器科,DR_U001,SL_0006,368,66.3,100.0,3.0,87.1\n泌尿器科,DR_U010,SL_0128,356,66.3,99.4,3.0,86.6\n泌尿器科,DR_U003,SL_0019,328,60.4,100.0,4.0,84.6\n泌尿器科,DR_U008,SL_0112,288,50.3,100.0,4.0,81.2\n泌尿器科,DR_U006,SL_0037,203,50.7,99.5,4.0,80.9\n泌尿器科,DR_U004,SL_0005,60,41.7,100.0,0.0,80.6\n泌尿器科,DR_U022,SL_0009,10,40.0,100.0,0.5,79.7\n耳鼻咽喉科,DR_ENT005,SL_0009,11,100.0,100.0,0.0,100.0\n耳鼻咽喉科,DR_ENT005,SL_0099,69,98.6,100.0,0.0,99.5\n耳鼻咽喉科,DR_ENT003,SL_0064,167,97.6,100.0,0.0,99.2\n耳鼻咽喉科,DR_ENT003,SL_0063,25,96.0,100.0,0.0,98.7\n耳鼻咽喉科,DR_ENT022,SL_0716,86,93.0,100.0,0.0,97.7\n耳鼻咽喉科,DR_ENT004,SL_0009,75,60.0,100.0,4.0,84.4\n耳鼻咽喉科,DR_ENT004,SL_0181,96,56.2,100.0,4.0,83.2\n耳鼻咽喉科,DR_ENT008,SL_0155,139,54.0,100.0,4.0,82.4\n耳鼻咽喉科,DR_ENT001,SL_0009,60,41.7,100.0,6.0,77.2\n耳鼻咽喉科,DR_ENT011,SL_0232,34,38.2,100.0,6.0,76.1\n耳鼻咽喉科,DR_ENT002,SL_0048,54,37.0,100.0,5.5,75.9\n耳鼻咽喉科,DR_ENT020,SL_0009,10,30.0,100.0,8.5,71.9\n耳鼻咽喉科,DR_ENT011,SL_0009,18,22.2,100.0,6.0,70.7\n耳鼻咽喉科,DR_ENT013,SL_0009,40,25.0,100.0,8.5,70.3\n耳鼻咽喉科,DR_ENT001,SL_0095,127,23.6,100.0,8.5,69.8\n総合内科,DR_GM004,SL_0009,136,72.1,100.0,0.0,90.7\n総合内科,DR_GM001,SL_0009,40,70.0,100.0,1.0,89.4\n総合内科,DR_GM024,SL_0717,12,66.7,100.0,0.0,88.9\n総合内科,DR_GM001,SL_0016,21,57.1,100.0,1.5,84.9\n総合内科,DR_GM012,SL_0009,54,29.6,100.0,8.0,72.1\n総合内科,DR_GM004,SL_0157,35,37.1,100.0,15.5,70.4\n総合内科,DR_GM019,SL_0471,11,18.2,100.0,7.5,68.6\n総合内科,DR_GM008,SL_0149,20,20.0,100.0,9.0,68.3\n総合内科,DR_GM007,SL_0148,28,17.9,100.0,8.0,68.2\n総合内科,DR_GM013,SL_0247,27,22.2,100.0,11.0,68.0\n総合内科,DR_GM003,SL_0071,59,13.6,100.0,7.0,67.3\n総合内科,DR_GM017,SL_0330,24,16.7,100.0,9.0,67.2\n総合内科,DR_GM012,SL_0238,57,14.0,100.0,8.0,66.9\n総合内科,DR_GM016,SL_0289,49,12.2,100.0,8.0,66.3\n総合内科,DR_GM018,SL_0337,37,10.8,100.0,9.0,65.3\n歯科口腔外科,DR_OS015,SL_0009,11,90.9,100.0,0.0,97.0\n歯科口腔外科,DR_OS011,SL_0322,13,53.8,100.0,0.0,84.6\n歯科口腔外科,DR_OS005,SL_0133,19,52.6,100.0,3.0,82.5\n歯科口腔外科,DR_OS003,SL_0009,16,31.2,100.0,7.5,72.9\n歯科口腔外科,DR_OS004,SL_0009,34,23.5,100.0,9.0,69.5\n歯科口腔外科,DR_OS007,SL_0141,25,20.0,100.0,10.0,67.8\n歯科口腔外科,DR_OS007,SL_0009,23,17.4,100.0,11.0,66.4\n歯科口腔外科,DR_OS017,SL_0505,13,15.4,100.0,10.0,66.2\n歯科口腔外科,DR_OS014,SL_0372,12,16.7,100.0,11.0,66.1\n歯科口腔外科,DR_OS020,SL_0703,133,15.8,100.0,13.0,64.7\n歯科口腔外科,DR_OS010,SL_0009,14,35.7,100.0,26.0,64.1\n歯科口腔外科,DR_OS020,SL_0009,19,10.5,100.0,11.0,64.1\n歯科口腔外科,DR_OS003,SL_0080,69,14.5,100.0,14.5,63.4\n歯科口腔外科,DR_OS002,SL_0009,24,16.7,100.0,16.0,63.3\n歯科口腔外科,DR_OS009,SL_0478,42,11.9,100.0,15.0,62.3\n消化器内科,DR_GI001,SL_0009,153,77.8,100.0,0.0,92.6\n消化器内科,DR_GI006,SL_0120,161,72.0,100.0,3.0,89.0\n消化器内科,DR_GI004,SL_0009,12,50.0,100.0,3.0,81.7\n消化器内科,DR_GI008,SL_0315,14,42.9,100.0,5.5,77.9\n消化器内科,DR_GI005,SL_0152,225,41.8,100.0,5.0,77.8\n消化器内科,DR_GI002,SL_0046,193,38.3,100.0,5.0,76.7\n消化器内科,DR_GI008,SL_0214,182,36.3,100.0,5.0,76.0\n消化器内科,DR_GI006,SL_0320,45,37.8,100.0,6.0,75.9\n消化器内科,DR_GI011,SL_0385,11,27.3,100.0,6.0,72.4\n消化器内科,DR_GI004,SL_0086,32,28.1,100.0,7.0,72.1\n消化器内科,DR_GI003,SL_0083,93,19.4,100.0,8.0,68.7\n消化器内科,DR_PD012,SL_0475,34,20.6,100.0,10.0,68.0\n消化器内科,DR_GI006,SL_0258,12,8.3,100.0,7.5,65.3\n消化器内科,DR_GI002,SL_0423,12,16.7,100.0,14.0,64.5\n消化器内科,DR_GI005,SL_0362,10,10.0,100.0,11.0,63.9\n一般消化器外科,DR_BR005,SL_0009,25,72.0,100.0,0.0,90.7\n一般消化器外科,DR_GS011,SL_0009,25,72.0,100.0,0.0,90.7\n一般消化器外科,DR_GS016,SL_0770,20,70.0,100.0,0.0,90.0\n一般消化器外科,DR_BR005,SL_0516,15,53.3,100.0,0.0,84.4\n一般消化器外科,DR_GS001,SL_0022,135,58.5,100.0,4.0,83.9\n一般消化器外科,DR_GS006,SL_0202,95,41.1,100.0,5.0,77.6\n一般消化器外科,DR_GS002,SL_0085,91,40.7,100.0,5.0,77.5\n一般消化器外科,DR_GS004,SL_0109,64,40.6,100.0,5.0,77.4\n一般消化器外科,DR_GS009,SL_0374,63,15.9,100.0,9.0,67.0\n一般消化器外科,DR_GS003,SL_0280,11,18.2,100.0,11.0,66.6\n一般消化器外科,DR_GS014,SL_0523,11,36.4,90.9,9.0,65.6\n一般消化器外科,DR_GS008,SL_0229,31,12.9,100.0,10.0,65.4\n一般消化器外科,DR_GS003,SL_0103,206,9.7,99.0,9.0,64.0\n一般消化器外科,DR_GS005,SL_0194,35,11.4,100.0,13.0,63.2\n一般消化器外科,DR_GS015,SL_0715,45,4.4,100.0,12.0,61.5\nリウマチ膠原病内科,DR_RH007,SL_0009,39,71.8,100.0,0.5,90.3\nリウマチ膠原病内科,DR_RH005,SL_0156,49,49.0,100.0,0.0,83.0\nリウマチ膠原病内科,DR_RH004,SL_0139,97,50.5,100.0,4.0,81.3\nリウマチ膠原病内科,DR_RH003,SL_0009,33,45.5,100.0,6.0,78.5\nリウマチ膠原病内科,DR_RH010,SL_0222,139,37.4,100.0,5.0,76.4\nリウマチ膠原病内科,DR_RH003,SL_0066,135,30.4,100.0,6.0,73.5\nリウマチ膠原病内科,DR_RH009,SL_0210,213,28.2,100.0,6.0,72.7\nリウマチ膠原病内科,DR_RH001,SL_0008,36,19.4,100.0,8.0,68.7\nリウマチ膠原病内科,DR_RH006,SL_0009,13,23.1,100.0,11.0,68.3\nリウマチ膠原病内科,DR_RH006,SL_0174,155,11.6,100.0,9.0,65.5\nリウマチ膠原病内科,DR_RH002,SL_0014,31,3.2,100.0,8.0,63.3\nリウマチ膠原病内科,DR_RH008,SL_0201,17,5.9,100.0,10.0,63.1\nリウマチ膠原病内科,DR_RH013,SL_0596,10,0.0,100.0,12.0,60.0\n循環器内科,DR_CV002,SL_0009,121,66.1,100.0,1.0,88.1\n循環器内科,DR_CV008,SL_0150,183,45.9,100.0,5.0,79.2\n循環器内科,DR_CV002,SL_0118,21,47.6,95.2,5.0,75.4\n循環器内科,DR_CV004,SL_0034,72,33.3,100.0,6.0,74.4\n循環器内科,DR_CV001,SL_0044,133,30.8,100.0,5.0,74.2\n循環器内科,DR_CV016,SL_0616,49,30.6,100.0,6.0,73.5\n循環器内科,DR_CV003,SL_0031,77,18.2,100.0,6.0,69.4\n循環器内科,DR_CV001,SL_0009,12,16.7,100.0,6.5,68.6\n循環器内科,DR_CV010,SL_0193,150,10.7,100.0,9.0,65.2\n循環器内科,DR_CV007,SL_0078,50,10.0,100.0,11.0,63.9\n循環器内科,DR_CV006,SL_0067,113,1.8,100.0,11.0,61.2\n循環器内科,DR_CV011,SL_0196,92,3.3,100.0,12.0,61.1\n循環器内科,DR_CV009,SL_0153,107,5.6,100.0,14.0,60.8\n循環器内科,DR_CV005,SL_0058,19,68.4,63.2,0.5,55.9\n皮膚科,DR_DM003,SL_0009,28,71.4,100.0,0.0,90.5\n皮膚科,DR_DM005,SL_0009,18,72.2,100.0,1.0,90.2\n皮膚科,DR_DM002,SL_0009,62,66.1,100.0,0.0,88.7\n皮膚科,DR_DM006,SL_0009,44,63.6,100.0,0.5,87.6\n皮膚科,DR_DM008,SL_0009,58,37.9,100.0,6.5,75.7\n皮膚科,DR_DM002,SL_0056,154,33.8,100.0,6.0,74.6\n皮膚科,DR_DM001,SL_0009,11,27.3,100.0,11.0,69.7\n皮膚科,DR_DM003,SL_0091,137,19.0,100.0,8.0,68.6\n皮膚科,DR_DM005,SL_0101,119,17.6,100.0,9.0,67.5\n皮膚科,DR_DM006,SL_0161,113,13.3,100.0,7.0,67.2\n皮膚科,DR_DM001,SL_0173,143,8.4,100.0,10.0,63.9\n皮膚科,DR_DM009,SL_0292,50,14.0,96.0,7.0,63.8\n皮膚科,DR_DM007,SL_0197,47,8.5,100.0,11.0,63.4\n放射線治療科,DR_U002,SL_0009,14,92.9,100.0,0.0,97.6\n放射線治療科,DR_RT004,SL_0108,156,66.7,100.0,3.0,87.2\n放射線治療科,DR_RT002,SL_0009,51,64.7,100.0,2.0,87.1\n放射線治療科,DR_RT004,SL_0009,41,63.4,100.0,2.0,86.7\n放射線治療科,DR_RT002,SL_0134,345,63.2,100.0,3.0,86.1\n放射線治療科,DR_RT005,SL_0209,43,62.8,100.0,4.0,85.4\n放射線治療科,DR_RT001,SL_0023,17,58.8,100.0,4.0,84.0\n放射線治療科,DR_RT008,SL_0005,14,7.1,100.0,0.0,69.0\n放射線治療科,DR_RT006,SL_0009,14,35.7,100.0,23.5,65.5\n放射線治療科,DR_RT010,SL_0560,16,12.5,100.0,17.5,61.1\n放射線治療科,DR_RT006,SL_0251,25,28.0,100.0,27.5,60.7\n放射線治療科,DR_RT003,SL_0050,33,0.0,100.0,11.5,60.3\n血液内科,DR_HE005,SL_0216,57,78.9,100.0,2.5,91.6\n血液内科,DR_HE009,SL_0383,19,73.7,100.0,0.0,91.2\n血液内科,DR_HE007,SL_0005,14,71.4,100.0,0.0,90.5\n血液内科,DR_HE006,SL_0009,37,70.3,100.0,0.0,90.1\n血液内科,DR_RH005,SL_0156,27,66.7,100.0,1.0,88.3\n血液内科,DR_HE004,SL_0169,116,62.9,100.0,3.0,86.0\n血液内科,DR_HE001,SL_0012,149,45.0,100.0,5.0,78.9\n血液内科,DR_HE004,SL_0009,16,37.5,100.0,5.0,76.4\n血液内科,DR_HE003,SL_0096,137,37.2,100.0,6.0,75.7\n血液内科,DR_HE002,SL_0089,57,29.8,100.0,6.0,73.3\n血液内科,DR_HE010,SL_0439,68,26.5,100.0,7.0,71.6\n血液内科,DR_GM018,SL_0389,25,4.0,100.0,10.0,62.4\n血液内科,DR_HE008,SL_0339,19,0.0,100.0,15.0,58.3\n呼吸器内科,DR_RS2009,SL_0009,58,62.1,100.0,0.0,87.4\n呼吸器内科,DR_RS2004,SL_0009,47,46.8,100.0,5.5,79.2\n呼吸器内科,DR_RS2003,SL_0061,139,38.8,100.0,5.0,76.8\n呼吸器内科,DR_AL002,SL_0189,133,32.3,100.0,6.0,74.1\n呼吸器内科,DR_RS2004,SL_0082,236,27.1,100.0,8.0,71.3\n呼吸器内科,DR_AL001,SL_0033,49,24.5,100.0,6.5,71.2\n呼吸器内科,DR_RS2010,SL_0167,54,18.5,100.0,6.0,69.5\n呼吸器内科,DR_RS2005,SL_0100,107,13.1,100.0,7.0,67.1\n呼吸器内科,DR_RS2003,SL_0213,12,8.3,100.0,11.0,63.3\n呼吸器内科,DR_RS2006,SL_0106,89,7.9,100.0,11.0,63.2\n呼吸器内科,DR_RS2007,SL_0126,19,10.5,100.0,15.0,61.8\n呼吸器内科,DR_RS2008,SL_0127,56,5.4,100.0,12.0,61.8\n形成外科,DR_PS016,SL_0729,34,32.4,100.0,6.0,74.1\n形成外科,DR_PS008,SL_0336,15,33.3,100.0,7.0,73.9\n形成外科,DR_PS005,SL_0009,15,33.3,100.0,8.0,73.3\n形成外科,DR_PS013,SL_0701,89,23.6,100.0,7.0,70.6\n形成外科,DR_PS013,SL_0009,21,23.8,100.0,8.0,70.2\n形成外科,DR_PS005,SL_0707,52,23.1,100.0,8.5,69.6\n形成外科,DR_PS005,SL_0265,38,21.1,100.0,8.5,69.0\n形成外科,DR_PS015,SL_0709,50,16.0,100.0,10.0,66.4\n形成外科,DR_PS006,SL_0288,16,18.8,100.0,14.5,64.9\n形成外科,DR_PS015,SL_0009,45,15.6,100.0,15.0,63.5\n形成外科,DR_PS016,SL_0009,15,6.7,100.0,15.0,60.6\n小児科,DR_PD011,SL_0009,12,50.0,100.0,2.0,82.2\n小児科,DR_PD002,SL_0070,26,26.9,100.0,7.0,71.7\n小児科,DR_PD016,SL_0780,22,18.2,100.0,10.0,67.2\n小児科,DR_PD001,SL_0313,21,14.3,100.0,12.0,64.8\n小児科,DR_PD018,SL_0838,10,10.0,100.0,15.0,61.7\n小児科,DR_PD003,SL_0098,18,11.1,100.0,16.0,61.5\n小児科,DR_PD005,SL_0328,15,6.7,100.0,13.5,61.4\n小児科,DR_PD009,SL_0257,17,0.0,100.0,10.0,61.1\n小児科,DR_PD004,SL_0177,21,9.5,100.0,18.0,59.8\n小児科,DR_PD006,SL_0009,10,30.0,100.0,33.0,58.3\n小児科,DR_PD007,SL_0351,29,6.9,100.0,21.5,57.0\n小児科,DR_PD006,SL_0503,10,0.0,100.0,18.0,56.7\n小児科,DR_PD018,SL_0837,18,0.0,100.0,18.0,56.7\n小児科,DR_PD001,SL_0020,11,0.0,100.0,21.0,55.0\n小児科,DR_PD006,SL_0272,30,6.7,100.0,25.5,54.7\n腎内科,DR_NE004,SL_0348,35,80.0,100.0,0.0,93.3\n腎内科,DR_NE005,SL_0009,37,67.6,100.0,0.0,89.2\n腎内科,DR_NE002,SL_0041,250,37.2,100.0,5.0,76.3\n腎内科,DR_NE003,SL_0203,78,11.5,100.0,8.0,66.1\n腎内科,DR_NE002,SL_0749,22,13.6,100.0,10.0,65.6\n腎内科,DR_NE001,SL_0027,186,7.5,100.0,9.0,64.2\n腎内科,DR_NE001,SL_0009,39,23.1,100.0,21.5,62.4\n腎内科,DR_DB002,SL_0282,50,6.0,100.0,18.0,58.7\n乳腺外科,DR_BR006,SL_0175,703,62.7,100.0,4.0,85.3\n乳腺外科,DR_BR014,SL_0702,288,49.3,100.0,4.0,80.9\n乳腺外科,DR_BR006,SL_0009,106,40.6,100.0,5.0,77.4\n乳腺外科,DR_BR014,SL_0009,19,31.6,100.0,6.5,73.6\n乳腺外科,DR_BR015,SL_0839,93,25.8,100.0,8.0,70.8\n乳腺外科,DR_BR008,SL_0241,96,24.0,99.0,7.0,69.9\n乳腺外科,DR_BR002,SL_0032,19,5.3,100.0,16.0,59.5\n脳神経内科,DR_NR002,SL_0009,65,70.8,100.0,0.0,90.3\n脳神経内科,DR_NR003,SL_0160,86,65.1,100.0,3.5,86.4\n脳神経内科,DR_NR001,SL_0013,191,36.6,100.0,6.0,75.5\n脳神経内科,DR_NR005,SL_0291,33,27.3,100.0,8.0,71.3\n脳神経内科,DR_NR001,SL_0009,16,6.2,100.0,10.5,62.9\nメンタルケア科,DR_MN005,SL_0609,11,100.0,100.0,0.0,100.0\nメンタルケア科,DR_MN002,SL_0009,75,38.7,100.0,6.0,76.2\nメンタルケア科,DR_MN004,SL_0255,51,27.5,100.0,9.0,70.8\nメンタルケア科,DR_MN001,SL_0043,110,15.5,100.0,8.5,67.1\nメンタルケア科,DR_MN009,SL_0721,42,2.4,100.0,13.0,60.2\n脳神経外科,DR_NS001,SL_0009,14,42.9,100.0,8.5,76.2\n脳神経外科,DR_NS006,SL_0352,11,27.3,100.0,8.0,71.3\n脳神経外科,DR_NS004,SL_0302,38,23.7,97.4,10.0,66.7\n脳神経外科,DR_NS003,SL_0184,43,11.6,100.0,7.0,66.6\n脳神経外科,DR_NS005,SL_0343,28,10.7,100.0,11.5,63.8\nアレルギー科,DR_RS2003,SL_0061,44,34.1,100.0,5.0,75.3\nアレルギー科,DR_RS2005,SL_0100,22,22.7,100.0,7.0,70.3\nアレルギー科,DR_AL001,SL_0033,23,13.0,100.0,6.5,67.4\nアレルギー科,DR_AL002,SL_0189,43,11.6,100.0,7.0,66.6\n臨床腫瘍科,DR_ON001,SL_0088,102,12.7,100.0,7.0,67.0\n臨床腫瘍科,DR_ON001,SL_0009,29,13.8,100.0,9.0,66.3\n臨床腫瘍科,DR_ON001,SL_0633,21,23.8,100.0,19.0,64.0\n呼吸器外科,DR_RS2012,SL_0188,70,15.7,100.0,8.0,67.5\n呼吸器外科,DR_RS2001,SL_0024,65,13.8,100.0,8.0,66.8\n心臓血管外科,DR_CS003,SL_0009,13,53.8,100.0,1.5,83.8\n心臓血管外科,DR_CS002,SL_0168,41,7.3,100.0,8.0,64.7\n心臓血管外科,DR_CS006,SL_0726,150,0.0,100.0,17.0,57.2\n内科,DR_IM001,SL_0015,142,37.3,90.1,7.0,66.2\n救急科,DR_ER001,SL_0072,86,41.9,94.2,8.5,70.7", "2026-03": "診療科,医師匿名ID,予約名称,再診件数,短時間再診比率(%),紹介状なし再診比率(%),診察時間中央値(分),スコア\n眼科,DR_E021,SL_0200,40,100.0,100.0,0.0,100.0\n眼科,DR_E021,SL_0218,23,100.0,100.0,0.0,100.0\n眼科,DR_E032,SL_0447,14,100.0,100.0,0.0,100.0\n眼科,DR_E020,SL_0400,50,98.0,100.0,0.0,99.3\n眼科,DR_E020,SL_0009,48,95.8,100.0,0.0,98.6\n眼科,DR_E003,SL_0035,158,88.6,100.0,0.0,96.2\n眼科,DR_E005,SL_0054,187,88.2,100.0,0.0,96.1\n眼科,DR_E018,SL_0170,309,88.0,100.0,0.0,96.0\n眼科,DR_E002,SL_0136,235,86.0,100.0,2.0,93.0\n眼科,DR_E023,SL_0009,18,77.8,100.0,1.0,91.4\n眼科,DR_E016,SL_0151,92,76.1,100.0,1.0,90.8\n眼科,DR_E025,SL_0363,27,70.4,100.0,3.0,86.6\n眼科,DR_E017,SL_0009,34,58.8,100.0,2.0,83.9\n眼科,DR_E006,SL_0404,22,63.6,100.0,4.0,83.1\n眼科,DR_E030,SL_0442,41,43.9,100.0,0.0,81.3\n泌尿器科,DR_U002,SL_0009,313,94.9,100.0,0.0,98.3\n泌尿器科,DR_U013,SL_0137,94,94.7,100.0,0.0,98.2\n泌尿器科,DR_U005,SL_0009,232,94.4,100.0,0.0,98.1\n泌尿器科,DR_U011,SL_0009,54,94.4,100.0,0.0,98.1\n泌尿器科,DR_U003,SL_0009,30,86.7,100.0,1.0,94.4\n泌尿器科,DR_U008,SL_0009,63,74.6,100.0,0.0,91.5\n泌尿器科,DR_U018,SL_0009,120,72.5,100.0,0.0,90.8\n泌尿器科,DR_U001,SL_0009,20,65.0,100.0,0.0,88.3\n泌尿器科,DR_U004,SL_0005,63,58.7,100.0,0.0,86.2\n泌尿器科,DR_U001,SL_0006,489,67.7,100.0,3.0,85.7\n泌尿器科,DR_U010,SL_0128,415,63.1,99.8,3.0,83.9\n泌尿器科,DR_U003,SL_0019,357,58.0,100.0,4.0,81.2\n泌尿器科,DR_U006,SL_0037,214,51.9,100.0,4.0,79.2\n泌尿器科,DR_U022,SL_0009,13,46.2,100.0,2.5,79.1\n泌尿器科,DR_U008,SL_0112,431,49.9,100.0,4.0,78.5\n産婦人科,DR_G010,SL_0331,25,96.0,100.0,0.0,98.7\n産婦人科,DR_G012,SL_0358,35,91.4,100.0,0.0,97.1\n産婦人科,DR_G014,SL_0488,17,88.2,100.0,0.0,96.1\n産婦人科,DR_G006,SL_0208,81,71.6,100.0,0.0,90.5\n産婦人科,DR_G004,SL_0124,345,60.0,100.0,3.0,83.1\n産婦人科,DR_G009,SL_0166,15,60.0,100.0,3.0,83.1\n産婦人科,DR_G006,SL_0009,12,50.0,100.0,1.0,82.1\n産婦人科,DR_G003,SL_0028,235,51.9,100.0,4.0,79.2\n産婦人科,DR_G004,SL_0029,37,51.4,100.0,4.0,79.0\n産婦人科,DR_G004,SL_0009,11,45.5,100.0,4.5,76.5\n産婦人科,DR_G006,SL_0068,62,46.8,100.0,5.0,76.3\n産婦人科,DR_G006,SL_0517,10,50.0,100.0,6.5,75.6\n産婦人科,DR_G003,SL_0009,41,24.4,100.0,0.0,74.8\n産婦人科,DR_G005,SL_0049,159,42.8,100.0,6.0,73.8\n産婦人科,DR_G001,SL_0009,18,16.7,100.0,0.0,72.2\n耳鼻咽喉科,DR_ENT003,SL_0063,32,100.0,100.0,0.0,100.0\n耳鼻咽喉科,DR_ENT005,SL_0099,112,96.4,100.0,0.0,98.8\n耳鼻咽喉科,DR_ENT022,SL_0716,104,93.3,100.0,0.0,97.8\n耳鼻咽喉科,DR_ENT003,SL_0064,255,92.5,100.0,0.0,97.5\n耳鼻咽喉科,DR_ENT003,SL_0009,16,87.5,100.0,0.0,95.8\n耳鼻咽喉科,DR_ENT004,SL_0009,132,62.1,100.0,4.0,82.6\n耳鼻咽喉科,DR_ENT004,SL_0242,19,57.9,100.0,4.0,81.2\n耳鼻咽喉科,DR_ENT001,SL_0009,63,55.6,100.0,4.0,80.4\n耳鼻咽喉科,DR_ENT004,SL_0181,164,54.3,100.0,4.0,80.0\n耳鼻咽喉科,DR_ENT008,SL_0155,190,50.5,100.0,4.0,78.7\n耳鼻咽喉科,DR_ENT002,SL_0009,20,40.0,100.0,5.0,74.0\n耳鼻咽喉科,DR_ENT007,SL_0117,10,20.0,100.0,0.0,73.3\n耳鼻咽喉科,DR_ENT011,SL_0232,65,36.9,100.0,6.0,71.8\n耳鼻咽喉科,DR_ENT020,SL_0009,16,37.5,100.0,8.0,69.6\n耳鼻咽喉科,DR_ENT009,SL_0009,10,40.0,100.0,9.5,68.7\n整形外科,DR_OR009,SL_0165,56,98.2,100.0,0.0,99.4\n整形外科,DR_OR009,SL_0009,40,95.0,100.0,0.0,98.3\n整形外科,DR_OR012,SL_0009,13,84.6,100.0,0.0,94.9\n整形外科,DR_OR005,SL_0009,89,58.4,100.0,0.0,86.1\n整形外科,DR_OR016,SL_0252,12,58.3,100.0,3.5,81.9\n整形外科,DR_OR004,SL_0069,102,55.9,100.0,4.0,80.5\n整形外科,DR_OR003,SL_0038,208,54.8,100.0,4.0,80.2\n整形外科,DR_OR008,SL_0147,58,41.4,100.0,5.0,74.5\n整形外科,DR_OR014,SL_0009,12,41.7,100.0,7.0,72.2\n整形外科,DR_OR034,SL_0735,28,35.7,100.0,6.0,71.4\n整形外科,DR_OR011,SL_0206,20,30.0,100.0,5.0,70.7\n整形外科,DR_OR033,SL_0725,24,33.3,100.0,6.0,70.6\n整形外科,DR_OR022,SL_0421,60,31.7,100.0,6.0,70.1\n整形外科,DR_OR006,SL_0081,85,30.6,100.0,6.0,69.7\n整形外科,DR_OR007,SL_0261,117,29.1,100.0,6.0,69.2\n消化器内科,DR_GI001,SL_0009,159,77.4,100.0,0.0,92.5\n消化器内科,DR_GI006,SL_0120,376,74.7,100.0,3.0,88.0\n消化器内科,DR_GI004,SL_0009,12,66.7,100.0,4.0,84.1\n消化器内科,DR_GI005,SL_0554,13,53.8,100.0,4.0,79.8\n消化器内科,DR_GI010,SL_0005,18,33.3,100.0,0.0,77.8\n消化器内科,DR_GI005,SL_0152,180,44.4,100.0,5.0,75.5\n消化器内科,DR_GI008,SL_0214,194,37.6,100.0,5.0,73.2\n消化器内科,DR_GI002,SL_0046,201,35.8,100.0,5.0,72.6\n消化器内科,DR_GI008,SL_0315,31,35.5,100.0,6.0,71.4\n消化器内科,DR_GI004,SL_0086,34,32.4,100.0,8.0,67.9\n消化器内科,DR_PD012,SL_0475,34,29.4,100.0,9.0,65.8\n消化器内科,DR_GI011,SL_0385,21,14.3,100.0,7.5,62.5\n消化器内科,DR_GI006,SL_0320,19,10.5,100.0,6.5,62.4\n消化器内科,DR_GI005,SL_0362,14,14.3,100.0,8.0,61.9\n消化器内科,DR_GI003,SL_0083,166,13.3,100.0,9.0,60.4\n総合内科,DR_GM004,SL_0009,177,78.0,100.0,0.0,92.7\n総合内科,DR_GM001,SL_0009,39,69.2,100.0,0.0,89.7\n総合内科,DR_GM001,SL_0016,15,46.7,100.0,5.0,76.3\n総合内科,DR_GM019,SL_0471,29,44.8,100.0,5.0,75.6\n総合内科,DR_GM004,SL_0073,13,46.2,100.0,7.0,73.7\n総合内科,DR_GM024,SL_0717,10,40.0,100.0,8.0,70.5\n総合内科,DR_GM004,SL_0157,32,34.4,100.0,12.0,63.8\n総合内科,DR_GM013,SL_0247,51,21.6,100.0,9.0,63.2\n総合内科,DR_GM018,SL_0337,38,15.8,100.0,8.0,62.4\n総合内科,DR_GM027,SL_0742,18,22.2,100.0,10.0,62.2\n総合内科,DR_GM012,SL_0238,77,20.8,100.0,10.0,61.7\n総合内科,DR_GM012,SL_0009,67,17.9,100.0,10.0,60.7\n総合内科,DR_GM008,SL_0149,28,17.9,100.0,10.0,60.7\n総合内科,DR_GM016,SL_0289,68,7.4,100.0,8.0,59.6\n総合内科,DR_GM003,SL_0071,62,9.7,100.0,9.0,59.2\n血液内科,DR_HE009,SL_0383,17,76.5,100.0,0.0,92.2\n血液内科,DR_HE007,SL_0005,21,66.7,100.0,0.0,88.9\n血液内科,DR_HE006,SL_0009,30,60.0,100.0,0.0,86.7\n血液内科,DR_RH005,SL_0156,33,63.6,100.0,1.0,86.7\n血液内科,DR_HE005,SL_0216,51,68.6,100.0,3.0,86.0\n血液内科,DR_HE004,SL_0169,129,62.8,100.0,3.0,84.0\n血液内科,DR_HE004,SL_0009,26,57.7,100.0,3.0,82.3\n血液内科,DR_HE001,SL_0012,170,48.8,100.0,5.0,77.0\n血液内科,DR_HE010,SL_0439,66,47.0,100.0,5.0,76.4\n血液内科,DR_HE003,SL_0096,148,36.5,100.0,6.0,71.7\n血液内科,DR_HE002,SL_0089,75,28.0,100.0,6.0,68.9\n血液内科,DR_GM018,SL_0389,28,17.9,100.0,10.0,60.7\n血液内科,DR_HE008,SL_0339,31,9.7,100.0,14.0,53.2\n歯科口腔外科,DR_OS015,SL_0009,13,76.9,100.0,0.0,92.3\n歯科口腔外科,DR_OS010,SL_0009,15,53.3,100.0,0.0,84.4\n歯科口腔外科,DR_OS011,SL_0322,18,61.1,100.0,2.5,84.1\n歯科口腔外科,DR_OS007,SL_0009,12,50.0,100.0,4.5,78.0\n歯科口腔外科,DR_OS004,SL_0009,44,34.1,100.0,7.0,69.7\n歯科口腔外科,DR_OS003,SL_0009,10,30.0,100.0,8.0,67.1\n歯科口腔外科,DR_OS017,SL_0009,10,30.0,100.0,8.5,66.5\n歯科口腔外科,DR_OS017,SL_0505,21,23.8,100.0,8.5,64.5\n歯科口腔外科,DR_OS002,SL_0009,47,23.4,100.0,9.0,63.8\n歯科口腔外科,DR_OS020,SL_0703,121,16.5,100.0,9.0,61.5\n歯科口腔外科,DR_OS014,SL_0372,11,18.2,100.0,9.5,61.4\n歯科口腔外科,DR_OS005,SL_0133,20,20.0,100.0,10.5,60.8\n歯科口腔外科,DR_OS020,SL_0009,19,21.1,100.0,14.0,57.0\n歯科口腔外科,DR_OS007,SL_0141,24,4.2,100.0,12.0,53.8\n歯科口腔外科,DR_OS021,SL_0732,73,6.8,100.0,13.0,53.5\n形成外科,DR_PS001,SL_0009,16,43.8,100.0,5.0,75.3\n形成外科,DR_PS015,SL_0009,24,41.7,100.0,5.0,74.6\n形成外科,DR_PS008,SL_0009,11,45.5,100.0,7.0,73.5\n形成外科,DR_PS008,SL_0336,23,34.8,100.0,6.5,70.5\n形成外科,DR_PS013,SL_0701,115,25.2,100.0,7.0,66.7\n形成外科,DR_PS005,SL_0265,54,22.2,100.0,7.0,65.7\n形成外科,DR_PS013,SL_0009,28,32.1,100.0,11.0,64.3\n形成外科,DR_PS016,SL_0009,18,22.2,100.0,9.5,62.8\n形成外科,DR_PS005,SL_0707,46,13.0,100.0,7.0,62.7\n形成外科,DR_PS016,SL_0729,59,20.3,100.0,9.0,62.7\n形成外科,DR_PS015,SL_0709,81,21.0,100.0,10.0,61.8\n形成外科,DR_PS005,SL_0009,31,12.9,100.0,15.0,53.1\n形成外科,DR_PS006,SL_0288,19,0.0,100.0,16.0,47.6\n放射線治療科,DR_U002,SL_0009,14,78.6,100.0,0.0,92.9\n放射線治療科,DR_RT004,SL_0009,62,71.0,100.0,0.0,90.3\n放射線治療科,DR_RT004,SL_0108,197,67.5,100.0,3.0,85.6\n放射線治療科,DR_RT002,SL_0134,403,61.3,100.0,3.0,83.5\n放射線治療科,DR_RT002,SL_0009,57,59.6,100.0,3.0,83.0\n放射線治療科,DR_RT001,SL_0023,12,58.3,100.0,4.0,81.3\n放射線治療科,DR_RT005,SL_0209,68,52.9,100.0,4.0,79.5\n放射線治療科,DR_RT008,SL_0005,18,11.1,100.0,1.0,69.2\n放射線治療科,DR_RT009,SL_0009,14,35.7,100.0,10.0,66.7\n放射線治療科,DR_RT006,SL_0009,11,36.4,100.0,13.0,63.3\n放射線治療科,DR_RT003,SL_0050,32,3.1,100.0,9.0,57.0\n放射線治療科,DR_RT010,SL_0560,16,6.2,100.0,16.0,49.7\n放射線治療科,DR_RT006,SL_0251,28,32.1,100.0,24.0,48.8\nリウマチ膠原病内科,DR_RH007,SL_0009,37,67.6,100.0,0.0,89.2\nリウマチ膠原病内科,DR_RH005,SL_0156,56,50.0,100.0,0.0,83.3\nリウマチ膠原病内科,DR_RH004,SL_0139,108,43.5,100.0,5.0,75.2\nリウマチ膠原病内科,DR_RH003,SL_0009,36,41.7,100.0,5.0,74.6\nリウマチ膠原病内科,DR_RH009,SL_0210,230,37.4,100.0,5.0,73.2\nリウマチ膠原病内科,DR_RH003,SL_0066,160,36.2,100.0,5.0,72.8\nリウマチ膠原病内科,DR_RH010,SL_0222,137,29.9,100.0,6.0,69.5\nリウマチ膠原病内科,DR_RH001,SL_0008,35,14.3,100.0,9.0,60.7\nリウマチ膠原病内科,DR_RH006,SL_0174,184,12.5,100.0,8.5,60.7\nリウマチ膠原病内科,DR_RH007,SL_0176,11,36.4,90.9,7.0,60.6\nリウマチ膠原病内科,DR_RH009,SL_0009,15,13.3,100.0,12.0,56.8\nリウマチ膠原病内科,DR_RH002,SL_0014,38,7.9,100.0,11.0,56.2\nリウマチ膠原病内科,DR_RH008,SL_0201,10,0.0,100.0,16.5,47.0\nリウマチ膠原病内科,DR_RH011,SL_0368,14,7.1,100.0,20.0,45.2\nリウマチ膠原病内科,DR_RH013,SL_0596,10,0.0,100.0,18.5,44.6\n呼吸器内科,DR_RS2009,SL_0009,79,72.2,100.0,0.0,90.7\n呼吸器内科,DR_RS2003,SL_0061,171,39.2,100.0,5.0,73.8\n呼吸器内科,DR_RS2010,SL_0167,89,39.3,100.0,5.5,73.2\n呼吸器内科,DR_RS2004,SL_0009,43,39.5,100.0,6.0,72.7\n呼吸器内科,DR_AL002,SL_0189,187,31.0,100.0,6.0,69.9\n呼吸器内科,DR_RS2013,SL_0005,25,4.0,100.0,0.0,68.0\n呼吸器内科,DR_RS2009,SL_0366,16,43.8,93.8,7.0,66.2\n呼吸器内科,DR_RS2005,SL_0100,128,21.9,100.0,7.0,65.6\n呼吸器内科,DR_AL001,SL_0033,44,15.9,100.0,7.0,63.6\n呼吸器内科,DR_RS2004,SL_0082,288,22.2,100.0,9.5,62.8\n呼吸器内科,DR_RS2006,SL_0106,136,11.8,100.0,9.0,59.9\n呼吸器内科,DR_RS2003,SL_0213,15,6.7,100.0,10.5,56.4\n呼吸器内科,DR_RS2008,SL_0127,68,10.3,100.0,13.0,54.6\n呼吸器内科,DR_RS2007,SL_0126,23,0.0,100.0,18.0,45.2\n呼吸器内科,DR_RS2002,SL_0030,11,9.1,100.0,21.0,44.7\n一般消化器外科,DR_BR005,SL_0009,42,83.3,100.0,0.0,94.4\n一般消化器外科,DR_BR005,SL_0516,20,55.0,100.0,0.0,85.0\n一般消化器外科,DR_GS011,SL_0009,35,54.3,100.0,2.0,82.4\n一般消化器外科,DR_GS006,SL_0202,64,59.4,100.0,4.0,81.7\n一般消化器外科,DR_GS004,SL_0109,87,42.5,100.0,5.0,74.9\n一般消化器外科,DR_GS001,SL_0022,145,41.4,100.0,5.0,74.5\n一般消化器外科,DR_GS002,SL_0085,104,41.3,100.0,6.0,73.3\n一般消化器外科,DR_GS008,SL_0229,36,13.9,100.0,9.0,60.6\n一般消化器外科,DR_GS003,SL_0103,224,8.9,100.0,8.0,60.1\n一般消化器外科,DR_GS009,SL_0374,66,12.1,100.0,9.0,60.0\n一般消化器外科,DR_GS005,SL_0194,46,6.5,100.0,8.0,59.3\n一般消化器外科,DR_GS014,SL_0523,10,30.0,90.0,8.0,56.3\n一般消化器外科,DR_GS003,SL_0280,10,0.0,100.0,12.0,52.4\n一般消化器外科,DR_GS015,SL_0715,64,0.0,100.0,12.0,52.4\n皮膚科,DR_DM005,SL_0009,20,85.0,100.0,0.0,95.0\n皮膚科,DR_DM002,SL_0009,49,75.5,100.0,0.0,91.8\n皮膚科,DR_DM006,SL_0009,28,75.0,100.0,1.0,90.5\n皮膚科,DR_DM003,SL_0009,18,55.6,100.0,0.0,85.2\n皮膚科,DR_DM008,SL_0009,78,37.2,100.0,7.0,70.7\n皮膚科,DR_DM002,SL_0056,186,29.6,100.0,6.0,69.4\n皮膚科,DR_DM005,SL_0101,86,23.3,100.0,8.0,64.9\n皮膚科,DR_DM006,SL_0161,146,17.8,100.0,7.0,64.3\n皮膚科,DR_DM003,SL_0091,182,21.4,100.0,9.0,63.1\n皮膚科,DR_DM009,SL_0292,48,4.2,100.0,8.0,58.5\n皮膚科,DR_DM001,SL_0173,173,8.1,100.0,11.0,56.3\n皮膚科,DR_DM007,SL_0197,32,3.1,100.0,10.0,55.8\n乳腺外科,DR_BR005,SL_0009,11,63.6,100.0,0.0,87.9\n乳腺外科,DR_BR007,SL_0009,18,66.7,100.0,2.0,86.5\n乳腺外科,DR_BR006,SL_0175,853,62.6,100.0,4.0,82.8\n乳腺外科,DR_BR006,SL_0009,122,52.5,100.0,4.0,79.4\n乳腺外科,DR_BR014,SL_0702,381,47.8,100.0,5.0,76.6\n乳腺外科,DR_BR014,SL_0009,29,44.8,96.6,6.0,70.8\n乳腺外科,DR_BR008,SL_0241,102,17.6,100.0,8.0,63.0\n乳腺外科,DR_BR007,SL_0182,81,22.2,100.0,10.0,62.2\n乳腺外科,DR_BR002,SL_0032,77,26.0,98.7,12.0,59.6\n循環器内科,DR_CV002,SL_0009,123,70.7,100.0,0.0,90.2\n循環器内科,DR_CV008,SL_0150,207,40.1,100.0,5.0,74.1\n循環器内科,DR_CV004,SL_0034,78,30.8,100.0,6.0,69.8\n循環器内科,DR_CV001,SL_0044,196,25.5,99.5,6.0,67.5\n循環器内科,DR_CV002,SL_0118,28,42.9,92.9,5.5,66.7\n循環器内科,DR_CV016,SL_0616,63,20.6,100.0,6.0,66.4\n循環器内科,DR_CV001,SL_0009,15,20.0,100.0,10.0,61.4\n循環器内科,DR_CV010,SL_0193,132,11.4,100.0,8.0,60.9\n循環器内科,DR_CV007,SL_0078,73,15.1,98.6,9.0,59.5\n循環器内科,DR_CV008,SL_0539,10,20.0,100.0,13.0,57.9\n循環器内科,DR_CV003,SL_0031,75,4.0,100.0,10.0,56.1\n循環器内科,DR_CV006,SL_0067,140,3.6,99.3,10.0,55.2\n循環器内科,DR_CV006,SL_0600,10,10.0,100.0,12.5,55.1\n循環器内科,DR_CV011,SL_0196,91,3.3,100.0,11.0,54.7\n循環器内科,DR_CV012,SL_0325,12,16.7,100.0,15.0,54.4\n脳神経内科,DR_NR002,SL_0009,66,74.2,100.0,0.0,91.4\n脳神経内科,DR_NR003,SL_0160,106,52.8,100.0,4.0,79.5\n脳神経内科,DR_NR001,SL_0009,20,50.0,100.0,5.0,77.4\n脳神経内科,DR_NR003,SL_0009,10,40.0,100.0,7.0,71.7\n脳神経内科,DR_NR001,SL_0013,258,29.8,100.0,6.0,69.5\n脳神経内科,DR_NR005,SL_0291,45,11.1,100.0,7.0,62.0\n腎内科,DR_NE004,SL_0348,36,91.7,100.0,0.0,97.2\n腎内科,DR_NE005,SL_0009,47,76.6,100.0,0.0,92.2\n腎内科,DR_NE002,SL_0041,276,29.7,100.0,6.0,69.4\n腎内科,DR_NE003,SL_0203,99,13.1,100.0,9.0,60.3\n腎内科,DR_NE001,SL_0027,186,10.2,100.0,9.0,59.4\n腎内科,DR_NE002,SL_0749,23,13.0,100.0,10.0,59.1\n腎内科,DR_DB002,SL_0282,59,5.1,100.0,21.0,43.4\n腎内科,DR_NE001,SL_0009,28,17.9,100.0,28.0,39.3\nメンタルケア科,DR_MN005,SL_0609,10,100.0,100.0,0.0,100.0\nメンタルケア科,DR_MN002,SL_0009,86,39.5,100.0,6.0,72.7\nメンタルケア科,DR_MN004,SL_0255,80,22.5,100.0,8.0,64.6\nメンタルケア科,DR_MN001,SL_0043,123,14.6,100.0,8.0,62.0\nメンタルケア科,DR_MN009,SL_0721,40,2.5,100.0,14.0,50.8\n脳神経外科,DR_NS001,SL_0009,19,73.7,100.0,0.0,91.2\n脳神経外科,DR_NS006,SL_0352,13,38.5,100.0,4.5,74.1\n脳神経外科,DR_NS005,SL_0343,58,20.7,100.0,8.0,64.0\n脳神経外科,DR_NS004,SL_0302,51,17.6,100.0,8.0,63.0\n脳神経外科,DR_NS003,SL_0184,40,7.5,100.0,10.0,57.3\n小児科,DR_PD006,SL_0009,10,60.0,100.0,0.0,86.7\n小児科,DR_PD014,SL_0005,11,45.5,100.0,0.0,81.8\n小児科,DR_PD011,SL_0009,20,45.0,100.0,3.0,78.1\n小児科,DR_PD002,SL_0070,28,42.9,100.0,4.0,76.2\n小児科,DR_PD009,SL_0257,21,0.0,100.0,10.0,54.8\n小児科,DR_PD005,SL_0328,16,12.5,100.0,14.0,54.2\n小児科,DR_PD016,SL_0744,12,8.3,100.0,13.0,54.0\n小児科,DR_PD007,SL_0239,22,13.6,100.0,15.5,52.7\n小児科,DR_PD003,SL_0098,46,8.7,100.0,15.0,51.7\n小児科,DR_XX020,SL_0452,11,18.2,100.0,20.0,48.9\n小児科,DR_PD007,SL_0351,40,5.0,100.0,18.0,46.9\n小児科,DR_PD004,SL_0177,36,8.3,100.0,19.0,46.8\n小児科,DR_PD001,SL_0020,27,3.7,100.0,18.0,46.5\n小児科,DR_PD001,SL_0313,23,0.0,100.0,17.5,45.8\n小児科,DR_PD003,SL_0399,15,6.7,100.0,21.0,43.9\nアレルギー科,DR_RS2003,SL_0061,62,35.5,100.0,5.0,72.5\nアレルギー科,DR_AL002,SL_0189,39,25.6,100.0,6.0,68.1\nアレルギー科,DR_AL001,SL_0033,31,12.9,100.0,8.5,60.8\nアレルギー科,DR_RS2005,SL_0100,37,8.1,100.0,8.5,59.2\n臨床腫瘍科,DR_ON001,SL_0088,124,16.1,100.0,8.0,62.5\n臨床腫瘍科,DR_ON001,SL_0633,20,20.0,100.0,11.0,60.2\n臨床腫瘍科,DR_ON001,SL_0009,30,10.0,100.0,11.0,56.9\n救急科,DR_ER001,SL_0072,111,34.2,95.5,9.0,62.5\n呼吸器外科,DR_RS2012,SL_0188,90,16.7,100.0,7.5,63.3\n呼吸器外科,DR_RS2001,SL_0024,71,5.6,100.0,8.0,59.0\n心臓血管外科,DR_CS002,SL_0168,37,13.5,100.0,8.0,61.6\n心臓血管外科,DR_CS006,SL_0726,89,1.1,100.0,19.0,44.4\n内科,DR_IM001,SL_0015,146,32.2,87.7,10.0,52.2", "2026-04": "診療科,医師匿名ID,予約名称,再診件数,短時間再診比率(%),紹介状なし再診比率(%),診察時間中央値(分),スコア\n眼科,DR_E020,SL_0400,31,100.0,100.0,0.0,100.0\n眼科,DR_E021,SL_0200,28,100.0,100.0,0.0,100.0\n眼科,DR_E021,SL_0218,19,100.0,100.0,0.0,100.0\n眼科,DR_E032,SL_0447,10,100.0,100.0,0.0,100.0\n眼科,DR_E020,SL_0009,38,97.4,100.0,0.0,99.1\n眼科,DR_E003,SL_0035,110,95.5,100.0,0.0,98.5\n眼科,DR_E005,SL_0054,139,95.0,100.0,0.0,98.3\n眼科,DR_E018,SL_0170,198,94.4,100.0,0.0,98.1\n眼科,DR_E016,SL_0151,80,81.2,100.0,1.0,92.9\n眼科,DR_E002,SL_0136,105,81.9,100.0,2.0,92.3\n眼科,DR_E030,SL_0442,16,75.0,100.0,0.0,91.7\n眼科,DR_E006,SL_0404,17,82.4,100.0,4.0,90.8\n眼科,DR_E017,SL_0009,15,60.0,100.0,1.0,85.8\n眼科,DR_E014,SL_0138,18,55.6,100.0,0.0,85.2\n眼科,DR_E025,SL_0363,23,56.5,100.0,4.0,82.2\n産婦人科,DR_G012,SL_0358,31,100.0,100.0,0.0,100.0\n産婦人科,DR_G010,SL_0331,18,94.4,100.0,0.0,98.1\n産婦人科,DR_G014,SL_0488,11,90.9,100.0,0.0,97.0\n産婦人科,DR_G011,SL_0009,52,63.5,100.0,0.0,87.8\n産婦人科,DR_G006,SL_0208,71,59.2,100.0,1.0,85.6\n産婦人科,DR_G006,SL_0068,36,52.8,100.0,4.0,80.9\n産婦人科,DR_G004,SL_0124,205,51.7,100.0,4.0,80.6\n産婦人科,DR_G003,SL_0028,204,50.0,100.0,4.0,80.0\n産婦人科,DR_G004,SL_0009,11,45.5,100.0,3.0,79.3\n産婦人科,DR_G009,SL_0166,24,41.7,100.0,5.0,76.4\n産婦人科,DR_G005,SL_0371,44,36.4,100.0,6.0,73.8\n産婦人科,DR_G005,SL_0049,141,33.3,100.0,7.0,71.9\n産婦人科,DR_G001,SL_0009,14,14.3,100.0,0.0,71.4\n産婦人科,DR_G004,SL_0029,36,41.7,97.2,5.0,69.9\n産婦人科,DR_G008,SL_0009,19,5.3,100.0,0.0,68.4\n泌尿器科,DR_U011,SL_0009,46,97.8,100.0,0.0,99.3\n泌尿器科,DR_U002,SL_0009,232,95.7,100.0,0.0,98.6\n泌尿器科,DR_U005,SL_0009,243,95.9,100.0,0.0,98.6\n泌尿器科,DR_U013,SL_0137,65,92.3,100.0,0.0,97.4\n泌尿器科,DR_U003,SL_0009,23,82.6,100.0,1.0,93.4\n泌尿器科,DR_U018,SL_0009,79,78.5,100.0,0.0,92.8\n泌尿器科,DR_U004,SL_0005,57,73.7,100.0,0.0,91.2\n泌尿器科,DR_U008,SL_0009,55,72.7,100.0,0.0,90.9\n泌尿器科,DR_U010,SL_0128,290,68.3,100.0,3.0,86.9\n泌尿器科,DR_U001,SL_0006,429,67.1,100.0,3.0,86.5\n泌尿器科,DR_U003,SL_0019,376,62.5,100.0,4.0,84.2\n泌尿器科,DR_U008,SL_0112,278,56.5,100.0,4.0,82.2\n泌尿器科,DR_U008,SL_0244,22,54.5,100.0,4.0,81.5\n泌尿器科,DR_U006,SL_0037,199,54.3,100.0,4.0,81.4\n泌尿器科,DR_U012,SL_0132,172,51.2,100.0,4.0,80.4\n耳鼻咽喉科,DR_ENT003,SL_0009,11,100.0,100.0,0.0,100.0\n耳鼻咽喉科,DR_ENT005,SL_0099,58,100.0,100.0,0.0,100.0\n耳鼻咽喉科,DR_ENT003,SL_0064,182,95.1,100.0,0.0,98.4\n耳鼻咽喉科,DR_ENT003,SL_0063,24,91.7,100.0,0.0,97.2\n耳鼻咽喉科,DR_ENT012,SL_0236,36,91.7,100.0,0.0,97.2\n耳鼻咽喉科,DR_ENT004,SL_0009,61,63.9,100.0,4.0,84.6\n耳鼻咽喉科,DR_ENT004,SL_0181,115,51.3,100.0,4.0,80.4\n耳鼻咽喉科,DR_ENT008,SL_0155,118,46.6,100.0,5.0,78.0\n耳鼻咽喉科,DR_ENT002,SL_0009,22,31.8,100.0,5.5,72.7\n耳鼻咽喉科,DR_ENT001,SL_0009,58,31.0,100.0,6.0,72.0\n耳鼻咽喉科,DR_ENT004,SL_0242,12,33.3,100.0,7.0,71.9\n耳鼻咽喉科,DR_ENT011,SL_0009,13,30.8,100.0,6.0,71.9\n耳鼻咽喉科,DR_ENT002,SL_0048,43,27.9,100.0,6.0,71.0\n耳鼻咽喉科,DR_ENT013,SL_0009,37,29.7,100.0,7.5,70.3\n耳鼻咽喉科,DR_ENT013,SL_0293,40,25.0,100.0,7.5,68.8\n整形外科,DR_OR009,SL_0165,40,97.5,100.0,0.0,99.2\n整形外科,DR_OR009,SL_0009,38,94.7,100.0,0.0,98.2\n整形外科,DR_OR005,SL_0009,62,59.7,100.0,0.0,86.6\n整形外科,DR_OR011,SL_0206,22,59.1,100.0,4.0,83.0\n整形外科,DR_OR004,SL_0069,85,57.6,100.0,4.0,82.5\n整形外科,DR_OR003,SL_0038,180,55.6,100.0,4.0,81.9\n整形外科,DR_OR022,SL_0421,54,40.7,100.0,5.0,76.1\n整形外科,DR_OR022,SL_0286,12,33.3,100.0,5.0,73.6\n整形外科,DR_OR006,SL_0081,58,32.8,100.0,6.0,72.6\n整形外科,DR_OR020,SL_0279,39,20.5,100.0,7.0,67.7\n整形外科,DR_OR008,SL_0147,29,17.2,100.0,7.0,66.6\n整形外科,DR_OR007,SL_0261,68,23.5,98.5,7.0,65.2\n整形外科,DR_OR019,SL_0275,27,18.5,100.0,10.0,64.5\n整形外科,DR_OR010,SL_0198,25,16.0,100.0,9.0,64.5\n整形外科,DR_OR001,SL_0001,47,12.8,100.0,8.5,63.8\n総合内科,DR_GM004,SL_0009,110,80.0,100.0,0.0,93.3\n総合内科,DR_GM001,SL_0009,33,72.7,100.0,0.5,90.5\n総合内科,DR_GM001,SL_0016,10,70.0,100.0,3.0,87.5\n総合内科,DR_GM012,SL_0009,13,38.5,100.0,8.0,72.8\n総合内科,DR_GM016,SL_0289,52,21.2,100.0,7.5,67.5\n総合内科,DR_GM013,SL_0247,27,25.9,100.0,10.0,67.0\n総合内科,DR_GM003,SL_0071,45,20.0,100.0,8.0,66.7\n総合内科,DR_GM008,SL_0149,19,21.1,100.0,11.0,64.5\n総合内科,DR_GM004,SL_0157,37,24.3,100.0,13.0,63.9\n総合内科,DR_GM017,SL_0330,29,10.3,100.0,8.5,63.0\n総合内科,DR_GM018,SL_0337,31,12.9,100.0,10.0,62.6\n総合内科,DR_GM007,SL_0148,24,16.7,100.0,12.5,61.8\n総合内科,DR_GM012,SL_0238,36,11.1,100.0,12.0,60.4\n総合内科,DR_GM009,SL_0172,110,8.2,100.0,11.0,60.2\n総合内科,DR_GM011,SL_0231,11,18.2,100.0,15.5,59.8\n皮膚科,DR_DM002,SL_0009,26,76.9,100.0,0.0,92.3\n皮膚科,DR_DM001,SL_0009,13,61.5,100.0,1.0,86.3\n皮膚科,DR_DM005,SL_0009,14,64.3,100.0,3.0,85.6\n皮膚科,DR_DM006,SL_0009,19,57.9,100.0,4.0,82.6\n皮膚科,DR_DM003,SL_0009,26,34.6,100.0,6.0,73.2\n皮膚科,DR_DM008,SL_0009,53,37.7,100.0,8.0,72.6\n皮膚科,DR_DM002,SL_0056,120,28.3,100.0,7.0,70.3\n皮膚科,DR_DM003,SL_0091,107,24.3,100.0,8.0,68.1\n皮膚科,DR_DM006,SL_0161,137,20.4,100.0,8.0,66.8\n皮膚科,DR_DM009,SL_0292,34,14.7,100.0,8.0,64.9\n皮膚科,DR_DM005,SL_0101,71,14.1,100.0,9.0,63.9\n皮膚科,DR_DM001,SL_0173,138,13.0,100.0,9.5,63.1\n皮膚科,DR_DM004,SL_0094,18,27.8,100.0,18.5,60.5\n皮膚科,DR_DM007,SL_0197,36,8.3,100.0,11.0,60.3\n消化器内科,DR_GI001,SL_0009,104,75.0,100.0,0.0,91.7\n消化器内科,DR_GI006,SL_0120,187,72.2,100.0,3.0,88.2\n消化器内科,DR_PD012,SL_0475,22,50.0,100.0,2.0,81.7\n消化器内科,DR_GI010,SL_0005,11,36.4,100.0,0.0,78.8\n消化器内科,DR_GI002,SL_0046,194,42.8,100.0,5.0,76.8\n消化器内科,DR_GI005,SL_0152,157,42.0,100.0,5.0,76.5\n消化器内科,DR_GI008,SL_0214,128,36.7,100.0,6.0,73.9\n消化器内科,DR_GI006,SL_0320,12,25.0,100.0,7.5,68.8\n消化器内科,DR_GI002,SL_0333,10,30.0,100.0,12.5,66.2\n消化器内科,DR_GI008,SL_0315,11,9.1,100.0,6.0,64.7\n消化器内科,DR_GI009,SL_0370,14,21.4,100.0,11.5,64.2\n消化器内科,DR_GI004,SL_0086,19,21.1,100.0,12.0,63.7\n消化器内科,DR_GI003,SL_0083,108,10.2,100.0,8.0,63.4\n消化器内科,DR_GI003,SL_0502,12,0.0,100.0,14.0,55.0\n血液内科,DR_HE005,SL_0216,65,86.2,100.0,2.0,93.7\n血液内科,DR_HE006,SL_0009,27,74.1,100.0,1.0,90.5\n血液内科,DR_HE004,SL_0169,95,72.6,100.0,3.0,88.4\n血液内科,DR_HE007,SL_0005,18,61.1,100.0,0.0,87.0\n血液内科,DR_HE004,SL_0009,13,61.5,100.0,1.0,86.3\n血液内科,DR_HE009,SL_0383,20,55.0,100.0,0.0,85.0\n血液内科,DR_RH005,SL_0009,11,54.5,100.0,1.0,84.0\n血液内科,DR_RH005,SL_0156,16,56.2,100.0,4.0,82.1\n血液内科,DR_HE001,SL_0012,135,51.9,100.0,4.0,80.6\n血液内科,DR_HE003,SL_0096,116,36.2,100.0,6.0,73.7\n血液内科,DR_HE002,SL_0089,56,32.1,100.0,6.0,72.4\n血液内科,DR_HE010,SL_0439,46,19.6,100.0,9.0,65.7\n血液内科,DR_GM018,SL_0389,19,0.0,100.0,10.0,58.3\n血液内科,DR_HE008,SL_0339,28,0.0,100.0,14.0,55.0\n乳腺外科,DR_BR004,SL_0135,17,58.8,100.0,1.0,85.4\n乳腺外科,DR_BR002,SL_0009,29,62.1,100.0,3.5,84.4\n乳腺外科,DR_BR006,SL_0175,176,59.1,100.0,4.0,83.0\n乳腺外科,DR_BR002,SL_0032,253,55.3,100.0,4.0,81.8\n乳腺外科,DR_BR003,SL_0077,218,49.5,100.0,4.0,79.8\n乳腺外科,DR_BR003,SL_0009,14,35.7,100.0,7.0,72.7\n乳腺外科,DR_BR007,SL_0009,21,38.1,100.0,8.0,72.7\n乳腺外科,DR_BR006,SL_0009,32,28.1,100.0,5.5,71.4\n乳腺外科,DR_BR008,SL_0241,74,21.6,100.0,8.0,67.2\n乳腺外科,DR_BR001,SL_0297,52,21.2,100.0,9.0,66.2\n乳腺外科,DR_BR007,SL_0182,55,18.2,100.0,10.0,64.4\n乳腺外科,DR_BR001,SL_0009,22,4.5,100.0,8.5,61.1\nリウマチ膠原病内科,DR_RH005,SL_0156,35,68.6,100.0,0.0,89.5\nリウマチ膠原病内科,DR_RH007,SL_0009,29,69.0,100.0,1.5,88.4\nリウマチ膠原病内科,DR_RH009,SL_0009,11,54.5,100.0,3.0,82.3\nリウマチ膠原病内科,DR_RH004,SL_0139,75,45.3,100.0,5.0,77.6\nリウマチ膠原病内科,DR_RH009,SL_0210,201,36.3,100.0,5.0,74.6\nリウマチ膠原病内科,DR_RH003,SL_0066,102,35.3,100.0,6.0,73.4\nリウマチ膠原病内科,DR_RH003,SL_0009,15,26.7,100.0,6.0,70.6\nリウマチ膠原病内科,DR_RH010,SL_0222,66,22.7,100.0,6.0,69.2\nリウマチ膠原病内科,DR_RH006,SL_0174,117,8.5,100.0,8.5,62.4\nリウマチ膠原病内科,DR_RH001,SL_0008,37,5.4,100.0,8.0,61.8\nリウマチ膠原病内科,DR_RH002,SL_0014,53,3.8,100.0,11.0,58.8\nリウマチ膠原病内科,DR_RH008,SL_0201,16,0.0,100.0,14.0,55.0\n呼吸器内科,DR_RS2009,SL_0009,65,58.5,100.0,0.0,86.2\n呼吸器内科,DR_RS2003,SL_0061,113,43.4,100.0,5.0,77.0\n呼吸器内科,DR_RS2004,SL_0009,26,38.5,100.0,6.0,74.5\n呼吸器内科,DR_RS2005,SL_0100,85,34.1,100.0,6.0,73.0\n呼吸器内科,DR_AL002,SL_0189,108,33.3,100.0,6.0,72.8\n呼吸器内科,DR_RS2010,SL_0167,73,32.9,100.0,6.0,72.6\n呼吸器内科,DR_AL001,SL_0033,33,18.2,100.0,6.5,67.3\n呼吸器内科,DR_RS2006,SL_0106,96,20.8,100.0,8.0,66.9\n呼吸器内科,DR_RS2004,SL_0082,184,20.1,100.0,9.0,65.9\n呼吸器内科,DR_RS2007,SL_0126,15,20.0,100.0,11.5,63.8\n呼吸器内科,DR_RS2008,SL_0127,44,6.8,100.0,13.0,58.1\n呼吸器内科,DR_RS2002,SL_0030,17,11.8,100.0,16.0,57.3\n呼吸器内科,DR_RS2009,SL_0366,15,26.7,93.3,12.0,49.9\n循環器内科,DR_CV002,SL_0009,119,62.2,100.0,0.0,87.4\n循環器内科,DR_CV008,SL_0150,182,42.9,100.0,5.0,76.8\n循環器内科,DR_CV004,SL_0034,93,31.2,100.0,6.0,72.1\n循環器内科,DR_CV001,SL_0044,143,23.8,99.3,6.0,68.0\n循環器内科,DR_CV003,SL_0031,89,19.1,100.0,8.0,66.4\n循環器内科,DR_CV001,SL_0009,25,12.0,100.0,8.0,64.0\n循環器内科,DR_CV010,SL_0193,108,13.0,100.0,10.0,62.7\n循環器内科,DR_CV009,SL_0153,70,10.0,100.0,10.0,61.7\n循環器内科,DR_CV011,SL_0196,58,5.2,100.0,8.5,61.3\n循環器内科,DR_CV007,SL_0078,41,9.8,100.0,11.0,60.8\n循環器内科,DR_CV006,SL_0067,89,1.1,100.0,11.0,57.9\n循環器内科,DR_CV005,SL_0058,14,57.1,85.7,2.0,50.7\n循環器内科,DR_CV002,SL_0118,20,30.0,90.0,11.0,44.2\n一般消化器外科,DR_BR005,SL_0009,22,90.9,100.0,0.0,97.0\n一般消化器外科,DR_GS011,SL_0009,26,80.8,100.0,0.0,93.6\n一般消化器外科,DR_GS006,SL_0202,73,52.1,100.0,4.0,80.7\n一般消化器外科,DR_GS004,SL_0109,58,48.3,100.0,5.0,78.6\n一般消化器外科,DR_GS002,SL_0085,66,45.5,100.0,4.5,78.1\n一般消化器外科,DR_GS001,SL_0022,160,43.8,100.0,5.0,77.1\n一般消化器外科,DR_GS003,SL_0103,134,12.7,100.0,8.0,64.2\n一般消化器外科,DR_GS008,SL_0229,35,22.9,100.0,13.0,63.5\n一般消化器外科,DR_GS009,SL_0374,48,10.4,100.0,10.5,61.4\n一般消化器外科,DR_GS005,SL_0194,20,0.0,100.0,13.0,55.8\n放射線治療科,DR_RT004,SL_0009,32,71.9,100.0,2.0,89.0\n放射線治療科,DR_RT002,SL_0134,375,65.1,100.0,3.0,85.9\n放射線治療科,DR_RT002,SL_0009,55,61.8,100.0,2.0,85.6\n放射線治療科,DR_RT004,SL_0108,124,61.3,100.0,3.0,84.6\n放射線治療科,DR_RT005,SL_0209,38,55.3,100.0,4.0,81.8\n放射線治療科,DR_RT005,SL_0009,10,50.0,100.0,4.0,80.0\n放射線治療科,DR_RT001,SL_0023,19,26.3,100.0,7.0,69.6\n放射線治療科,DR_RT003,SL_0050,22,22.7,100.0,7.0,68.4\n放射線治療科,DR_RT006,SL_0251,25,28.0,100.0,29.0,51.8\n歯科口腔外科,DR_OS015,SL_0009,14,92.9,100.0,0.0,97.6\n歯科口腔外科,DR_OS005,SL_0133,11,63.6,100.0,0.0,87.9\n歯科口腔外科,DR_OS014,SL_0372,12,33.3,100.0,6.0,72.8\n歯科口腔外科,DR_OS003,SL_0009,14,35.7,100.0,8.0,71.9\n歯科口腔外科,DR_OS002,SL_0009,19,36.8,100.0,11.0,69.8\n歯科口腔外科,DR_OS007,SL_0141,13,30.8,100.0,14.0,65.3\n歯科口腔外科,DR_OS004,SL_0009,23,21.7,100.0,12.0,63.9\n歯科口腔外科,DR_OS010,SL_0009,14,21.4,100.0,16.0,60.5\n歯科口腔外科,DR_OS002,SL_0060,102,6.9,100.0,12.0,59.0\n歯科口腔外科,DR_OS004,SL_0123,100,9.0,100.0,14.0,58.0\n歯科口腔外科,DR_OS003,SL_0080,50,8.0,100.0,14.0,57.7\n歯科口腔外科,DR_OS006,SL_0285,50,12.0,100.0,17.0,56.5\n歯科口腔外科,DR_OS001,SL_0009,10,0.0,100.0,15.0,54.2\n歯科口腔外科,DR_OS008,SL_0329,11,9.1,100.0,22.5,50.9\n歯科口腔外科,DR_OS011,SL_0322,22,13.6,100.0,30.0,46.2\n形成外科,DR_PS003,SL_0009,36,33.3,100.0,8.0,71.1\n形成外科,DR_PS005,SL_0009,11,27.3,100.0,8.0,69.1\n形成外科,DR_PS002,SL_0062,14,21.4,100.0,8.5,66.7\n形成外科,DR_PS005,SL_0265,75,20.0,100.0,9.0,65.8\n形成外科,DR_PS003,SL_0093,68,19.1,100.0,9.0,65.5\n形成外科,DR_PS008,SL_0336,10,10.0,100.0,7.0,64.2\n形成外科,DR_PS004,SL_0245,52,9.6,100.0,11.0,60.7\n形成外科,DR_PS006,SL_0288,17,11.8,100.0,13.0,59.8\n形成外科,DR_PS004,SL_0009,14,14.3,100.0,18.0,56.4\n腎内科,DR_NE004,SL_0348,29,89.7,100.0,0.0,96.6\n腎内科,DR_NE005,SL_0009,31,64.5,100.0,0.0,88.2\n腎内科,DR_NE002,SL_0041,229,31.9,100.0,6.0,72.3\n腎内科,DR_NE006,SL_0364,15,20.0,100.0,6.0,68.3\n腎内科,DR_NE003,SL_0203,48,16.7,100.0,9.5,64.3\n腎内科,DR_NE001,SL_0027,150,10.0,100.0,8.0,63.3\n腎内科,DR_NE001,SL_0009,27,18.5,100.0,29.5,48.2\n腎内科,DR_NE003,SL_0009,10,0.0,100.0,24.0,46.7\n脳神経内科,DR_NR002,SL_0009,50,74.0,100.0,0.0,91.3\n脳神経内科,DR_NR003,SL_0160,68,47.1,100.0,5.0,78.2\n脳神経内科,DR_NR001,SL_0013,159,30.2,100.0,6.0,71.7\n脳神経内科,DR_NR005,SL_0291,34,11.8,100.0,7.5,64.4\n脳神経外科,DR_NS001,SL_0009,10,70.0,100.0,0.0,90.0\n脳神経外科,DR_NS004,SL_0302,37,29.7,100.0,7.5,70.3\n脳神経外科,DR_NS003,SL_0184,43,23.3,100.0,8.0,67.8\n脳神経外科,DR_NS005,SL_0343,46,15.2,100.0,9.0,64.2\nアレルギー科,DR_RS2003,SL_0061,42,42.9,100.0,5.0,76.8\nアレルギー科,DR_RS2005,SL_0100,24,20.8,100.0,6.0,68.6\nアレルギー科,DR_AL001,SL_0033,29,13.8,100.0,7.0,65.4\nアレルギー科,DR_AL002,SL_0189,44,6.8,100.0,7.0,63.1\nメンタルケア科,DR_MN002,SL_0009,78,50.0,100.0,4.0,80.0\nメンタルケア科,DR_MN004,SL_0255,37,32.4,100.0,7.0,71.6\nメンタルケア科,DR_MN001,SL_0043,126,21.4,100.0,9.0,66.3\nメンタルケア科,DR_MN003,SL_0084,39,2.6,100.0,17.0,53.4\n心臓血管外科,DR_CS003,SL_0009,10,60.0,100.0,0.5,86.2\n心臓血管外科,DR_CS002,SL_0168,27,11.1,100.0,8.0,63.7\n心臓血管外科,DR_CS001,SL_0163,34,11.8,100.0,10.0,62.3\n小児科,DR_PD011,SL_0009,10,30.0,100.0,12.0,66.7\n小児科,DR_PD002,SL_0070,30,10.0,100.0,6.0,65.0\n小児科,DR_PD001,SL_0020,27,22.2,100.0,13.0,63.2\n小児科,DR_PD004,SL_0177,31,16.1,100.0,15.0,59.5\n小児科,DR_PD009,SL_0257,13,0.0,100.0,10.0,58.3\n小児科,DR_PD008,SL_0250,21,14.3,100.0,18.0,56.4\n小児科,DR_PD004,SL_0270,10,10.0,100.0,16.5,56.2\n小児科,DR_PD007,SL_0351,24,4.2,100.0,16.0,54.7\n小児科,DR_PD005,SL_0328,15,0.0,100.0,15.0,54.2\n小児科,DR_PD003,SL_0098,18,0.0,100.0,15.0,54.2\n小児科,DR_PD006,SL_0503,14,14.3,100.0,21.0,53.9\n小児科,DR_PD001,SL_0313,15,0.0,100.0,15.5,53.8\n小児科,DR_PD007,SL_0239,12,0.0,100.0,17.0,52.5\n小児科,DR_PD006,SL_0272,25,0.0,100.0,22.5,47.9\n小児科,DR_PD003,SL_0399,12,0.0,100.0,23.5,47.1\n呼吸器外科,DR_RS2012,SL_0188,71,16.9,100.0,9.0,64.8\n呼吸器外科,DR_RS2001,SL_0024,60,13.3,100.0,9.0,63.6\n臨床腫瘍科,DR_ON001,SL_0088,80,13.8,100.0,8.5,64.2\n臨床腫瘍科,DR_ON001,SL_0009,28,14.3,100.0,12.5,61.0\n救急科,DR_ER001,SL_0072,69,34.8,97.1,8.0,64.8\n救急科,DR_ER002,SL_0395,13,0.0,100.0,22.0,48.3\n内科,DR_IM001,SL_0015,108,38.0,87.0,9.5,41.1\n糖尿病内分泌内科,DR_DB001,SL_0264,12,8.3,100.0,17.5,54.8\n糖尿病内分泌内科,DR_DB002,SL_0282,36,2.8,100.0,17.0,53.4"}</script>
 <script>
@@ -35171,73 +35308,6 @@ footer.site-footer {
   });
 })();
 </script>
-
-<script>// 共通ユーティリティ（Chart.js のデフォルト、数値整形、評価バッジ生成など）
-
-const OutpatientCommon = (() => {
-  const palette = {
-    naika: '#5b8a72',
-    geka: '#b25c2e',
-    other: '#9a7c4e',
-    primary: '#b25c2e',
-    accent: '#3d6b7d',
-    muted: '#6b6660',
-  };
-
-  function formatInt(n) {
-    if (n == null || Number.isNaN(n)) return '-';
-    return Math.round(n).toLocaleString('ja-JP');
-  }
-
-  function formatPct(n, digits = 1) {
-    if (n == null || Number.isNaN(n)) return '-';
-    return `${n.toFixed(digits)}%`;
-  }
-
-  function gradeFromPct(pct, inverse = false) {
-    if (pct == null || Number.isNaN(pct)) return 'D';
-    if (inverse) {
-      if (pct <= 90) return 'S';
-      if (pct <= 100) return 'A';
-      if (pct <= 110) return 'B';
-      if (pct <= 125) return 'C';
-      return 'D';
-    }
-    if (pct >= 110) return 'S';
-    if (pct >= 100) return 'A';
-    if (pct >= 90) return 'B';
-    if (pct >= 75) return 'C';
-    return 'D';
-  }
-
-  function gradeBadge(grade) {
-    const el = document.createElement('span');
-    el.className = `grade grade-${grade}`;
-    el.textContent = grade;
-    return el.outerHTML;
-  }
-
-  function typeBadge(type) {
-    const label = { naika: '内科', geka: '外科', other: 'その他' }[type] || type;
-    return `<span class="type-badge type-${type}">${label}</span>`;
-  }
-
-  if (typeof window !== 'undefined' && window.Chart) {
-    Chart.defaults.font.family =
-      '-apple-system, BlinkMacSystemFont, "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif';
-    Chart.defaults.font.size = 12;
-    Chart.defaults.color = '#2d2a26';
-  }
-
-  return { palette, formatInt, formatPct, gradeFromPct, gradeBadge, typeBadge };
-})();
-</script>
-</main>
-
-<footer class="site-footer">
-  外来効率化ダッシュボード
-</footer>
-
 
 </body>
 </html>

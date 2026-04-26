@@ -1,43 +1,12 @@
-<!DOCTYPE html>
-<html lang="ja">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>外来効率化ダッシュボード</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&family=DM+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+{% extends "_layout.html" %}
+
+{% block extra_head %}
 <style>
-  :root{
-    --bg:#F5F3EF; --surface:#FFFFFF; --surface2:#FAF9F6; --surface3:#F0EDE8;
-    --border:#E5E3DF; --border-strong:#D6D3CC;
-    --text:#2C2A28; --text-soft:#5A5651; --dim:#8A847C; --muted:#B0ABA3;
-    --header:#3D3A35;
-    --blue:#3F7FC1; --blue-light:#E7F0FA;
-    --naika:#2B9DB8; --naika-bg:#E4F3F6;
-    --geka:#D08620;  --geka-bg:#FAEEDB;
-    --other:#8B6FB6; --other-bg:#EFEAF5;
-    --up:#2F7A4B; --up-bg:#E5F1E9;
-    --down:#A33838; --down-bg:#F5E4E4;
-    --flat:#8A847C; --flat-bg:#EDEBE7;
-  }
-  *{box-sizing:border-box;margin:0;padding:0;}
-  body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.55;}
-  a{color:inherit;text-decoration:none;}
-
-  header{background:var(--header);color:#fff;padding:16px 28px;border-bottom:3px solid var(--geka);
-         display:flex;align-items:center;gap:14px;box-shadow:0 2px 8px rgba(0,0,0,.06);}
-  .logo{width:36px;height:36px;background:var(--geka);border-radius:8px;
-        display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;
-        font-family:'DM Mono',monospace;}
-  header h1{font-size:18px;font-weight:700;color:#fff;}
-  header .sub{font-size:11px;color:rgba(255,255,255,.65);font-family:'DM Mono',monospace;margin-top:2px;}
-
   .meta-bar{background:var(--surface2);border-bottom:1px solid var(--border);
-            padding:10px 28px;display:flex;gap:24px;flex-wrap:wrap;font-size:12px;color:var(--text-soft);}
+            padding:10px 28px;display:flex;gap:24px;flex-wrap:wrap;font-size:12px;color:var(--text-soft);
+            margin:-24px -28px 24px;}
   .meta-bar .k{color:var(--dim);margin-right:6px;}
   .meta-bar .v{font-family:'DM Mono',monospace;color:var(--text);font-weight:500;}
-
-  .container{max-width:1400px;margin:0 auto;padding:24px 28px 40px;}
 
   /* ===== Hero KPI row ===== */
   .hero{display:grid;grid-template-columns:1.3fr 2.7fr;gap:16px;margin-bottom:22px;}
@@ -71,7 +40,6 @@
   .kpi-delta.flat{background:var(--flat-bg);color:var(--flat);}
   .kpi-sub{font-size:11px;color:var(--dim);}
 
-  /* ===== Trend chart ===== */
   .trend-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;
               padding:20px 24px;margin-bottom:22px;box-shadow:0 1px 3px rgba(0,0,0,.03);}
   .trend-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:12px;}
@@ -82,7 +50,6 @@
   .trend-legend .leg-sho::before{background:var(--geka);}
   .chart-wrap{position:relative;height:220px;}
 
-  /* ===== Section ===== */
   .section{background:var(--surface);border:1px solid var(--border);border-radius:12px;
            padding:22px 26px;margin-bottom:20px;box-shadow:0 1px 3px rgba(0,0,0,.03);}
   .section-head{display:flex;align-items:baseline;gap:10px;margin-bottom:16px;
@@ -93,7 +60,6 @@
   .section-title{font-size:16px;font-weight:700;color:var(--text);}
   .section-sub{font-size:12px;color:var(--dim);margin-left:4px;}
 
-  /* ===== Dept cards ===== */
   .group{margin-bottom:20px;}
   .group:last-child{margin-bottom:0;}
   .group-head{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
@@ -125,7 +91,6 @@
   .mini-delta.flat{background:var(--flat-bg);color:var(--flat);}
   .dept-arrow{font-size:14px;color:var(--dim);}
 
-  /* ===== Month chips ===== */
   .month-chips{display:flex;flex-wrap:wrap;gap:8px;}
   .month-chip{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;
               background:var(--surface2);border:1px solid var(--border);border-radius:6px;
@@ -134,7 +99,6 @@
   .month-chip:hover{border-color:var(--blue);color:var(--blue);}
   .month-chip.latest{border-color:var(--geka);background:var(--geka-bg);color:var(--geka);font-weight:700;}
 
-  /* ===== Past months (details) ===== */
   details.past-month{border-top:1px solid var(--border);padding-top:14px;margin-top:14px;}
   details.past-month:first-of-type{border-top:none;padding-top:0;margin-top:0;}
   details.past-month > summary{cursor:pointer;list-style:none;
@@ -153,7 +117,6 @@
   details.past-month .chip-code{font-family:'DM Mono',monospace;font-size:11px;font-weight:700;color:var(--dim);min-width:28px;}
   details.past-month .chip-name{font-size:12px;color:var(--text);}
 
-  /* ===== Extras ===== */
   .extras{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;}
   .extra{padding:16px 18px;background:var(--surface2);border:1px solid var(--border);
          border-radius:8px;display:flex;flex-direction:column;gap:4px;
@@ -167,21 +130,10 @@
 
   .empty{color:var(--dim);font-size:13px;padding:16px;background:var(--surface3);
          border-radius:6px;text-align:center;}
-
-  footer{padding:20px 28px;text-align:center;color:var(--dim);font-size:11px;
-         border-top:1px solid var(--border);margin-top:20px;}
 </style>
-</head>
-<body>
+{% endblock %}
 
-<header>
-  <div class="logo">OE</div>
-  <div>
-    <h1>外来効率化ダッシュボード</h1>
-    <div class="sub">Outpatient Efficiency Dashboard</div>
-  </div>
-</header>
-
+{% block content %}
 <div class="meta-bar">
   <div><span class="k">最終更新</span><span class="v">{{ generated_at }}</span></div>
   {% if data_period %}
@@ -191,204 +143,198 @@
   <div><span class="k">診療科深掘り</span><span class="v">{{ dept_total_count }} 本</span></div>
 </div>
 
-<main class="container">
+{% if kpis %}
+<section class="hero">
+  <div class="hero-month-card">
+    <div class="hero-month-label">最新月</div>
+    <div class="hero-month-value">{{ latest_month }}</div>
+    <div class="hero-month-cta">
+      {% if latest_month %}
+      <a class="hero-cta-link" href="monthly/{{ latest_month }}.html">月次管理ダッシュボードを開く →</a>
+      {% endif %}
+    </div>
+  </div>
+  <div class="kpi-row">
+    <div class="kpi">
+      <div class="kpi-label">総外来件数</div>
+      <div class="kpi-value">{{ "{:,}".format(kpis.total) }}<span class="kpi-unit">件</span></div>
+      <span class="kpi-delta {{ kpis.total_delta.sign }}">
+        {{ '+' if kpis.total_delta.pct > 0 else '' }}{{ kpis.total_delta.pct }}% MoM
+      </span>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">初診件数</div>
+      <div class="kpi-value">{{ "{:,}".format(kpis.sho) }}<span class="kpi-unit">件</span></div>
+      <span class="kpi-delta {{ kpis.sho_delta.sign }}">
+        {{ '+' if kpis.sho_delta.pct > 0 else '' }}{{ kpis.sho_delta.pct }}% MoM
+      </span>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">紹介率（初診）</div>
+      <div class="kpi-value">{{ kpis.ref_rate }}<span class="kpi-unit">%</span></div>
+      <span class="kpi-sub">紹介状あり / 初診</span>
+    </div>
+    <div class="kpi">
+      <div class="kpi-label">未来院率</div>
+      <div class="kpi-value">{{ kpis.miraiin_rate }}<span class="kpi-unit">%</span></div>
+      <span class="kpi-delta {{ kpis.miraiin_rate_delta.sign }}">
+        {{ '+' if kpis.miraiin_rate_delta.pct > 0 else '' }}{{ kpis.miraiin_rate_delta.pct }}% MoM
+      </span>
+    </div>
+  </div>
+</section>
+{% endif %}
 
-  {% if kpis %}
-  <section class="hero">
-    <div class="hero-month-card">
-      <div class="hero-month-label">最新月</div>
-      <div class="hero-month-value">{{ latest_month }}</div>
-      <div class="hero-month-cta">
-        {% if latest_month %}
-        <a class="hero-cta-link" href="monthly/{{ latest_month }}.html">月次管理ダッシュボードを開く →</a>
-        {% endif %}
+{% if trend_json and trend_json != '[]' %}
+<section class="trend-card">
+  <div class="trend-head">
+    <div class="trend-title">月次トレンド（全診療科合計）</div>
+    <div class="trend-legend">
+      <span class="leg-total">総件数</span>
+      <span class="leg-sho">初診件数</span>
+    </div>
+  </div>
+  <div class="chart-wrap"><canvas id="trendChart"></canvas></div>
+</section>
+{% endif %}
+
+<section class="section">
+  <div class="section-head">
+    <span class="section-num">01</span>
+    <span class="section-title">診療科別サマリ（{{ latest_month or '—' }}）</span>
+    <span class="section-sub">科コード＋科名＋KPI＋前月比。カードクリックで深掘りへ</span>
+  </div>
+
+  {% if dept_groups %}
+    {% for g in dept_groups %}
+    <div class="group">
+      <div class="group-head">
+        <span class="group-badge {{ g.type_key }}">{{ g.group }}</span>
+        <span class="group-count">{{ g["items"]|length }} 科</span>
+      </div>
+      <div class="dept-grid">
+        {% for it in g["items"] %}
+        <a class="dept-card" href="{{ it.href }}">
+          <div class="dept-card-head">
+            <span class="dept-code">{{ it.code }}</span>
+            <span class="dept-name">{{ it.name }}</span>
+          </div>
+          <div class="dept-stats">
+            <div class="stat">
+              <span class="stat-k">総件数</span>
+              <span class="stat-v">{{ "{:,}".format(it.total) }}<span class="stat-u"> 件</span></span>
+            </div>
+            <div class="stat">
+              <span class="stat-k">初診</span>
+              <span class="stat-v">{{ "{:,}".format(it.sho) }}<span class="stat-u"> 件</span></span>
+            </div>
+            <div class="stat">
+              <span class="stat-k">紹介率</span>
+              <span class="stat-v">{{ it.ref_rate }}<span class="stat-u">%</span></span>
+            </div>
+            <div class="stat">
+              <span class="stat-k">未来院率</span>
+              <span class="stat-v">{{ it.miraiin_rate }}<span class="stat-u">%</span></span>
+            </div>
+          </div>
+          <div class="dept-card-foot">
+            <span class="mini-delta {{ it.delta.sign }}">
+              {{ '+' if it.delta.pct > 0 else '' }}{{ it.delta.pct }}% MoM
+            </span>
+            <span class="dept-arrow">→</span>
+          </div>
+        </a>
+        {% endfor %}
       </div>
     </div>
-    <div class="kpi-row">
-      <div class="kpi">
-        <div class="kpi-label">総外来件数</div>
-        <div class="kpi-value">{{ "{:,}".format(kpis.total) }}<span class="kpi-unit">件</span></div>
-        <span class="kpi-delta {{ kpis.total_delta.sign }}">
-          {{ '+' if kpis.total_delta.pct > 0 else '' }}{{ kpis.total_delta.pct }}% MoM
-        </span>
-      </div>
-      <div class="kpi">
-        <div class="kpi-label">初診件数</div>
-        <div class="kpi-value">{{ "{:,}".format(kpis.sho) }}<span class="kpi-unit">件</span></div>
-        <span class="kpi-delta {{ kpis.sho_delta.sign }}">
-          {{ '+' if kpis.sho_delta.pct > 0 else '' }}{{ kpis.sho_delta.pct }}% MoM
-        </span>
-      </div>
-      <div class="kpi">
-        <div class="kpi-label">紹介率（初診）</div>
-        <div class="kpi-value">{{ kpis.ref_rate }}<span class="kpi-unit">%</span></div>
-        <span class="kpi-sub">紹介状あり / 初診</span>
-      </div>
-      <div class="kpi">
-        <div class="kpi-label">未来院率</div>
-        <div class="kpi-value">{{ kpis.miraiin_rate }}<span class="kpi-unit">%</span></div>
-        <span class="kpi-delta {{ kpis.miraiin_rate_delta.sign }}">
-          {{ '+' if kpis.miraiin_rate_delta.pct > 0 else '' }}{{ kpis.miraiin_rate_delta.pct }}% MoM
-        </span>
-      </div>
-    </div>
-  </section>
+    {% endfor %}
+  {% else %}
+    <div class="empty">まだ生成された診療科深掘りダッシュボードはありません。</div>
   {% endif %}
+</section>
 
-  {% if trend_json and trend_json != '[]' %}
-  <section class="trend-card">
-    <div class="trend-head">
-      <div class="trend-title">月次トレンド（全診療科合計）</div>
-      <div class="trend-legend">
-        <span class="leg-total">総件数</span>
-        <span class="leg-sho">初診件数</span>
-      </div>
+<section class="section">
+  <div class="section-head">
+    <span class="section-num">02</span>
+    <span class="section-title">月次管理ダッシュボード</span>
+    <span class="section-sub">月別リンク</span>
+  </div>
+  {% if monthly_links %}
+    <div class="month-chips">
+      {% for m in monthly_links %}
+      <a class="month-chip {% if m.is_latest %}latest{% endif %}" href="{{ m.href }}">
+        {{ m.month }}{% if m.is_latest %} ● 最新{% endif %}
+      </a>
+      {% endfor %}
     </div>
-    <div class="chart-wrap"><canvas id="trendChart"></canvas></div>
-  </section>
+  {% else %}
+    <div class="empty">まだ生成された月次ダッシュボードはありません。</div>
   {% endif %}
+</section>
 
-  <section class="section">
-    <div class="section-head">
-      <span class="section-num">01</span>
-      <span class="section-title">診療科別サマリ（{{ latest_month or '—' }}）</span>
-      <span class="section-sub">科コード＋科名＋KPI＋前月比。カードクリックで深掘りへ</span>
-    </div>
-
-    {% if dept_groups %}
-      {% for g in dept_groups %}
+{% if past_dept_by_month %}
+<section class="section">
+  <div class="section-head">
+    <span class="section-num">03</span>
+    <span class="section-title">過去月の診療科深掘り</span>
+    <span class="section-sub">クリックで展開</span>
+  </div>
+  {% for pm in past_dept_by_month %}
+  <details class="past-month">
+    <summary>
+      <span class="month-label">{{ pm.month }}</span>
+      <span class="group-count">{{ pm.total }} 科</span>
+    </summary>
+    <div class="group-inner">
+      {% for g in pm.groups %}
       <div class="group">
         <div class="group-head">
           <span class="group-badge {{ g.type_key }}">{{ g.group }}</span>
           <span class="group-count">{{ g["items"]|length }} 科</span>
         </div>
-        <div class="dept-grid">
+        <div class="chip-grid">
           {% for it in g["items"] %}
-          <a class="dept-card" href="{{ it.href }}">
-            <div class="dept-card-head">
-              <span class="dept-code">{{ it.code }}</span>
-              <span class="dept-name">{{ it.name }}</span>
-            </div>
-            <div class="dept-stats">
-              <div class="stat">
-                <span class="stat-k">総件数</span>
-                <span class="stat-v">{{ "{:,}".format(it.total) }}<span class="stat-u"> 件</span></span>
-              </div>
-              <div class="stat">
-                <span class="stat-k">初診</span>
-                <span class="stat-v">{{ "{:,}".format(it.sho) }}<span class="stat-u"> 件</span></span>
-              </div>
-              <div class="stat">
-                <span class="stat-k">紹介率</span>
-                <span class="stat-v">{{ it.ref_rate }}<span class="stat-u">%</span></span>
-              </div>
-              <div class="stat">
-                <span class="stat-k">未来院率</span>
-                <span class="stat-v">{{ it.miraiin_rate }}<span class="stat-u">%</span></span>
-              </div>
-            </div>
-            <div class="dept-card-foot">
-              <span class="mini-delta {{ it.delta.sign }}">
-                {{ '+' if it.delta.pct > 0 else '' }}{{ it.delta.pct }}% MoM
-              </span>
-              <span class="dept-arrow">→</span>
-            </div>
+          <a class="chip" href="{{ it.href }}">
+            <span class="chip-code">{{ it.code }}</span>
+            <span class="chip-name">{{ it.name }}</span>
           </a>
           {% endfor %}
         </div>
       </div>
       {% endfor %}
-    {% else %}
-      <div class="empty">まだ生成された診療科深掘りダッシュボードはありません。</div>
-    {% endif %}
-  </section>
-
-  <section class="section">
-    <div class="section-head">
-      <span class="section-num">02</span>
-      <span class="section-title">月次管理ダッシュボード</span>
-      <span class="section-sub">月別リンク</span>
     </div>
-    {% if monthly_links %}
-      <div class="month-chips">
-        {% for m in monthly_links %}
-        <a class="month-chip {% if m.is_latest %}latest{% endif %}" href="{{ m.href }}">
-          {{ m.month }}{% if m.is_latest %} ● 最新{% endif %}
-        </a>
-        {% endfor %}
-      </div>
-    {% else %}
-      <div class="empty">まだ生成された月次ダッシュボードはありません。</div>
-    {% endif %}
-  </section>
+  </details>
+  {% endfor %}
+</section>
+{% endif %}
 
-  {% if past_dept_by_month %}
-  <section class="section">
-    <div class="section-head">
-      <span class="section-num">03</span>
-      <span class="section-title">過去月の診療科深掘り</span>
-      <span class="section-sub">クリックで展開</span>
-    </div>
-    {% for pm in past_dept_by_month %}
-    <details class="past-month">
-      <summary>
-        <span class="month-label">{{ pm.month }}</span>
-        <span class="group-count">{{ pm.total }} 科</span>
-      </summary>
-      <div class="group-inner">
-        {% for g in pm.groups %}
-        <div class="group">
-          <div class="group-head">
-            <span class="group-badge {{ g.type_key }}">{{ g.group }}</span>
-            <span class="group-count">{{ g["items"]|length }} 科</span>
-          </div>
-          <div class="chip-grid">
-            {% for it in g["items"] %}
-            <a class="chip" href="{{ it.href }}">
-              <span class="chip-code">{{ it.code }}</span>
-              <span class="chip-name">{{ it.name }}</span>
-            </a>
-            {% endfor %}
-          </div>
-        </div>
-        {% endfor %}
+{% if extras %}
+<section class="section">
+  <div class="section-head">
+    <span class="section-num">04</span>
+    <span class="section-title">補助ダッシュボード</span>
+  </div>
+  <div class="extras">
+    {% for x in extras %}
+      {% if x.href %}
+      <a class="extra" href="{{ x.href }}"{% if x.external %} target="_blank" rel="noopener"{% endif %}>
+        <span class="extra-title">{{ x.title }}{% if x.external %} <span style="font-size:10px;color:var(--blue);">↗</span>{% endif %}</span>
+        <span class="extra-desc">{{ x.desc }}</span>
+      </a>
+      {% else %}
+      <div class="extra disabled">
+        <span class="extra-title">{{ x.title }}</span>
+        <span class="extra-desc">{{ x.desc }}</span>
+        <span class="extra-status">未生成</span>
       </div>
-    </details>
+      {% endif %}
     {% endfor %}
-  </section>
-  {% endif %}
+  </div>
+</section>
+{% endif %}
+{% endblock %}
 
-  {% if extras %}
-  <section class="section">
-    <div class="section-head">
-      <span class="section-num">04</span>
-      <span class="section-title">補助ダッシュボード</span>
-    </div>
-    <div class="extras">
-      {% for x in extras %}
-        {% if x.href %}
-        <a class="extra" href="{{ x.href }}"{% if x.external %} target="_blank" rel="noopener"{% endif %}>
-          <span class="extra-title">{{ x.title }}{% if x.external %} <span style="font-size:10px;color:var(--blue);">↗</span>{% endif %}</span>
-          <span class="extra-desc">{{ x.desc }}</span>
-        </a>
-        {% else %}
-        <div class="extra disabled">
-          <span class="extra-title">{{ x.title }}</span>
-          <span class="extra-desc">{{ x.desc }}</span>
-          <span class="extra-status">未生成</span>
-        </div>
-        {% endif %}
-      {% endfor %}
-    </div>
-  </section>
-  {% endif %}
-
-</main>
-
-<footer>
-  外来効率化ダッシュボード
-</footer>
-
+{% block scripts %}
 <script>
 const TREND_DATA = {{ trend_json | safe }};
 if (TREND_DATA && TREND_DATA.length > 0 && document.getElementById('trendChart')) {
@@ -456,6 +402,4 @@ if (TREND_DATA && TREND_DATA.length > 0 && document.getElementById('trendChart')
   });
 }
 </script>
-
-</body>
-</html>
+{% endblock %}

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>メンタルケア科 深掘り 2026-03 | 外来ダッシュボード</title>
+<title>{{ title }} | 外来ダッシュボード</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&family=DM+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
@@ -105,42 +105,9 @@
   .gh-dropdown-menu a.active{background:rgba(255,255,255,.15);color:#fff;font-weight:700;}
   .gh-dropdown-menu a .ext{font-size:9px;margin-left:4px;opacity:.7;}
 </style>
-
-<style>
-  .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;
-        padding:22px 26px;margin-bottom:20px;box-shadow:0 1px 3px rgba(0,0,0,.03);}
-  .card h2{font-size:16px;font-weight:700;color:var(--text);margin-bottom:14px;
-           padding-bottom:10px;border-bottom:1px solid var(--border);}
-  .card h3{font-size:13px;font-weight:600;color:var(--text-soft);margin-bottom:8px;}
-
-  .grid{display:grid;gap:18px;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));}
-
-  table{width:100%;border-collapse:collapse;font-size:13px;}
-  table th, table td{padding:8px 10px;border-bottom:1px solid var(--border);text-align:left;}
-  table th{background:var(--surface2);font-weight:700;font-size:11px;color:var(--text-soft);
-           text-transform:uppercase;letter-spacing:.04em;}
-  table td.num, table th.num{text-align:right;font-family:'DM Mono',monospace;}
-
-  .grade{display:inline-block;min-width:24px;padding:2px 8px;border-radius:4px;
-         font-weight:700;text-align:center;font-family:'DM Mono',monospace;font-size:12px;}
-  .grade-S{background:var(--grade-s-bg);color:var(--grade-s-fg);}
-  .grade-A{background:var(--grade-a-bg);color:var(--grade-a-fg);}
-  .grade-B{background:var(--grade-b-bg);color:var(--grade-b-fg);}
-  .grade-C{background:var(--grade-c-bg);color:var(--grade-c-fg);}
-  .grade-D{background:var(--grade-d-bg);color:var(--grade-d-fg);}
-
-  .type-badge{display:inline-block;padding:1px 8px;border-radius:4px;font-size:10px;
-              font-weight:700;letter-spacing:.04em;margin-left:6px;vertical-align:middle;}
-  .type-naika{background:var(--naika-bg);color:var(--naika);}
-  .type-geka{background:var(--geka-bg);color:var(--geka);}
-  .type-other{background:var(--other-bg);color:var(--other);}
-
-  .chart-wrap{position:relative;height:280px;}
-  .site-meta{font-size:12px;color:var(--text-soft);margin-bottom:8px;}
-</style>
-
+{% block extra_head %}{% endblock %}
 </head>
-<body data-view="dept-detail" data-month="2026-03" data-code="MN">
+<body data-view="{{ active }}" data-month="{{ current_month or latest_month or '' }}"{% if current_code %} data-code="{{ current_code }}"{% endif %}>
 
 <header class="site">
   <div class="gh-row1">
@@ -150,223 +117,57 @@
       <div class="sub">Outpatient Dashboard</div>
     </div>
     <div class="gh-meta">
-      <div>更新 2026-04-26 20:21</div>
+      <div>更新 {{ generated_at }}</div>
     </div>
   </div>
   <div class="gh-row2">
     <div class="gh-views">
-      <a href="../../index.html">ホーム</a>
-      
-      <a href="../../monthly/2026-03.html">月次経営サマリ</a>
-      <a href="../../dept/2026-03/MN.html" class="active">診療科ドリルダウン</a>
-      
+      <a href="{{ root_prefix }}index.html"{% if active == 'home' %} class="active"{% endif %}>ホーム</a>
+      {% if latest_month %}
+      <a href="{{ root_prefix }}monthly/{{ current_month or latest_month }}.html"{% if active == 'monthly' %} class="active"{% endif %}>月次経営サマリ</a>
+      <a href="{{ root_prefix }}dept/{{ current_month or latest_month }}/{{ current_code or 'index' }}.html"{% if active in ('dept', 'dept-detail') %} class="active"{% endif %}>診療科ドリルダウン</a>
+      {% endif %}
       <div class="gh-dropdown">
-        <button type="button" class="gh-view-btn" id="gh-extras-btn">
+        <button type="button" class="gh-view-btn{% if active in ('doctor', 'drug') %} active{% endif %}" id="gh-extras-btn">
           補助分析 <span style="font-size:9px;">▾</span>
         </button>
         <div class="gh-dropdown-menu">
-          <a href="../../doctor_analysis.html">医師別 深掘り分析</a>
-          <a href="../../drug_revisit.html">薬再診候補スコア</a>
+          <a href="{{ root_prefix }}doctor_analysis.html"{% if active == 'doctor' %} class="active"{% endif %}>医師別 深掘り分析</a>
+          <a href="{{ root_prefix }}drug_revisit.html"{% if active == 'drug' %} class="active"{% endif %}>薬再診候補スコア</a>
           <a href="https://genie-scripts.github.io/Outpatient-Restructuring/" target="_blank" rel="noopener">外来再編分析サイト<span class="ext">↗</span></a>
         </div>
       </div>
     </div>
-    
+    {% if all_months and active in ('monthly', 'dept', 'dept-detail') %}
     <div class="gh-month">
       <label>月:</label>
       <button id="gh-prev-month" type="button" title="前月">←</button>
       <select id="gh-month-select">
-        
-        <option value="2026-04">2026-04</option>
-        
-        <option value="2026-03" selected>2026-03</option>
-        
-        <option value="2026-02">2026-02</option>
-        
-        <option value="2026-01">2026-01</option>
-        
-        <option value="2025-12">2025-12</option>
-        
-        <option value="2025-11">2025-11</option>
-        
+        {% for m in all_months %}
+        <option value="{{ m }}"{% if m == (current_month or latest_month) %} selected{% endif %}>{{ m }}</option>
+        {% endfor %}
       </select>
       <button id="gh-next-month" type="button" title="翌月">→</button>
     </div>
-    
+    {% endif %}
   </div>
 </header>
 
-
+{% if breadcrumb %}
 <div class="breadcrumb">
-  
-    
-    <a href="../../index.html">ホーム</a>
-    
-    <span class="sep">/</span>
-  
-    
-    <span class="current">診療科ドリルダウン（2026-03）</span>
-    
-    <span class="sep">/</span>
-  
-    
-    <span class="current">メンタルケア科</span>
-    
-    
-  
+  {% for crumb in breadcrumb %}
+    {% if crumb.href %}
+    <a href="{{ crumb.href }}">{{ crumb.label }}</a>
+    {% else %}
+    <span class="current">{{ crumb.label }}</span>
+    {% endif %}
+    {% if not loop.last %}<span class="sep">/</span>{% endif %}
+  {% endfor %}
 </div>
-
+{% endif %}
 
 <main class="container">
-
-<div class="card">
-  <h2>メンタルケア科 <span class="type-badge type-naika">内科</span> — 2026-03 深掘り</h2>
-  <div class="grid">
-    <div>
-      <h3>当月サマリ</h3>
-      <table>
-        <tbody>
-          <tr><th>総件数</th><td class="num">374</td></tr>
-          <tr><th>初診</th><td class="num">0</td></tr>
-          <tr><th>再診</th><td class="num">374</td></tr>
-          <tr><th>紹介状あり初診</th><td class="num">0</td></tr>
-          <tr><th>未来院</th><td class="num">34</td></tr>
-          <tr><th>初診率</th><td class="num">0.0%</td></tr>
-          <tr><th>紹介率（初診）</th><td class="num">0.0%</td></tr>
-          <tr><th>未来院率</th><td class="num">9.09%</td></tr>
-        </tbody>
-      </table>
-    </div>
-    <div>
-      <h3>KPI 評価</h3>
-      <table>
-        <thead><tr><th>指標</th><th class="num">実績</th><th class="num">目標</th><th>評価</th></tr></thead>
-        <tbody>
-          
-        </tbody>
-      </table>
-    </div>
-  </div>
-</div>
-
-<div class="card">
-  <h2>時間帯別（曜日×時間帯ゾーン）件数</h2>
-  <div class="chart-wrap"><canvas id="chartTimezone"></canvas></div>
-</div>
-
-<div class="card">
-  <h2>医師別 当月内訳（上位10名）</h2>
-  <table>
-    <thead>
-      <tr>
-        <th>#</th><th>医師</th>
-        <th class="num">総件数</th><th class="num">初診</th><th class="num">再診</th>
-        <th class="num">紹介状あり初診</th>
-      </tr>
-    </thead>
-    <tbody>
-      
-      <tr>
-        <td class="num">1</td>
-        <td>医師A</td>
-        <td class="num">132</td>
-        <td class="num">0</td>
-        <td class="num">132</td>
-        <td class="num">0</td>
-      </tr>
-      
-      <tr>
-        <td class="num">2</td>
-        <td>医師B</td>
-        <td class="num">91</td>
-        <td class="num">0</td>
-        <td class="num">91</td>
-        <td class="num">0</td>
-      </tr>
-      
-      <tr>
-        <td class="num">3</td>
-        <td>医師C</td>
-        <td class="num">86</td>
-        <td class="num">0</td>
-        <td class="num">86</td>
-        <td class="num">0</td>
-      </tr>
-      
-      <tr>
-        <td class="num">4</td>
-        <td>医師D</td>
-        <td class="num">46</td>
-        <td class="num">0</td>
-        <td class="num">46</td>
-        <td class="num">0</td>
-      </tr>
-      
-      <tr>
-        <td class="num">5</td>
-        <td>医師E</td>
-        <td class="num">10</td>
-        <td class="num">0</td>
-        <td class="num">10</td>
-        <td class="num">0</td>
-      </tr>
-      
-      <tr>
-        <td class="num">6</td>
-        <td>医師F</td>
-        <td class="num">5</td>
-        <td class="num">0</td>
-        <td class="num">5</td>
-        <td class="num">0</td>
-      </tr>
-      
-      <tr>
-        <td class="num">7</td>
-        <td>医師G</td>
-        <td class="num">2</td>
-        <td class="num">0</td>
-        <td class="num">2</td>
-        <td class="num">0</td>
-      </tr>
-      
-      <tr>
-        <td class="num">8</td>
-        <td>医師H</td>
-        <td class="num">1</td>
-        <td class="num">0</td>
-        <td class="num">1</td>
-        <td class="num">0</td>
-      </tr>
-      
-      <tr>
-        <td class="num">9</td>
-        <td>医師I</td>
-        <td class="num">1</td>
-        <td class="num">0</td>
-        <td class="num">1</td>
-        <td class="num">0</td>
-      </tr>
-      
-    </tbody>
-  </table>
-</div>
-
-<div class="card">
-  <h2>逆紹介候補（薬のみ・短時間・紹介状なし・併科なし 再診）</h2>
-  <p class="site-meta">抽出条件：初再診=再診、紹介状無し、併科無、診察時間 9分以下、診察前検査なし</p>
-  <table>
-    <thead><tr><th>診察時間階級</th><th class="num">件数</th></tr></thead>
-    <tbody>
-      
-      <tr><td>0-4分</td><td class="num">21</td></tr>
-      
-      <tr><td>5-9分</td><td class="num">4</td></tr>
-      
-      <tr><th>合計</th><th class="num">25</th></tr>
-    </tbody>
-  </table>
-</div>
-
+{% block content %}{% endblock %}
 </main>
 
 <footer class="site">
@@ -475,31 +276,6 @@ window.OutpatientCommon = (function(){
 })();
 </script>
 
-
-<script>
-const TZ_DATA = {"labels": ["月", "火", "水", "木", "金", "土", "日"], "datasets": [{"label": "午前(〜12時)", "data": [114, 17, 108, 26, 13, 0, 0]}, {"label": "午後前半(12-15時)", "data": [3, 34, 38, 1, 4, 0, 0]}, {"label": "午後後半(15-17時)", "data": [0, 12, 0, 3, 1, 0, 0]}, {"label": "夕方以降(17時〜)", "data": [0, 0, 0, 0, 0, 0, 0]}]};
-new Chart(document.getElementById('chartTimezone'), {
-  type: 'bar',
-  data: {
-    labels: TZ_DATA.labels,
-    datasets: TZ_DATA.datasets.map((ds, i) => ({
-      label: ds.label,
-      data: ds.data,
-      backgroundColor: [
-        OutpatientCommon.palette.primary,
-        OutpatientCommon.palette.accent,
-        OutpatientCommon.palette.naika,
-        OutpatientCommon.palette.other,
-      ][i % 4],
-    })),
-  },
-  options: {
-    responsive: true,
-    maintainAspectRatio: false,
-    scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } },
-  },
-});
-</script>
-
+{% block scripts %}{% endblock %}
 </body>
 </html>

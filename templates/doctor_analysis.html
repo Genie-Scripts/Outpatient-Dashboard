@@ -1,3 +1,31 @@
+{% extends "_layout.html" %}
+
+{% block extra_head %}
+<style>
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;
+        padding:22px 26px;margin-bottom:20px;box-shadow:0 1px 3px rgba(0,0,0,.03);}
+  .card h2{font-size:16px;font-weight:700;color:var(--text);margin-bottom:14px;
+           padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .site-meta{font-size:12px;color:var(--text-soft);line-height:1.7;}
+
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  table th, table td{padding:8px 10px;border-bottom:1px solid var(--border);text-align:left;}
+  table th{background:var(--surface2);font-weight:700;font-size:11px;color:var(--text-soft);
+           text-transform:uppercase;letter-spacing:.04em;}
+  table td.num, table th.num{text-align:right;font-family:'DM Mono',monospace;}
+
+  .type-badge{display:inline-block;padding:1px 8px;border-radius:4px;font-size:10px;
+              font-weight:700;letter-spacing:.04em;margin-left:6px;vertical-align:middle;
+              background:var(--surface3);color:var(--text-soft);}
+
+  .nav-list{list-style:none;padding:0;margin:0;}
+  .nav-list li{margin-bottom:6px;}
+  .nav-list a{color:var(--blue);font-size:13px;}
+  .nav-list a:hover{text-decoration:underline;}
+</style>
+{% endblock %}
+
+{% block content %}
 <div class="card">
   <h2>医師別 分析 — {{ month }}</h2>
   <p class="site-meta">
@@ -51,7 +79,4 @@
   </table>
 </div>
 {% endfor %}
-
-<p><a href="../index.html">← ハブへ戻る</a></p>
-
-<script>{{ common_js | safe }}</script>
+{% endblock %}

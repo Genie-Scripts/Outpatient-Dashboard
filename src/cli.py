@@ -49,9 +49,6 @@ DEFAULT_PATHS: dict[str, Path] = {
     "docs_monthly": REPO_ROOT / "docs" / "monthly",
     "docs_dept": REPO_ROOT / "docs" / "dept",
     "templates_dir": REPO_ROOT / "templates",
-    "template_monthly": REPO_ROOT / "templates" / "monthly.html",
-    "theme_css": REPO_ROOT / "static" / "css" / "theme.css",
-    "common_js": REPO_ROOT / "static" / "js" / "common.js",
     "master_key": REPO_ROOT / "config" / "master_key.csv",
     "slot_key": REPO_ROOT / "config" / "slot_key.csv",
     "dept_classification": REPO_ROOT / "config" / "dept_classification.csv",
@@ -76,10 +73,6 @@ def _setup_logging(verbose: bool) -> None:
         level=logging.DEBUG if verbose else logging.INFO,
         format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
     )
-
-
-def _read_static(path: Path) -> str:
-    return path.read_text(encoding="utf-8") if path.exists() else ""
 
 
 def _detect_months(anon_dir: Path) -> list[str]:
@@ -185,17 +178,19 @@ def _cmd_build_monthly(
     paths: dict[str, Path] = DEFAULT_PATHS,
     use_real_names: bool = False,
 ) -> None:
-    months = [month] if month else _detect_months(paths["anon_dir"])
+    all_months = _detect_months(paths["anon_dir"])
+    months = [month] if month else all_months
     for m in months:
         output_path = paths["docs_monthly"] / f"{m}.html"
         build_monthly_dashboard(
             month=m,
             output_path=output_path,
             aggregated_root=paths["agg_root"],
-            template_path=paths["template_monthly"],
+            templates_dir=paths["templates_dir"],
             classification_path=paths["dept_classification"],
             targets_path=paths["dept_targets"],
             llm_config_path=paths["llm_config"],
+            all_months=all_months,
             use_llm=use_llm,
             use_real_names=use_real_names,
         )
@@ -207,9 +202,8 @@ def _cmd_build_dept(
     paths: dict[str, Path] = DEFAULT_PATHS,
     use_real_names: bool = False,
 ) -> None:
-    months = [month] if month else _detect_months(paths["anon_dir"])
-    theme = _read_static(paths["theme_css"])
-    js = _read_static(paths["common_js"])
+    all_months = _detect_months(paths["anon_dir"])
+    months = [month] if month else all_months
     for m in months:
         out_dir = paths["docs_dept"] / m
         generated = build_dept_drilldown(
@@ -219,8 +213,7 @@ def _cmd_build_dept(
             output_dir=out_dir,
             classification_path=paths["dept_classification"],
             targets_path=paths["dept_targets"],
-            theme_css=theme,
-            common_js=js,
+            all_months=all_months,
             use_real_names=use_real_names,
         )
         print(f"✓ 診療科深掘り生成: {len(generated)} 件 → {out_dir}")
@@ -231,7 +224,8 @@ def _cmd_build_doctor(
     paths: dict[str, Path] = DEFAULT_PATHS,
     use_real_names: bool = False,
 ) -> None:
-    months = [month] if month else _detect_months(paths["anon_dir"])
+    all_months = _detect_months(paths["anon_dir"])
+    months = [month] if month else all_months
     latest = months[-1]
     output_path = paths["docs_dir"] / "doctor_analysis.html"
     build_doctor_analysis(
@@ -240,8 +234,7 @@ def _cmd_build_doctor(
         templates_dir=paths["templates_dir"],
         output_path=output_path,
         classification_path=paths["dept_classification"],
-        theme_css=_read_static(paths["theme_css"]),
-        common_js=_read_static(paths["common_js"]),
+        all_months=all_months,
         use_real_names=use_real_names,
     )
     print(f"✓ 医師別分析生成 ({latest}): {output_path}")
@@ -263,8 +256,7 @@ def _cmd_build_drug_revisit(
         templates_dir=paths["templates_dir"],
         output_path=output_path,
         classification_path=paths["dept_classification"],
-        theme_css=_read_static(paths["theme_css"]),
-        common_js=_read_static(paths["common_js"]),
+        all_months=all_months,
         default_month=default_month,
     )
     print(f"✓ 薬再診候補スコア生成 ({len(available)}ヶ月, 既定={default_month}): {output_path}")
@@ -276,7 +268,6 @@ def _cmd_build_hub(paths: dict[str, Path] = DEFAULT_PATHS) -> None:
         templates_dir=paths["templates_dir"],
         aggregated_root=paths["agg_root"],
         classification_path=paths["dept_classification"],
-        theme_css=_read_static(paths["theme_css"]),
     )
     print(f"✓ ハブページ生成: {output}")
 

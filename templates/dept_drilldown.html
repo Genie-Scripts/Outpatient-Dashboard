@@ -1,3 +1,41 @@
+{% extends "_layout.html" %}
+
+{% block extra_head %}
+<style>
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;
+        padding:22px 26px;margin-bottom:20px;box-shadow:0 1px 3px rgba(0,0,0,.03);}
+  .card h2{font-size:16px;font-weight:700;color:var(--text);margin-bottom:14px;
+           padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .card h3{font-size:13px;font-weight:600;color:var(--text-soft);margin-bottom:8px;}
+
+  .grid{display:grid;gap:18px;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));}
+
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  table th, table td{padding:8px 10px;border-bottom:1px solid var(--border);text-align:left;}
+  table th{background:var(--surface2);font-weight:700;font-size:11px;color:var(--text-soft);
+           text-transform:uppercase;letter-spacing:.04em;}
+  table td.num, table th.num{text-align:right;font-family:'DM Mono',monospace;}
+
+  .grade{display:inline-block;min-width:24px;padding:2px 8px;border-radius:4px;
+         font-weight:700;text-align:center;font-family:'DM Mono',monospace;font-size:12px;}
+  .grade-S{background:var(--grade-s-bg);color:var(--grade-s-fg);}
+  .grade-A{background:var(--grade-a-bg);color:var(--grade-a-fg);}
+  .grade-B{background:var(--grade-b-bg);color:var(--grade-b-fg);}
+  .grade-C{background:var(--grade-c-bg);color:var(--grade-c-fg);}
+  .grade-D{background:var(--grade-d-bg);color:var(--grade-d-fg);}
+
+  .type-badge{display:inline-block;padding:1px 8px;border-radius:4px;font-size:10px;
+              font-weight:700;letter-spacing:.04em;margin-left:6px;vertical-align:middle;}
+  .type-naika{background:var(--naika-bg);color:var(--naika);}
+  .type-geka{background:var(--geka-bg);color:var(--geka);}
+  .type-other{background:var(--other-bg);color:var(--other);}
+
+  .chart-wrap{position:relative;height:280px;}
+  .site-meta{font-size:12px;color:var(--text-soft);margin-bottom:8px;}
+</style>
+{% endblock %}
+
+{% block content %}
 <div class="card">
   <h2>{{ dept_name }} {{ type_badge | safe }} — {{ month }} 深掘り</h2>
   <div class="grid">
@@ -78,11 +116,9 @@
     </tbody>
   </table>
 </div>
+{% endblock %}
 
-<p><a href="../../index.html">← ハブへ戻る</a></p>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
-<script>{{ common_js | safe }}</script>
+{% block scripts %}
 <script>
 const TZ_DATA = {{ timezone_data_json | safe }};
 new Chart(document.getElementById('chartTimezone'), {
@@ -107,3 +143,4 @@ new Chart(document.getElementById('chartTimezone'), {
   },
 });
 </script>
+{% endblock %}

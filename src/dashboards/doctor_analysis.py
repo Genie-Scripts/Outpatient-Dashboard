@@ -79,8 +79,7 @@ def build_doctor_analysis(
     templates_dir: Path,
     output_path: Path,
     classification_path: Path,
-    theme_css: str,
-    common_js: str,
+    all_months: list[str],
     use_real_names: bool = False,
 ) -> Path:
     """評価対象の全診療科について、医師別一覧HTMLを1枚生成する。"""
@@ -105,19 +104,23 @@ def build_doctor_analysis(
         loader=FileSystemLoader(str(templates_dir)),
         autoescape=select_autoescape(["html"]),
     )
+    sorted_desc = sorted(all_months, reverse=True)
+    latest = sorted_desc[0] if sorted_desc else month
 
-    body = env.get_template("doctor_analysis.html").render(
+    html = env.get_template("doctor_analysis.html").render(
+        # ===== グローバルレイアウト共通コンテキスト =====
+        title=f"医師別 分析 {month}",
+        active="doctor",
+        current_month=None,
+        latest_month=latest,
+        current_code=None,
+        all_months=sorted_desc,
+        root_prefix="",
+        breadcrumb=None,
+        generated_at=datetime.now().strftime("%Y-%m-%d %H:%M"),
+        # ===== ページ固有 =====
         month=month,
         sections=sections,
-        common_js=common_js,
-    )
-    html = env.get_template("base.html").render(
-        title=f"医師別 深掘り {month}",
-        site_title=f"医師別 分析 ({month})",
-        generated_at=datetime.now().strftime("%Y-%m-%d %H:%M"),
-        theme_css=theme_css,
-        content=body,
-        scripts="",
     )
 
     output_path.parent.mkdir(parents=True, exist_ok=True)

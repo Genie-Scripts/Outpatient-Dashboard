@@ -90,6 +90,11 @@ def _badge(grade: str) -> str:
     return f'<span class="grade grade-{grade}">{grade}</span>'
 
 
+def _type_badge(type_key: str) -> str:
+    label = {"geka": "外科", "naika": "内科", "other": "その他"}[type_key]
+    return f'<span class="type-badge type-{type_key}">{label}</span>'
+
+
 def _timezone_chart_data(tz_df: pd.DataFrame, dept: str) -> dict[str, Any]:
     sub = tz_df[tz_df["診療科名"] == dept]
     if sub.empty:
@@ -174,24 +179,39 @@ def _render(
     env: Environment,
     *,
     dept_name: str,
+    dept_code: str,
     dept_type: str,
     month: str,
+    all_months: list[str],
     summary: _DeptSummary,
     kpis: list[dict[str, Any]],
     timezone_data: dict[str, Any],
     doctors: list[dict[str, Any]],
     reverse_referral_rows: list[dict[str, Any]],
     reverse_referral_total: int,
-    theme_css: str,
-    common_js: str,
 ) -> str:
     type_key = {"外科系": "geka", "内科系": "naika"}.get(dept_type, "other")
-    type_label = {"geka": "外科", "naika": "内科", "other": "その他"}[type_key]
-    type_badge = f'<span class="type-badge type-{type_key}">{type_label}</span>'
-
-    body = env.get_template("dept_drilldown.html").render(
+    sorted_desc = sorted(all_months, reverse=True)
+    latest = sorted_desc[0] if sorted_desc else month
+    breadcrumb = [
+        {"label": "ホーム", "href": "../../index.html"},
+        {"label": f"診療科ドリルダウン（{month}）", "href": None},
+        {"label": dept_name, "href": None},
+    ]
+    return env.get_template("dept_drilldown.html").render(
+        # ===== グローバルレイアウト共通コンテキスト =====
+        title=f"{dept_name} 深掘り {month}",
+        active="dept-detail",
+        current_month=month,
+        latest_month=latest,
+        current_code=dept_code,
+        all_months=sorted_desc,
+        root_prefix="../../",
+        breadcrumb=breadcrumb,
+        generated_at=datetime.now().strftime("%Y-%m-%d %H:%M"),
+        # ===== ページ固有 =====
         dept_name=dept_name,
-        type_badge=type_badge,
+        type_badge=_type_badge(type_key),
         month=month,
         summary={
             "total": f"{summary.total:,}",
@@ -209,15 +229,6 @@ def _render(
         reverse_referral=reverse_referral_rows,
         reverse_referral_total=f"{reverse_referral_total:,}",
         timezone_data_json=json.dumps(timezone_data, ensure_ascii=False),
-        common_js=common_js,
-    )
-    return env.get_template("base.html").render(
-        title=f"{dept_name} 深掘り {month}",
-        site_title=f"{dept_name} 深掘り ({month})",
-        generated_at=datetime.now().strftime("%Y-%m-%d %H:%M"),
-        theme_css=theme_css,
-        content=body,
-        scripts="",
     )
 
 
@@ -228,8 +239,7 @@ def build_dept_drilldown(
     output_dir: Path,
     classification_path: Path,
     targets_path: Path,
-    theme_css: str,
-    common_js: str,
+    all_months: list[str],
     use_real_names: bool = False,
 ) -> list[Path]:
     """評価対象の全診療科について深掘りHTMLを一括生成する。"""
@@ -266,16 +276,16 @@ def build_dept_drilldown(
         html = _render(
             env,
             dept_name=info.name,
+            dept_code=info.code,
             dept_type=info.type,
             month=month,
+            all_months=all_months,
             summary=summary,
             kpis=kpis,
             timezone_data=timezone_data,
             doctors=doctors,
             reverse_referral_rows=rr_rows,
             reverse_referral_total=rr_total,
-            theme_css=theme_css,
-            common_js=common_js,
         )
 
         out_path = output_dir / f"{info.code}.html"
