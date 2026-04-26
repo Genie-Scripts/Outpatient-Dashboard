@@ -220,37 +220,27 @@ def _build_past_dept(
 
 
 def _build_extras(docs_dir: Path) -> list[dict[str, str]]:
-    """補助ダッシュボードの存在確認つきリスト。"""
+    """補助ダッシュボード（医師・看護師の自己点検向け）の存在確認つきリスト。
+
+    経営計画的な再編分析（予約枠サマリ／曜日×時間帯／医師×時間帯／外来枠×時間帯
+    ヒートマップ）は別リポ Outpatient-Restructuring に分離している。
+    """
     return [
         {
-            "title": "予約枠 再設計提案",
-            "desc": "全科の予約枠内訳と再設計シミュレーション",
-            "href": "slot_redesign.html" if (docs_dir / "slot_redesign.html").exists() else "",
-        },
-        {
             "title": "医師別 深掘り分析",
-            "desc": "医師ごとの外来パフォーマンス分析",
+            "desc": "医師ごとの外来パフォーマンス（自分の指標を匿名IDで確認）",
             "href": "doctor_analysis.html" if (docs_dir / "doctor_analysis.html").exists() else "",
         },
         {
-            "title": "曜日×時間帯ヒートマップ",
-            "desc": "看護師配置最適化のための到着・同時並行診察数マップ",
-            "href": "hourly_heatmap.html" if (docs_dir / "hourly_heatmap.html").exists() else "",
-        },
-        {
-            "title": "医師×時間帯ヒートマップ",
-            "desc": "診療科ごとの医師別 曜日×時間帯 出勤パターン（出勤頻度率）",
-            "href": "doctor_heatmap.html" if (docs_dir / "doctor_heatmap.html").exists() else "",
-        },
-        {
-            "title": "外来枠×時間帯ヒートマップ",
-            "desc": "予約名称(外来枠)別の曜日×時間帯 稼働パターン。枠再編(縮小・統合)検討用",
-            "href": "slot_heatmap.html" if (docs_dir / "slot_heatmap.html").exists() else "",
-        },
-        {
             "title": "薬再診候補スコア",
-            "desc": "短時間再診比率等から逆紹介候補を抽出",
+            "desc": "短時間再診比率等から逆紹介候補を抽出（自分の薬再診比率の自己点検）",
             "href": "drug_revisit.html" if (docs_dir / "drug_revisit.html").exists() else "",
+        },
+        {
+            "title": "外来再編分析サイト",
+            "desc": "経営企画向けの再編診断・テーマ別分析（別リポ／GitHub Pages）",
+            "href": "https://genie-scripts.github.io/Outpatient-Restructuring/",
+            "external": True,
         },
     ]
 

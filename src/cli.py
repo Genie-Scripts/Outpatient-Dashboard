@@ -1,15 +1,18 @@
 """外来ダッシュボード CLI 統合エントリポイント。
 
+医師・看護師向けの自己点検サイト（フィードバック側）の生成を担う。
+経営計画的な再編分析は別リポ Outpatient-Restructuring に分離されているため、
+このリポからは予約枠再設計／時間帯ヒートマップ／医師ヒートマップ／枠ヒートマップは
+削除されている（集計CSVは継続して出力し、Restructuring 側が消費する）。
+
 使い方（--month 省略時は data/raw/ を自動スキャン）:
     python -m src.cli anonymize                      # data/raw/ の全CSVを処理
     python -m src.cli anonymize --month 2026-04      # 指定月のみ（単一ファイル）
     python -m src.cli aggregate
     python -m src.cli build monthly
     python -m src.cli build dept
-    python -m src.cli build slot
     python -m src.cli build doctor
-    python -m src.cli build doctor-heatmap
-    python -m src.cli build slot-heatmap
+    python -m src.cli build drug-revisit
     python -m src.cli build hub
     python -m src.cli run-all [--no-llm]
 """
@@ -30,13 +33,9 @@ from src.anonymize import (
 )
 from src.dashboards.dept_drilldown import build_dept_drilldown
 from src.dashboards.doctor_analysis import build_doctor_analysis
-from src.dashboards.doctor_heatmap import build_doctor_heatmap
 from src.dashboards.drug_revisit import build_drug_revisit
-from src.dashboards.hourly_heatmap import build_hourly_heatmap
 from src.dashboards.hub import build_hub_page
 from src.dashboards.monthly import build_monthly_dashboard
-from src.dashboards.slot_heatmap import build_slot_heatmap
-from src.dashboards.slot_redesign import build_slot_redesign
 
 _ANON_FILE_RE = re.compile(r"^raw_data_(\d{4}-\d{2})\.csv$")
 
@@ -227,22 +226,6 @@ def _cmd_build_dept(
         print(f"✓ 診療科深掘り生成: {len(generated)} 件 → {out_dir}")
 
 
-def _cmd_build_slot(month: str | None, paths: dict[str, Path] = DEFAULT_PATHS) -> None:
-    months = [month] if month else _detect_months(paths["anon_dir"])
-    latest = months[-1]
-    output_path = paths["docs_dir"] / "slot_redesign.html"
-    build_slot_redesign(
-        month=latest,
-        aggregated_root=paths["agg_root"],
-        templates_dir=paths["templates_dir"],
-        output_path=output_path,
-        classification_path=paths["dept_classification"],
-        theme_css=_read_static(paths["theme_css"]),
-        common_js=_read_static(paths["common_js"]),
-    )
-    print(f"✓ 予約枠再設計生成 ({latest}): {output_path}")
-
-
 def _cmd_build_doctor(
     month: str | None,
     paths: dict[str, Path] = DEFAULT_PATHS,
@@ -262,89 +245,6 @@ def _cmd_build_doctor(
         use_real_names=use_real_names,
     )
     print(f"✓ 医師別分析生成 ({latest}): {output_path}")
-
-
-def _cmd_build_heatmap(
-    month: str | None,
-    paths: dict[str, Path] = DEFAULT_PATHS,
-) -> None:
-    all_months = _detect_months(paths["anon_dir"])
-    available = [m for m in all_months if (paths["agg_root"] / m / "12_hourly_load.csv").exists()]
-    if not available:
-        raise FileNotFoundError("12_hourly_load.csv を持つ月がありません。先に aggregate を実行してください。")
-    default_month = month if month in available else available[-1]
-    output_path = paths["docs_dir"] / "hourly_heatmap.html"
-    build_hourly_heatmap(
-        months=available,
-        aggregated_root=paths["agg_root"],
-        templates_dir=paths["templates_dir"],
-        output_path=output_path,
-        classification_path=paths["dept_classification"],
-        theme_css=_read_static(paths["theme_css"]),
-        common_js=_read_static(paths["common_js"]),
-        default_month=default_month,
-    )
-    print(f"✓ 曜日×時間帯ヒートマップ生成 ({len(available)}ヶ月, 既定={default_month}): {output_path}")
-
-
-def _cmd_build_doctor_heatmap(
-    month: str | None,
-    paths: dict[str, Path] = DEFAULT_PATHS,
-) -> None:
-    all_months = _detect_months(paths["anon_dir"])
-    available = [
-        m for m in all_months
-        if (paths["agg_root"] / m / "14_doctor_hourly.csv").exists()
-    ]
-    if not available:
-        raise FileNotFoundError(
-            "14_doctor_hourly.csv を持つ月がありません。先に aggregate を実行してください。"
-        )
-    default_month = month if month in available else available[-1]
-    output_path = paths["docs_dir"] / "doctor_heatmap.html"
-    build_doctor_heatmap(
-        months=available,
-        aggregated_root=paths["agg_root"],
-        templates_dir=paths["templates_dir"],
-        output_path=output_path,
-        classification_path=paths["dept_classification"],
-        theme_css=_read_static(paths["theme_css"]),
-        common_js=_read_static(paths["common_js"]),
-        default_month=default_month,
-    )
-    print(
-        f"✓ 医師×時間帯ヒートマップ生成 ({len(available)}ヶ月, 既定={default_month}): {output_path}"
-    )
-
-
-def _cmd_build_slot_heatmap(
-    month: str | None,
-    paths: dict[str, Path] = DEFAULT_PATHS,
-) -> None:
-    all_months = _detect_months(paths["anon_dir"])
-    available = [
-        m for m in all_months
-        if (paths["agg_root"] / m / "15_slot_hourly.csv").exists()
-    ]
-    if not available:
-        raise FileNotFoundError(
-            "15_slot_hourly.csv を持つ月がありません。先に aggregate を実行してください。"
-        )
-    default_month = month if month in available else available[-1]
-    output_path = paths["docs_dir"] / "slot_heatmap.html"
-    build_slot_heatmap(
-        months=available,
-        aggregated_root=paths["agg_root"],
-        templates_dir=paths["templates_dir"],
-        output_path=output_path,
-        classification_path=paths["dept_classification"],
-        theme_css=_read_static(paths["theme_css"]),
-        common_js=_read_static(paths["common_js"]),
-        default_month=default_month,
-    )
-    print(
-        f"✓ 外来枠×時間帯ヒートマップ生成 ({len(available)}ヶ月, 既定={default_month}): {output_path}"
-    )
 
 
 def _cmd_build_drug_revisit(
@@ -390,11 +290,7 @@ def _cmd_run_all(month: str | None, use_llm: bool, no_anon: bool = False) -> Non
     _cmd_aggregate(month, paths)
     _cmd_build_monthly(month, use_llm, paths, use_real_names=no_anon)
     _cmd_build_dept(month, paths, use_real_names=no_anon)
-    _cmd_build_slot(month, paths)
     _cmd_build_doctor(month, paths, use_real_names=no_anon)
-    _cmd_build_heatmap(month, paths)
-    _cmd_build_doctor_heatmap(month, paths)
-    _cmd_build_slot_heatmap(month, paths)
     _cmd_build_drug_revisit(month, paths)
     _cmd_build_hub(paths)
     print("=== 全処理完了 ===")
@@ -424,20 +320,8 @@ def _build_parser() -> argparse.ArgumentParser:
     p_dept = build_sub.add_parser("dept", help="診療科深掘り（44科一括）")
     p_dept.add_argument("--month", default=None, help="YYYY-MM（省略時は全月）")
 
-    p_slot = build_sub.add_parser("slot", help="予約枠再設計（最新月）")
-    p_slot.add_argument("--month", default=None, help="YYYY-MM（省略時は最新月）")
-
     p_doc = build_sub.add_parser("doctor", help="医師別分析（最新月）")
     p_doc.add_argument("--month", default=None, help="YYYY-MM（省略時は最新月）")
-
-    p_heat = build_sub.add_parser("heatmap", help="曜日×時間帯ヒートマップ（最新月）")
-    p_heat.add_argument("--month", default=None, help="YYYY-MM（省略時は最新月）")
-
-    p_dheat = build_sub.add_parser("doctor-heatmap", help="医師×時間帯ヒートマップ（最新月）")
-    p_dheat.add_argument("--month", default=None, help="YYYY-MM（省略時は最新月）")
-
-    p_sheat = build_sub.add_parser("slot-heatmap", help="外来枠×時間帯ヒートマップ（最新月）")
-    p_sheat.add_argument("--month", default=None, help="YYYY-MM（省略時は最新月）")
 
     p_drev = build_sub.add_parser("drug-revisit", help="薬再診候補スコア（最新月）")
     p_drev.add_argument("--month", default=None, help="YYYY-MM（省略時は最新月）")
@@ -471,16 +355,8 @@ def main(argv: list[str] | None = None) -> int:
                 _cmd_build_monthly(args.month, use_llm=not args.no_llm)
             elif args.target == "dept":
                 _cmd_build_dept(args.month)
-            elif args.target == "slot":
-                _cmd_build_slot(args.month)
             elif args.target == "doctor":
                 _cmd_build_doctor(args.month)
-            elif args.target == "heatmap":
-                _cmd_build_heatmap(args.month)
-            elif args.target == "doctor-heatmap":
-                _cmd_build_doctor_heatmap(args.month)
-            elif args.target == "slot-heatmap":
-                _cmd_build_slot_heatmap(args.month)
             elif args.target == "drug-revisit":
                 _cmd_build_drug_revisit(args.month)
             elif args.target == "hub":

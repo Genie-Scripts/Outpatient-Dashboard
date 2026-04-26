@@ -367,8 +367,8 @@
     <div class="extras">
       {% for x in extras %}
         {% if x.href %}
-        <a class="extra" href="{{ x.href }}">
-          <span class="extra-title">{{ x.title }}</span>
+        <a class="extra" href="{{ x.href }}"{% if x.external %} target="_blank" rel="noopener"{% endif %}>
+          <span class="extra-title">{{ x.title }}{% if x.external %} <span style="font-size:10px;color:var(--blue);">↗</span>{% endif %}</span>
           <span class="extra-desc">{{ x.desc }}</span>
         </a>
         {% else %}
