@@ -1,0 +1,1427 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>月次 2025-06 | 外来ダッシュボード</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&family=DM+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F5F3EF; --surface:#FFFFFF; --surface2:#FAF9F6; --surface3:#F0EDE8;
+    --border:#E5E3DF; --border-strong:#D6D3CC;
+    --text:#2C2A28; --text-soft:#5A5651; --dim:#8A847C; --muted:#B0ABA3;
+    --header:#3D3A35; --header-line:#4F4B45;
+    --blue:#3F7FC1; --blue-light:#E7F0FA;
+    --naika:#2B9DB8; --naika-bg:#E4F3F6;
+    --geka:#D08620;  --geka-bg:#FAEEDB;
+    --other:#8B6FB6; --other-bg:#EFEAF5;
+    --up:#2F7A4B; --up-bg:#E5F1E9;
+    --down:#A33838; --down-bg:#F5E4E4;
+    --flat:#8A847C; --flat-bg:#EDEBE7;
+    --warn:#8A6D1A; --warn-bg:#FAF3E0; --warn-border:#D4B860;
+    --grade-s-bg:#C89020;  --grade-s-fg:#FFFFFF;
+    --grade-a-bg:#2F7A4B;  --grade-a-fg:#FFFFFF;
+    --grade-b-bg:#2E5F85;  --grade-b-fg:#FFFFFF;
+    --grade-c-bg:#7A746B;  --grade-c-fg:#FFFFFF;
+    --grade-d-bg:#A33838;  --grade-d-fg:#FFFFFF;
+    --grade-na-bg:#E5E3DF; --grade-na-fg:#8A847C;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.55;}
+  a{color:inherit;text-decoration:none;}
+
+  /* ===== Global header (sticky) ===== */
+  header.site{position:sticky;top:0;z-index:30;background:var(--header);color:#fff;
+              border-bottom:3px solid var(--geka);box-shadow:0 2px 8px rgba(0,0,0,.06);}
+  .gh-row1{display:flex;align-items:center;gap:14px;padding:12px 28px;
+           border-bottom:1px solid var(--header-line);flex-wrap:wrap;}
+  .gh-logo{width:34px;height:34px;background:var(--geka);border-radius:8px;
+           display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;
+           font-family:'DM Mono',monospace;flex-shrink:0;}
+  .gh-title h1{font-size:16px;font-weight:700;color:#fff;margin:0;line-height:1.2;}
+  .gh-title .sub{font-size:11px;color:rgba(255,255,255,.65);font-family:'DM Mono',monospace;}
+  .gh-meta{margin-left:auto;display:flex;gap:14px;align-items:center;font-size:11px;
+           color:rgba(255,255,255,.65);font-family:'DM Mono',monospace;flex-wrap:wrap;}
+
+  .gh-row2{display:flex;align-items:center;gap:18px;padding:8px 28px;
+           background:rgba(0,0,0,.12);flex-wrap:wrap;}
+  .gh-views{display:flex;gap:4px;flex-wrap:wrap;}
+  .gh-views a, .gh-views button.gh-view-btn{font-size:12px;color:rgba(255,255,255,.85);padding:6px 14px;border-radius:6px;
+              transition:background .15s, color .15s;font-weight:500;white-space:nowrap;
+              background:none;border:none;cursor:pointer;font-family:inherit;}
+  .gh-views a:hover, .gh-views button.gh-view-btn:hover{background:rgba(255,255,255,.12);color:#fff;}
+  .gh-views a.active, .gh-views button.gh-view-btn.active{background:#fff;color:var(--header);font-weight:700;}
+  .gh-views a.disabled{color:rgba(255,255,255,.35);cursor:not-allowed;}
+
+  .gh-month{margin-left:auto;display:flex;gap:8px;align-items:center;font-size:12px;color:rgba(255,255,255,.85);flex-wrap:nowrap;}
+  .gh-month label{color:rgba(255,255,255,.6);font-size:11px;letter-spacing:.04em;text-transform:uppercase;font-weight:700;}
+  .gh-month select{background:rgba(255,255,255,.95);color:var(--text);
+                   border:none;padding:5px 10px;border-radius:6px;
+                   font-family:'DM Mono',monospace;font-size:13px;font-weight:600;cursor:pointer;
+                   min-width:110px;}
+  .gh-month button{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2);
+                   padding:4px 10px;border-radius:5px;font-size:12px;cursor:pointer;
+                   font-family:'DM Mono',monospace;}
+  .gh-month button:hover:not(:disabled){background:rgba(255,255,255,.2);}
+  .gh-month button:disabled{opacity:.35;cursor:not-allowed;}
+
+  @media (max-width: 760px){
+    .gh-row1, .gh-row2{padding-left:14px;padding-right:14px;}
+    .gh-meta{margin-left:0;flex-basis:100%;}
+    .gh-month{margin-left:0;width:100%;justify-content:flex-end;}
+    .gh-views{flex-basis:100%;justify-content:flex-start;}
+    .container{padding:16px 14px 30px;}
+    .breadcrumb{padding:8px 14px;}
+  }
+
+  .breadcrumb{background:var(--surface2);border-bottom:1px solid var(--border);
+              padding:8px 28px;font-size:12px;color:var(--text-soft);
+              display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+  .breadcrumb a{color:var(--blue);}
+  .breadcrumb a:hover{text-decoration:underline;}
+  .breadcrumb .sep{color:var(--dim);}
+  .breadcrumb .current{color:var(--text);font-weight:600;}
+
+  .container{max-width:1400px;margin:0 auto;padding:24px 28px 40px;}
+
+  footer.site{padding:18px 28px;text-align:center;color:var(--dim);font-size:11px;
+              border-top:1px solid var(--border);margin-top:20px;}
+
+  /* テーマ/補助分析ドロップダウン（JS クリックトグル） */
+  .gh-dropdown{position:relative;}
+  .gh-dropdown-menu{
+    display:none;position:absolute;top:calc(100% + 6px);left:0;
+    background:var(--header);border:1px solid var(--header-line);
+    border-radius:8px;min-width:220px;z-index:100;padding:6px 0;
+    box-shadow:0 4px 16px rgba(0,0,0,.2);
+  }
+  .gh-dropdown-menu.open{ display:block; }
+  .gh-dropdown-menu a{
+    display:block;padding:8px 16px;font-size:12px;
+    color:rgba(255,255,255,.85);white-space:nowrap;
+  }
+  .gh-dropdown-menu a:hover{background:rgba(255,255,255,.12);color:#fff;}
+  .gh-dropdown-menu a.active{background:rgba(255,255,255,.15);color:#fff;font-weight:700;}
+  .gh-dropdown-menu a .ext{font-size:9px;margin-left:4px;opacity:.7;}
+</style>
+
+<style>
+  :root {
+    /* ==== Warm Light Theme ==== */
+    --bg:#F5F3EF;             /* オフホワイト+ベージュ */
+    --surface:#FFFFFF;
+    --surface2:#FAF9F6;        /* さらに薄いクリーム */
+    --surface3:#F0EDE8;        /* 薄いベージュ */
+    --border:#E5E3DF;
+    --border-strong:#D6D3CC;
+    --text:#2C2A28;
+    --text-soft:#5A5651;
+    --dim:#8A847C;
+    --muted:#B0ABA3;
+    --header:#3D3A35;          /* 深いブラウン */
+
+    /* ==== Accent ==== */
+    --blue:#3F7FC1;
+    --blue-light:#E7F0FA;
+    --naika:#2B9DB8;
+    --geka:#D08620;
+    --other:#8B6FB6;
+
+    /* ==== Grade colors (solid, high contrast) ==== */
+    --grade-s-bg:#C89020;  --grade-s-fg:#FFFFFF;  /* 金系 */
+    --grade-a-bg:#2F7A4B;  --grade-a-fg:#FFFFFF;  /* 深緑 */
+    --grade-b-bg:#2E5F85;  --grade-b-fg:#FFFFFF;  /* 深青 */
+    --grade-c-bg:#7A746B;  --grade-c-fg:#FFFFFF;  /* ウォームグレー */
+    --grade-d-bg:#A33838;  --grade-d-fg:#FFFFFF;  /* 深赤 */
+    --grade-na-bg:#E5E3DF; --grade-na-fg:#8A847C; /* 非評価 */
+
+    /* ==== Status / Trend ==== */
+    --up:#2F7A4B;
+    --down:#A33838;
+    --flat:#8A847C;
+    --target:#2F7A4B;
+    --warn-bg:#FAF3E0;
+    --warn-fg:#8A6D1A;
+    --warn-border:#D4B860;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5;}
+
+  header{background:var(--header);color:#fff;padding:16px 28px;border-bottom:3px solid var(--geka);
+         display:flex;align-items:center;gap:14px;position:sticky;top:0;z-index:30;
+         box-shadow:0 2px 8px rgba(0,0,0,.06);}
+  .logo{width:36px;height:36px;background:var(--geka);border-radius:8px;
+        display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff;}
+  header h1{font-size:18px;font-weight:700;color:#fff;}
+  header .sub{font-size:11px;color:rgba(255,255,255,.65);font-family:'DM Mono',monospace;}
+  .month-sel{margin-left:auto;display:flex;align-items:center;gap:10px;}
+  .current-month{font-family:'DM Mono',monospace;font-size:14px;color:#fff;
+                 background:rgba(255,255,255,.12);padding:7px 14px;
+                 border-radius:6px;border:1px solid rgba(255,255,255,.2);font-weight:700;}
+  .warning-badge{font-size:10px;color:#F3D888;background:rgba(212,184,96,.2);
+                 padding:4px 10px;border-radius:4px;border:1px solid rgba(212,184,96,.4);}
+
+  .container{max-width:1400px;margin:0 auto;padding:20px 28px 40px;}
+
+  .screen{margin-bottom:44px;}
+  .screen-title{display:flex;align-items:baseline;gap:10px;margin:0 0 18px;padding-bottom:12px;
+                border-bottom:2px solid var(--border-strong);}
+  .screen-num{font-size:11px;font-family:'DM Mono',monospace;color:var(--blue);
+              background:var(--blue-light);padding:4px 10px;border-radius:4px;
+              font-weight:700;letter-spacing:.04em;}
+  .screen-head{font-size:18px;font-weight:700;color:var(--text);}
+  .screen-subhead{font-size:12px;color:var(--dim);margin-left:6px;}
+
+  /* ===== KPI Cards ===== */
+  .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
+  .kpi{background:var(--surface);border:1px solid var(--border);
+       border-radius:12px;padding:18px 20px;position:relative;
+       box-shadow:0 1px 3px rgba(0,0,0,.03);}
+  .kpi-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px;}
+  .kpi-label{font-size:11px;color:var(--text-soft);font-weight:600;}
+  .kpi-trend{display:flex;align-items:center;gap:3px;font-size:11px;font-weight:700;
+             font-family:'DM Mono',monospace;padding:3px 8px;border-radius:4px;}
+  .trend-up{background:rgba(47,122,75,.1);color:var(--up);}
+  .trend-down{background:rgba(163,56,56,.1);color:var(--down);}
+  .trend-flat{background:rgba(138,132,124,.1);color:var(--flat);}
+  .kpi-value{font-size:28px;font-weight:700;font-family:'DM Mono',monospace;
+             margin:4px 0 2px;color:var(--text);}
+  .kpi-unit{font-size:12px;color:var(--dim);margin-left:4px;}
+  .kpi-target{font-size:11px;color:var(--dim);font-family:'DM Mono',monospace;margin-top:3px;}
+  .kpi-bar{height:6px;background:var(--surface3);border-radius:3px;overflow:hidden;margin-top:10px;}
+  .kpi-bar-fill{height:100%;transition:width .5s;border-radius:3px;}
+  .kpi-spark-wrap{position:relative;height:30px;margin-top:10px;}
+
+  /* ===== Cards ===== */
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;
+        box-shadow:0 1px 3px rgba(0,0,0,.03);}
+  .ctitle{font-size:12px;font-weight:700;color:var(--text-soft);letter-spacing:.05em;
+          text-transform:uppercase;margin-bottom:14px;padding-bottom:10px;
+          border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+  .dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex-shrink:0;}
+  .d-blue{background:var(--blue);} .d-naika{background:var(--naika);}
+  .d-geka{background:var(--geka);} .d-other{background:var(--other);}
+  .d-red{background:var(--grade-d-bg);} .d-green{background:var(--grade-a-bg);}
+  .d-gold{background:var(--grade-s-bg);}
+
+  .g2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;}
+  .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:16px;}
+  .g4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:16px;}
+
+  /* ===== Highlights ===== */
+  .highlights{background:var(--surface);border:1px solid var(--border);
+              border-radius:12px;padding:18px 22px;margin-bottom:24px;
+              box-shadow:0 1px 3px rgba(0,0,0,.03);}
+  .highlights-title{font-size:12px;font-weight:700;color:var(--text-soft);letter-spacing:.05em;
+                    text-transform:uppercase;margin-bottom:14px;padding-bottom:10px;
+                    border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;}
+  .hl-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+  .hl-item{padding:14px 16px;border-radius:8px;border-left:3px solid;}
+  .hl-success{background:rgba(47,122,75,.07);border-left-color:var(--grade-a-bg);}
+  .hl-warn{background:rgba(200,144,32,.08);border-left-color:var(--grade-s-bg);}
+  .hl-danger{background:rgba(163,56,56,.07);border-left-color:var(--grade-d-bg);}
+  .hl-icon{font-size:18px;margin-bottom:6px;}
+  .hl-head{font-size:11px;font-weight:700;color:var(--text);letter-spacing:.04em;
+           text-transform:uppercase;margin-bottom:6px;}
+  .hl-body{font-size:13px;line-height:1.7;color:var(--text);}
+  .hl-body strong{color:var(--blue);font-weight:700;}
+
+  /* ===== Grade Badges ===== */
+  .grade{display:inline-block;min-width:30px;height:26px;line-height:26px;padding:0 8px;
+         border-radius:5px;font-weight:700;font-family:'DM Mono',monospace;
+         font-size:12px;text-align:center;box-shadow:0 1px 2px rgba(0,0,0,.08);}
+  .g-S{background:var(--grade-s-bg);color:var(--grade-s-fg);}
+  .g-A{background:var(--grade-a-bg);color:var(--grade-a-fg);}
+  .g-B{background:var(--grade-b-bg);color:var(--grade-b-fg);}
+  .g-C{background:var(--grade-c-bg);color:var(--grade-c-fg);}
+  .g-D{background:var(--grade-d-bg);color:var(--grade-d-fg);}
+  .g-NA{background:var(--grade-na-bg);color:var(--grade-na-fg);box-shadow:none;}
+
+  /* ===== Legend ===== */
+  .grade-legend{display:flex;gap:16px;padding:14px 18px;background:var(--surface2);
+                border:1px solid var(--border);border-radius:10px;margin-bottom:16px;
+                font-size:12px;flex-wrap:wrap;}
+  .leg-item{display:flex;align-items:center;gap:8px;}
+  .leg-desc{color:var(--dim);font-size:11px;}
+
+  /* ===== Score card table ===== */
+  .sc-table{width:100%;border-collapse:separate;border-spacing:0;font-size:13px;}
+  .sc-table thead th{text-align:center;color:var(--text);font-size:11px;font-weight:700;
+               letter-spacing:.04em;padding:12px 10px;
+               background:var(--surface3);border-bottom:2px solid var(--border-strong);}
+  .sc-table thead th:first-child,.sc-table thead th:nth-child(2){text-align:left;}
+  .sc-table tbody td{padding:10px 10px;border-bottom:1px solid var(--border);
+               text-align:center;font-family:'DM Mono',monospace;font-size:12px;color:var(--text);
+               vertical-align:middle;}
+  .sc-table tbody td:first-child,.sc-table tbody td:nth-child(2){text-align:left;
+    font-family:'Noto Sans JP',sans-serif;font-size:13px;}
+  .sc-table tbody tr:hover td{background:var(--surface2);}
+  .sc-table tbody tr.clickable{cursor:pointer;}
+  .sc-table tbody tr.clickable:hover td{background:var(--blue-light);}
+
+  .type-tag{display:inline-block;padding:2px 8px;border-radius:3px;font-size:10px;
+            font-weight:700;margin-right:6px;vertical-align:middle;}
+  .tag-naika{background:rgba(43,157,184,.15);color:var(--naika);}
+  .tag-geka{background:rgba(208,134,32,.15);color:var(--geka);}
+  .tag-other{background:rgba(139,111,182,.15);color:var(--other);}
+
+  .change-up{color:var(--up);font-weight:700;}
+  .change-down{color:var(--down);font-weight:700;}
+  .change-flat{color:var(--flat);}
+
+  .achiev{display:inline-block;font-family:'DM Mono',monospace;font-size:11px;
+          padding:2px 7px;border-radius:3px;margin-top:3px;}
+  .ach-over{background:rgba(47,122,75,.12);color:var(--up);}
+  .ach-near{background:rgba(62,126,178,.12);color:var(--blue);}
+  .ach-under{background:rgba(163,56,56,.12);color:var(--down);}
+
+  /* Sparkline bars */
+  .spark-bars{display:inline-flex;align-items:flex-end;height:24px;gap:2px;}
+  .spark-bar{width:6px;border-radius:1px 1px 0 0;}
+
+  /* ===== Filter bar ===== */
+  .filter-bar{display:flex;gap:8px;margin-bottom:12px;align-items:center;font-size:12px;
+              background:var(--surface);padding:10px 14px;border-radius:10px;
+              border:1px solid var(--border);box-shadow:0 1px 3px rgba(0,0,0,.03);}
+  .filter-label{color:var(--dim);font-size:11px;}
+  .filter-btn{padding:6px 14px;border-radius:6px;background:var(--surface2);
+              border:1px solid var(--border);color:var(--text);cursor:pointer;font-size:12px;
+              font-weight:500;transition:all .15s;}
+  .filter-btn:hover{background:var(--blue-light);border-color:var(--blue);}
+  .filter-btn.active{background:var(--blue);color:white;border-color:var(--blue);font-weight:700;}
+
+  /* ===== Heatmap ===== */
+  .heatmap-wrap{overflow-x:auto;}
+  .hm-cell{display:inline-block;padding:6px 4px;border-radius:4px;font-weight:700;
+           font-family:'DM Mono',monospace;font-size:11px;min-width:32px;text-align:center;}
+
+  /* ===== Notes ===== */
+  .note{font-size:11px;color:var(--dim);margin-top:10px;line-height:1.6;}
+  .note-box{background:var(--blue-light);border-left:3px solid var(--blue);
+            padding:10px 14px;font-size:12px;color:var(--text);border-radius:4px;margin:12px 0;}
+  .note-warn{background:var(--warn-bg);border-left:3px solid var(--warn-border);
+             padding:10px 14px;font-size:12px;color:var(--warn-fg);border-radius:4px;margin:12px 0;}
+
+  /* ===== Canvas constraints ===== */
+  canvas{max-width:100%!important;}
+  .chart-md{position:relative;width:100%;height:240px;}
+  .chart-sm{position:relative;width:100%;height:180px;}
+  .chart-xs{position:relative;width:100%;height:150px;}
+
+  /* ===== Dept selector ===== */
+  .dept-selector-bar{background:var(--surface);border:1px solid var(--border);
+                     border-radius:12px;padding:14px 20px;margin-bottom:18px;
+                     display:flex;align-items:center;gap:16px;
+                     box-shadow:0 1px 3px rgba(0,0,0,.03);}
+  .dept-label{font-size:11px;color:var(--dim);font-weight:600;letter-spacing:.04em;text-transform:uppercase;}
+  .dept-select{padding:8px 14px;font-size:14px;font-weight:600;
+               background:var(--surface2);border:1px solid var(--border-strong);
+               color:var(--text);border-radius:6px;cursor:pointer;min-width:200px;
+               font-family:'Noto Sans JP',sans-serif;}
+  .dept-info{margin-left:auto;display:flex;gap:18px;align-items:center;}
+  .dept-info-item{display:flex;flex-direction:column;}
+  .dept-info-label{font-size:10px;color:var(--dim);letter-spacing:.05em;text-transform:uppercase;}
+  .dept-info-val{font-size:16px;font-weight:700;font-family:'DM Mono',monospace;color:var(--text);}
+
+  /* Summary badges */
+  .eval-summary{display:flex;gap:14px;flex-wrap:wrap;margin-bottom:18px;}
+  .eval-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;
+             padding:14px 18px;flex:1;min-width:180px;box-shadow:0 1px 3px rgba(0,0,0,.03);}
+  .eval-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+  .eval-lbl{font-size:11px;color:var(--text-soft);font-weight:600;}
+  .eval-val{font-size:22px;font-weight:700;font-family:'DM Mono',monospace;margin-top:4px;color:var(--text);}
+  .eval-target{font-size:10px;color:var(--dim);font-family:'DM Mono',monospace;}
+
+  /* Rankings (lists) */
+  .rank-list{list-style:none;padding:0;}
+  .rank-list li{padding:9px 12px;margin-bottom:6px;background:var(--surface2);
+                border:1px solid var(--border);border-radius:6px;
+                display:flex;align-items:center;gap:10px;font-size:12px;}
+  .rank-list li:last-child{margin-bottom:0;}
+  .rank-badge{font-family:'DM Mono',monospace;font-weight:700;color:var(--dim);
+              width:20px;flex-shrink:0;}
+  .rank-name{flex:1;color:var(--text);}
+  .rank-meta{font-family:'DM Mono',monospace;font-size:11px;color:var(--text-soft);font-weight:600;}
+
+</style>
+
+</head>
+<body data-view="monthly" data-month="2025-06">
+
+<header class="site">
+  <div class="gh-row1">
+    <div class="gh-logo">OD</div>
+    <div class="gh-title">
+      <h1>外来ダッシュボード</h1>
+      <div class="sub">Outpatient Dashboard</div>
+    </div>
+    <div class="gh-meta">
+      <div>更新 2026-04-27 15:37</div>
+    </div>
+  </div>
+  <div class="gh-row2">
+    <div class="gh-views">
+      <a href="../index.html">ホーム</a>
+      
+      <a href="../monthly/2025-06.html" class="active">月次経営サマリ</a>
+      <a href="../dept/2025-06/index.html">診療科ドリルダウン</a>
+      
+      <div class="gh-dropdown">
+        <button type="button" class="gh-view-btn" id="gh-extras-btn">
+          補助分析 <span style="font-size:9px;">▾</span>
+        </button>
+        <div class="gh-dropdown-menu">
+          <a href="../doctor_analysis.html">医師別 深掘り分析</a>
+          <a href="../drug_revisit.html">薬再診候補スコア</a>
+          <a href="https://genie-scripts.github.io/Outpatient-Restructuring/" target="_blank" rel="noopener">外来再編分析サイト<span class="ext">↗</span></a>
+        </div>
+      </div>
+    </div>
+    
+    <div class="gh-month">
+      <label>月:</label>
+      <button id="gh-prev-month" type="button" title="前月">←</button>
+      <select id="gh-month-select">
+        
+        <option value="2026-04">2026-04</option>
+        
+        <option value="2026-03">2026-03</option>
+        
+        <option value="2026-02">2026-02</option>
+        
+        <option value="2026-01">2026-01</option>
+        
+        <option value="2025-12">2025-12</option>
+        
+        <option value="2025-11">2025-11</option>
+        
+        <option value="2025-10">2025-10</option>
+        
+        <option value="2025-09">2025-09</option>
+        
+        <option value="2025-08">2025-08</option>
+        
+        <option value="2025-07">2025-07</option>
+        
+        <option value="2025-06" selected>2025-06</option>
+        
+        <option value="2025-05">2025-05</option>
+        
+        <option value="2025-04">2025-04</option>
+        
+      </select>
+      <button id="gh-next-month" type="button" title="翌月">→</button>
+    </div>
+    
+  </div>
+</header>
+
+
+
+<main class="container">
+
+
+<!-- ====================================================================
+ SCREEN 1: エグゼクティブサマリー
+===================================================================== -->
+<div class="screen">
+  <div class="screen-title">
+    <span class="screen-num">SCREEN 1</span>
+    <span class="screen-head">エグゼクティブサマリー</span>
+    <span class="screen-subhead">全体像を1画面で把握</span>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi">
+      <div class="kpi-head">
+        <span class="kpi-label">総外来件数</span>
+        <span class="kpi-trend" id="kpi1Trend">—</span>
+      </div>
+      <div class="kpi-value" id="kpi1Val">—</div>
+      <div class="kpi-target" id="kpi1Target">—</div>
+      <div class="kpi-spark-wrap"><canvas id="sparkTotal"></canvas></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-head">
+        <span class="kpi-label">初診件数</span>
+        <span class="kpi-trend" id="kpi2Trend">—</span>
+      </div>
+      <div class="kpi-value" id="kpi2Val" style="color:var(--blue);">—</div>
+      <div class="kpi-target" id="kpi2Target">—</div>
+      <div class="kpi-bar"><div class="kpi-bar-fill" id="kpi2Bar" style="background:var(--blue);"></div></div>
+      <div class="kpi-spark-wrap"><canvas id="sparkSho"></canvas></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-head">
+        <span class="kpi-label">再診:初診 比率</span>
+        <span class="kpi-trend" id="kpi3Trend">—</span>
+      </div>
+      <div class="kpi-value" id="kpi3Val" style="color:var(--other);">—</div>
+      <div class="kpi-target" id="kpi3Target">—</div>
+      <div class="kpi-spark-wrap"><canvas id="sparkSps"></canvas></div>
+    </div>
+    <div class="kpi">
+      <div class="kpi-head">
+        <span class="kpi-label">「薬のみ」再診件数</span>
+        <span class="kpi-trend" id="kpi4Trend">—</span>
+      </div>
+      <div class="kpi-value" id="kpi4Val" style="color:var(--grade-s-bg);">—</div>
+      <div class="kpi-target" id="kpi4Target">—</div>
+      <div class="kpi-bar"><div class="kpi-bar-fill" id="kpi4Bar" style="background:var(--grade-s-bg);"></div></div>
+      <div class="kpi-spark-wrap"><canvas id="sparkKus"></canvas></div>
+    </div>
+  </div>
+
+  <!-- ハイライト -->
+  <div class="highlights">
+    <div class="highlights-title"><span class="dot d-blue"></span>今月のハイライト（自動抽出）</div>
+    <div class="hl-grid" id="highlightsContainer"></div>
+  </div>
+
+  <!-- 診療科別 × 月 ヒートマップ（3指標分） -->
+  <div class="card" style="margin-bottom:16px;">
+    <div class="ctitle"><span class="dot d-blue"></span>初診件数 達成率ヒートマップ（診療科×月）</div>
+    <div class="heatmap-wrap">
+      <table class="sc-table" style="font-size:11px;">
+        <thead id="heatShoHead"></thead>
+        <tbody id="heatShoBody"></tbody>
+      </table>
+    </div>
+    <p class="note">各月の初診実績 ÷ 初診目標 の達成率をS〜Dで表示。目標は直近6ヶ月実績 × 1.10。</p>
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="ctitle"><span class="dot d-other"></span>再診:初診 比率の月次変化（低下＝改善）</div>
+      <div class="heatmap-wrap">
+        <table class="sc-table" style="font-size:11px;">
+          <thead id="heatSpsHead"></thead>
+          <tbody id="heatSpsBody"></tbody>
+        </table>
+      </div>
+      <p class="note">目標は6ヶ月平均比率 × 0.9（10%削減）。比率が低いほど高評価。</p>
+    </div>
+
+    <div class="card">
+      <div class="ctitle"><span class="dot d-gold"></span>「薬のみ」再診件数の月次変化（減少＝改善）</div>
+      <div class="heatmap-wrap">
+        <table class="sc-table" style="font-size:11px;">
+          <thead id="heatKusHead"></thead>
+          <tbody id="heatKusBody"></tbody>
+        </table>
+      </div>
+      <p class="note">目標は6ヶ月平均 × 0.85（15%削減）。処方更新のみ再診＝逆紹介最有力。</p>
+    </div>
+  </div>
+</div>
+
+<!-- ====================================================================
+ SCREEN 2: 2軸トレンド分析
+===================================================================== -->
+<div class="screen">
+  <div class="screen-title">
+    <span class="screen-num">SCREEN 2</span>
+    <span class="screen-head">主要指標トレンド分析</span>
+    <span class="screen-subhead">3指標の月次推移と目標線</span>
+  </div>
+
+  <div class="note-box">
+    💡 <strong>逆紹介候補件数</strong>は評価指標から外し、参考情報としてスコアカードの右端に表示しています。「候補」ではなく「実際の実行」を測るには電子カルテ連携が必要です。
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="ctitle"><span class="dot d-blue"></span>全体 初診件数 月次推移（目標線付き）</div>
+      <div class="chart-md"><canvas id="chartShoTrend"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="ctitle"><span class="dot d-other"></span>全体 再診:初診 比率 月次推移</div>
+      <div class="chart-md"><canvas id="chartSpsTrend"></canvas></div>
+    </div>
+  </div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="ctitle"><span class="dot d-gold"></span>全体 「薬のみ」再診件数 月次推移（目標線付き）</div>
+      <div class="chart-md"><canvas id="chartKusTrend"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="ctitle"><span class="dot d-blue"></span>主要診療科 初診件数 月次推移</div>
+      <div class="chart-md"><canvas id="chartShoDept"></canvas></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ====================================================================
+ SCREEN 3: 診療科スコアカード
+===================================================================== -->
+<div class="screen">
+  <div class="screen-title">
+    <span class="screen-num">SCREEN 3</span>
+    <span class="screen-head">診療科スコアカード</span>
+    <span class="screen-subhead">3軸独立評価（目標達成率ベース）・行クリックで詳細へ</span>
+  </div>
+
+  <div class="grade-legend">
+    <div class="leg-item"><span class="grade g-S">S</span><span class="leg-desc">110%以上</span></div>
+    <div class="leg-item"><span class="grade g-A">A</span><span class="leg-desc">100〜110%</span></div>
+    <div class="leg-item"><span class="grade g-B">B</span><span class="leg-desc">90〜100%</span></div>
+    <div class="leg-item"><span class="grade g-C">C</span><span class="leg-desc">80〜90%</span></div>
+    <div class="leg-item"><span class="grade g-D">D</span><span class="leg-desc">80%未満</span></div>
+    <div class="leg-item"><span class="grade g-NA">—</span><span class="leg-desc">目標未設定</span></div>
+  </div>
+
+  <div class="filter-bar">
+    <span class="filter-label">診療科タイプ:</span>
+    <span class="filter-btn active" data-filter="all">全て</span>
+    <span class="filter-btn" data-filter="naika">内科系</span>
+    <span class="filter-btn" data-filter="geka">外科系</span>
+    <span class="filter-btn" data-filter="alert">要注意（どれかD）</span>
+    <span style="margin-left:auto;color:var(--dim);font-size:11px;">※ 「薬のみ」「再診:初診比率」は少ない/低いほど高評価</span>
+  </div>
+
+  <div class="card">
+    <div class="ctitle"><span class="dot d-blue"></span>診療科別 3軸評価（当月 = 2026年4月 / 30日換算推計）</div>
+    <div style="overflow-x:auto;">
+      <table class="sc-table">
+        <thead>
+          <tr>
+            <th rowspan="2" style="width:17%;vertical-align:middle;">診療科</th>
+            <th rowspan="2" style="width:8%;vertical-align:middle;">月平均件数</th>
+            <th colspan="3" style="background:rgba(63,127,193,.06);">
+              <div style="color:var(--blue);">初診件数</div>
+            </th>
+            <th colspan="3" style="background:rgba(139,111,182,.06);">
+              <div style="color:var(--other);">再診:初診 比率</div>
+            </th>
+            <th colspan="3" style="background:rgba(200,144,32,.06);">
+              <div style="color:var(--grade-s-bg);">「薬のみ」再診</div>
+            </th>
+            <th rowspan="2" style="width:9%;vertical-align:middle;background:var(--surface2);color:var(--dim);">
+              <div>候補件数</div><div style="font-size:9px;font-weight:400;">(参考)</div>
+            </th>
+          </tr>
+          <tr>
+            <th style="width:5%;background:rgba(63,127,193,.04);">評価</th>
+            <th style="width:8%;background:rgba(63,127,193,.04);">実績/目標</th>
+            <th style="width:8%;background:rgba(63,127,193,.04);">前月比</th>
+            <th style="width:5%;background:rgba(139,111,182,.04);">評価</th>
+            <th style="width:7%;background:rgba(139,111,182,.04);">実績/目標</th>
+            <th style="width:8%;background:rgba(139,111,182,.04);">前月比</th>
+            <th style="width:5%;background:rgba(200,144,32,.04);">評価</th>
+            <th style="width:7%;background:rgba(200,144,32,.04);">実績/目標</th>
+            <th style="width:8%;background:rgba(200,144,32,.04);">前月比</th>
+          </tr>
+        </thead>
+        <tbody id="scoreCardBody"></tbody>
+      </table>
+    </div>
+    <p class="note" style="margin-top:14px;">
+      <strong>目標値の自動算出ルール</strong>：初診目標=直近6ヶ月実績×1.10（+10%）、再診:初診比率目標=6ヶ月平均×0.9（-10%）、薬のみ目標=6ヶ月平均×0.85（-15%）。
+      <code>dept_targets.csv</code> で個別上書き可能。
+    </p>
+  </div>
+</div>
+
+<!-- ====================================================================
+ SCREEN 4: 診療科別ドリルダウン
+===================================================================== -->
+<div class="screen">
+  <div class="screen-title">
+    <span class="screen-num">SCREEN 4</span>
+    <span class="screen-head">診療科別ドリルダウン</span>
+    <span class="screen-subhead">1診療科の全情報を1画面で</span>
+  </div>
+
+  <div class="dept-selector-bar">
+    <span class="dept-label">📋 診療科選択:</span>
+    <select class="dept-select" id="deptSelector"></select>
+    <div class="dept-info" id="deptInfo"></div>
+  </div>
+
+  <!-- ① 当月評価サマリ -->
+  <div class="eval-summary" id="evalSummary"></div>
+
+  <!-- ② 主要KPI 6ヶ月トレンド -->
+  <div class="g4">
+    <div class="card">
+      <div class="ctitle"><span class="dot d-blue"></span>初診件数 6ヶ月</div>
+      <div class="chart-xs"><canvas id="d4ChartSho"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="ctitle"><span class="dot d-naika"></span>再診件数 6ヶ月</div>
+      <div class="chart-xs"><canvas id="d4ChartSai"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="ctitle"><span class="dot d-gold"></span>「薬のみ」再診 6ヶ月</div>
+      <div class="chart-xs"><canvas id="d4ChartKus"></canvas></div>
+    </div>
+    <div class="card">
+      <div class="ctitle"><span class="dot d-other"></span>再診:初診 比率 6ヶ月</div>
+      <div class="chart-xs"><canvas id="d4ChartSps"></canvas></div>
+    </div>
+  </div>
+
+  <!-- ③ 時間帯分布 + 薬のみ vs 全再診 -->
+  <div class="g2">
+    <div class="card">
+      <div class="ctitle"><span class="dot d-naika"></span>時間帯ゾーン分布（6ヶ月合計）</div>
+      <div class="chart-md"><canvas id="d4ChartTz"></canvas></div>
+      <p class="note">内科系は午後枠拡大の余地あり。外科系は手術の関係で午前中心が原則。</p>
+    </div>
+    <div class="card">
+      <div class="ctitle"><span class="dot d-gold"></span>「薬のみ」再診 vs 全再診の月次比較</div>
+      <div class="chart-md"><canvas id="d4ChartKusCmp"></canvas></div>
+      <p class="note">全再診に占める「薬のみ」の比率が高い場合、処方更新のみの患者を地域クリニックに戻す逆紹介余地が大きい。</p>
+    </div>
+  </div>
+
+  <!-- ④ 医師別内訳 -->
+  <div class="card" style="margin-bottom:16px;">
+    <div class="ctitle"><span class="dot d-blue"></span>医師別 件数・初診率（6ヶ月合計・上位8名）</div>
+    <div class="chart-md"><canvas id="d4ChartDoc"></canvas></div>
+    <p class="note">医師名は匿名化表示（医師A,B,C...）。初診率が高い医師＝新患対応を担う、低い医師＝既存患者の継続診療が中心。</p>
+  </div>
+
+  <!-- ⑤ 改善余地ランキング -->
+  <div class="g3">
+    <div class="card">
+      <div class="ctitle"><span class="dot d-red"></span>稀用枠 TOP5（統廃合候補）</div>
+      <ul class="rank-list" id="rareSlotList"></ul>
+      <p class="note">6ヶ月で10件未満の低稼働枠。「その他」枠等に統合することで予約システムUIを整理。</p>
+    </div>
+    <div class="card">
+      <div class="ctitle"><span class="dot d-other"></span>再診偏重枠 TOP5（逆紹介候補）</div>
+      <ul class="rank-list" id="saijyuSlotList"></ul>
+      <p class="note">初診率2%以下・件数100以上の枠。継続管理患者が多い＝逆紹介を検討しやすい候補。</p>
+    </div>
+    <div class="card">
+      <div class="ctitle"><span class="dot d-gold"></span>名称と実態の乖離枠</div>
+      <ul class="rank-list" id="kairiSlotList"></ul>
+      <p class="note">名称に「初診」を含むが実態は初診率50%未満の枠。予約受付の混乱要因、命名修正候補。</p>
+    </div>
+  </div>
+
+</div>
+
+
+</main>
+
+<footer class="site">
+  外来ダッシュボード
+</footer>
+
+<script>
+/* グローバルヘッダ：月セレクタとビュー切替の連動。
+   現在のビュー（data-view）と現在の科コード（data-code）を保ったまま
+   月だけを切り替える。ホームの場合はその月の monthly に遷移する。 */
+(function(){
+  const body = document.body;
+  const view = body.getAttribute('data-view');
+  const code = body.getAttribute('data-code');
+  const sel = document.getElementById('gh-month-select');
+  const prevBtn = document.getElementById('gh-prev-month');
+  const nextBtn = document.getElementById('gh-next-month');
+  if (!sel) return;
+
+  function rootPrefix(){
+    const a = document.querySelector('header.site .gh-views a');
+    if (!a) return '';
+    const href = a.getAttribute('href') || '';
+    return href.replace(/index\.html$/, '');
+  }
+
+  function targetUrl(month, view, code){
+    const root = rootPrefix();
+    if (view === 'monthly' || view === 'home') {
+      return root + 'monthly/' + month + '.html';
+    }
+    if (view === 'dept' || view === 'dept-detail') {
+      const filename = code ? (code + '.html') : 'index.html';
+      return root + 'dept/' + month + '/' + filename;
+    }
+    return root + 'index.html';
+  }
+
+  sel.addEventListener('change', () => {
+    location.href = targetUrl(sel.value, view, code);
+  });
+
+  function shiftMonth(delta){
+    /* sel.options は新→旧。delta=-1 で前月（idx 増）、+1 で翌月（idx 減）。 */
+    const idx = sel.selectedIndex;
+    const newIdx = idx - delta;
+    if (newIdx < 0 || newIdx >= sel.options.length) return;
+    sel.selectedIndex = newIdx;
+    sel.dispatchEvent(new Event('change'));
+  }
+  if (prevBtn) prevBtn.addEventListener('click', () => shiftMonth(-1));
+  if (nextBtn) nextBtn.addEventListener('click', () => shiftMonth(+1));
+
+  function refreshBtns(){
+    const idx = sel.selectedIndex;
+    if (prevBtn) prevBtn.disabled = (idx >= sel.options.length - 1);
+    if (nextBtn) nextBtn.disabled = (idx <= 0);
+  }
+  refreshBtns();
+  sel.addEventListener('change', refreshBtns);
+})();
+
+/* 補助分析ドロップダウン：クリックトグル */
+(function(){
+  const btn  = document.getElementById('gh-extras-btn');
+  const menu = btn && btn.parentElement.querySelector('.gh-dropdown-menu');
+  if (!btn || !menu) return;
+
+  btn.addEventListener('click', function(e){
+    e.stopPropagation();
+    menu.classList.toggle('open');
+  });
+  menu.addEventListener('click', function(){ menu.classList.remove('open'); });
+  document.addEventListener('click', function(){ menu.classList.remove('open'); });
+})();
+
+/* 共通ユーティリティ（チャート色・整形・評価バッジ）。
+   各ダッシュボードの個別 <script> から OutpatientCommon を参照する。 */
+window.OutpatientCommon = (function(){
+  const palette = {
+    naika:'#2B9DB8', geka:'#D08620', other:'#8B6FB6',
+    primary:'#D08620', accent:'#3F7FC1', muted:'#8A847C',
+  };
+  function formatInt(n){ return (n==null||Number.isNaN(n))?'-':Math.round(n).toLocaleString('ja-JP'); }
+  function formatPct(n, d=1){ return (n==null||Number.isNaN(n))?'-':(n.toFixed(d)+'%'); }
+  function gradeFromPct(pct, inverse=false){
+    if (pct==null||Number.isNaN(pct)) return 'D';
+    if (inverse){
+      if (pct<=90) return 'S'; if (pct<=100) return 'A';
+      if (pct<=110) return 'B'; if (pct<=125) return 'C'; return 'D';
+    }
+    if (pct>=110) return 'S'; if (pct>=100) return 'A';
+    if (pct>=90) return 'B'; if (pct>=75) return 'C'; return 'D';
+  }
+  function gradeBadge(g){ return '<span class="grade grade-'+g+'">'+g+'</span>'; }
+  function typeBadge(t){
+    const label = {naika:'内科', geka:'外科', other:'その他'}[t] || t;
+    return '<span class="type-badge '+t+'">'+label+'</span>';
+  }
+  if (window.Chart){
+    Chart.defaults.font.family = "'Noto Sans JP', sans-serif";
+    Chart.defaults.font.size = 12;
+    Chart.defaults.color = '#2C2A28';
+  }
+  return { palette, formatInt, formatPct, gradeFromPct, gradeBadge, typeBadge };
+})();
+</script>
+
+
+<script>
+// ============================================================
+// Helper functions (must be defined BEFORE dataScript runs)
+// ============================================================
+function gradeFromPct(pct, inverse=false){
+  // inverse=true: 低いほど良い指標（再診:初診比率・薬のみ件数）
+  if(inverse){
+    if(pct <= 90) return 'S';
+    if(pct <= 100) return 'A';
+    if(pct <= 110) return 'B';
+    if(pct <= 120) return 'C';
+    return 'D';
+  } else {
+    if(pct >= 110) return 'S';
+    if(pct >= 100) return 'A';
+    if(pct >= 90) return 'B';
+    if(pct >= 80) return 'C';
+    return 'D';
+  }
+}
+function fmtNum(n){ return n.toLocaleString(); }
+
+// ============================================================
+// Common chart colors (warm light theme)
+// ============================================================
+const CC = {
+  blue:'#3F7FC1', blueL:'rgba(63,127,193,.15)',
+  gold:'#C89020', goldL:'rgba(200,144,32,.15)',
+  naika:'#2B9DB8', naikaL:'rgba(43,157,184,.15)',
+  geka:'#D08620', gekaL:'rgba(208,134,32,.15)',
+  other:'#8B6FB6', otherL:'rgba(139,111,182,.15)',
+  green:'#2F7A4B', red:'#A33838',
+  target:'#2F7A4B',
+  grid:'rgba(214,211,204,.6)',
+  text:'#5A5651'
+};
+Chart.defaults.color = '#5A5651';
+Chart.defaults.borderColor = CC.grid;
+Chart.defaults.font.family = "'Noto Sans JP', sans-serif";
+
+const charts = {};
+</script>
+
+<script id="dataScript">
+// DATA injection
+const DATA = {"months":["2025-04","2025-05","2025-06"],"monthLabels":["4月","5月","6月"],"depts":[{"name":"泌尿器科","type":"geka","avg_monthly":3575,"sho_m":[137,140,128],"sai_m":[3619,3241,3461],"kus_m":[906,780,840],"cand_m":[494,418,458],"total_m":[3756,3381,3589],"sps_m":[26.4,23.1,27.0],"sho_target":148,"kus_target":715,"sps_target":22.9,"sho_apr":128,"sai_apr":3461,"kus_apr":840,"cand_apr":458,"total_apr":3589,"sps_apr":27.0},{"name":"眼科","type":"geka","avg_monthly":3453,"sho_m":[241,239,223],"sai_m":[3262,3166,3230],"kus_m":[208,209,185],"cand_m":[106,116,79],"total_m":[3503,3405,3453],"sps_m":[13.5,13.2,14.5],"sho_target":257,"kus_target":170,"sps_target":12.3,"sho_apr":223,"sai_apr":3230,"kus_apr":185,"cand_apr":79,"total_apr":3453,"sps_apr":14.5},{"name":"産婦人科","type":"geka","avg_monthly":1971,"sho_m":[148,150,146],"sai_m":[1796,1840,1835],"kus_m":[184,147,190],"cand_m":[42,37,54],"total_m":[1944,1990,1981],"sps_m":[12.1,12.3,12.6],"sho_target":162,"kus_target":147,"sps_target":11.1,"sho_apr":146,"sai_apr":1835,"kus_apr":190,"cand_apr":54,"total_apr":1981,"sps_apr":12.6},{"name":"耳鼻咽喉科","type":"geka","avg_monthly":1897,"sho_m":[194,198,211],"sai_m":[1769,1625,1696],"kus_m":[301,274,290],"cand_m":[176,184,169],"total_m":[1963,1823,1907],"sps_m":[9.1,8.2,8.0],"sho_target":221,"kus_target":245,"sps_target":7.6,"sho_apr":211,"sai_apr":1696,"kus_apr":290,"cand_apr":169,"total_apr":1907,"sps_apr":8.0},{"name":"整形外科","type":"geka","avg_monthly":1847,"sho_m":[225,224,234],"sai_m":[1641,1539,1679],"kus_m":[178,174,184],"cand_m":[89,81,89],"total_m":[1866,1763,1913],"sps_m":[7.3,6.9,7.2],"sho_target":250,"kus_target":151,"sps_target":6.4,"sho_apr":234,"sai_apr":1679,"kus_apr":184,"cand_apr":89,"total_apr":1913,"sps_apr":7.2},{"name":"乳腺外科","type":"geka","avg_monthly":1614,"sho_m":[70,54,56],"sai_m":[1600,1429,1633],"kus_m":[152,143,166],"cand_m":[62,52,82],"total_m":[1670,1483,1689],"sps_m":[22.9,26.5,29.2],"sho_target":66,"kus_target":130,"sps_target":23.3,"sho_apr":56,"sai_apr":1633,"kus_apr":166,"cand_apr":82,"total_apr":1689,"sps_apr":29.2},{"name":"消化器内科","type":"naika","avg_monthly":1587,"sho_m":[210,170,163],"sai_m":[1412,1359,1448],"kus_m":[160,176,130],"cand_m":[89,91,73],"total_m":[1622,1529,1611],"sps_m":[6.7,8.0,8.9],"sho_target":199,"kus_target":132,"sps_target":7.0,"sho_apr":163,"sai_apr":1448,"kus_apr":130,"cand_apr":73,"total_apr":1611,"sps_apr":8.9},{"name":"循環器内科","type":"naika","avg_monthly":1536,"sho_m":[150,128,142],"sai_m":[1449,1288,1451],"kus_m":[223,196,220],"cand_m":[75,82,82],"total_m":[1599,1416,1593],"sps_m":[9.7,10.1,10.2],"sho_target":154,"kus_target":181,"sps_target":9.0,"sho_apr":142,"sai_apr":1451,"kus_apr":220,"cand_apr":82,"total_apr":1593,"sps_apr":10.2},{"name":"呼吸器内科","type":"naika","avg_monthly":1362,"sho_m":[98,86,77],"sai_m":[1280,1258,1289],"kus_m":[163,153,141],"cand_m":[56,58,50],"total_m":[1378,1344,1366],"sps_m":[13.1,14.6,16.7],"sho_target":95,"kus_target":129,"sps_target":13.2,"sho_apr":77,"sai_apr":1289,"kus_apr":141,"cand_apr":50,"total_apr":1366,"sps_apr":16.7},{"name":"皮膚科","type":"geka","avg_monthly":1350,"sho_m":[117,109,115],"sai_m":[1234,1246,1231],"kus_m":[270,254,247],"cand_m":[115,107,108],"total_m":[1351,1355,1346],"sps_m":[10.5,11.4,10.7],"sho_target":125,"kus_target":218,"sps_target":9.8,"sho_apr":115,"sai_apr":1231,"kus_apr":247,"cand_apr":108,"total_apr":1346,"sps_apr":10.7},{"name":"総合内科","type":"naika","avg_monthly":1253,"sho_m":[209,243,236],"sai_m":[993,1052,1027],"kus_m":[262,320,285],"cand_m":[104,119,116],"total_m":[1202,1295,1263],"sps_m":[4.8,4.3,4.4],"sho_target":252,"kus_target":245,"sps_target":4.0,"sho_apr":236,"sai_apr":1027,"kus_apr":285,"cand_apr":116,"total_apr":1263,"sps_apr":4.4},{"name":"一般消化器外科","type":"geka","avg_monthly":1177,"sho_m":[67,58,71],"sai_m":[1146,1072,1117],"kus_m":[135,118,103],"cand_m":[62,55,50],"total_m":[1213,1130,1188],"sps_m":[17.1,18.5,15.7],"sho_target":71,"kus_target":100,"sps_target":15.3,"sho_apr":71,"sai_apr":1117,"kus_apr":103,"cand_apr":50,"total_apr":1188,"sps_apr":15.7},{"name":"リウマチ膠原病内科","type":"naika","avg_monthly":1008,"sho_m":[29,34,38],"sai_m":[924,1070,931],"kus_m":[113,105,86],"cand_m":[51,43,26],"total_m":[953,1104,969],"sps_m":[31.9,31.5,24.5],"sho_target":37,"kus_target":86,"sps_target":26.1,"sho_apr":38,"sai_apr":931,"kus_apr":86,"cand_apr":26,"total_apr":969,"sps_apr":24.5},{"name":"放射線治療科","type":"other","avg_monthly":1006,"sho_m":[12,3,7],"sai_m":[1072,973,952],"kus_m":[220,230,185],"cand_m":[131,147,112],"total_m":[1084,976,959],"sps_m":[89.3,324.3,136.0],"sho_target":8,"kus_target":179,"sps_target":122.6,"sho_apr":7,"sai_apr":952,"kus_apr":185,"cand_apr":112,"total_apr":959,"sps_apr":136.0},{"name":"歯科口腔外科","type":"geka","avg_monthly":981,"sho_m":[240,246,282],"sai_m":[682,719,774],"kus_m":[136,150,141],"cand_m":[56,71,53],"total_m":[922,965,1056],"sps_m":[2.8,2.9,2.7],"sho_target":281,"kus_target":120,"sps_target":2.5,"sho_apr":282,"sai_apr":774,"kus_apr":141,"cand_apr":53,"total_apr":1056,"sps_apr":2.7},{"name":"血液内科","type":"naika","avg_monthly":842,"sho_m":[30,22,34],"sai_m":[780,800,861],"kus_m":[42,49,61],"cand_m":[19,19,31],"total_m":[810,822,895],"sps_m":[26.0,36.4,25.3],"sho_target":31,"kus_target":43,"sps_target":25.6,"sho_apr":34,"sai_apr":861,"kus_apr":61,"cand_apr":31,"total_apr":895,"sps_apr":25.3},{"name":"腎内科","type":"naika","avg_monthly":767,"sho_m":[27,15,23],"sai_m":[771,695,771],"kus_m":[93,90,88],"cand_m":[27,27,22],"total_m":[798,710,794],"sps_m":[28.6,46.3,33.5],"sho_target":23,"kus_target":76,"sps_target":31.0,"sho_apr":23,"sai_apr":771,"kus_apr":88,"cand_apr":22,"total_apr":794,"sps_apr":33.5},{"name":"小児科","type":"naika","avg_monthly":614,"sho_m":[125,132,145],"sai_m":[482,455,505],"kus_m":[67,54,48],"cand_m":[31,18,12],"total_m":[607,587,650],"sps_m":[3.9,3.4,3.5],"sho_target":147,"kus_target":47,"sps_target":3.2,"sho_apr":145,"sai_apr":505,"kus_apr":48,"cand_apr":12,"total_apr":650,"sps_apr":3.5},{"name":"形成外科","type":"geka","avg_monthly":612,"sho_m":[40,52,45],"sai_m":[558,588,554],"kus_m":[132,151,145],"cand_m":[23,35,32],"total_m":[598,640,599],"sps_m":[13.9,11.3,12.3],"sho_target":50,"kus_target":121,"sps_target":11.2,"sho_apr":45,"sai_apr":554,"kus_apr":145,"cand_apr":32,"total_apr":599,"sps_apr":12.3},{"name":"脳神経内科","type":"naika","avg_monthly":533,"sho_m":[62,59,61],"sai_m":[468,456,493],"kus_m":[69,72,76],"cand_m":[31,30,31],"total_m":[530,515,554],"sps_m":[7.5,7.7,8.1],"sho_target":66,"kus_target":61,"sps_target":7.0,"sho_apr":61,"sai_apr":493,"kus_apr":76,"cand_apr":31,"total_apr":554,"sps_apr":8.1},{"name":"メンタルケア科","type":"naika","avg_monthly":341,"sho_m":[0,1,3],"sai_m":[365,320,336],"kus_m":[92,81,82],"cand_m":[46,33,27],"total_m":[365,321,339],"sps_m":[null,320.0,112.0],"sho_target":1,"kus_target":72,"sps_target":229.7,"sho_apr":3,"sai_apr":336,"kus_apr":82,"cand_apr":27,"total_apr":339,"sps_apr":112.0},{"name":"救急科","type":"other","avg_monthly":334,"sho_m":[218,248,205],"sai_m":[111,115,105],"kus_m":[12,11,7],"cand_m":[1,0,0],"total_m":[329,363,310],"sps_m":[0.5,0.5,0.5],"sho_target":246,"kus_target":8,"sps_target":0.5,"sho_apr":205,"sai_apr":105,"kus_apr":7,"cand_apr":0,"total_apr":310,"sps_apr":0.5},{"name":"内科","type":"naika","avg_monthly":315,"sho_m":[185,166,165],"sai_m":[136,159,134],"kus_m":[0,0,3],"cand_m":[0,0,1],"total_m":[321,325,299],"sps_m":[0.7,1.0,0.8],"sho_target":189,"kus_target":0,"sps_target":0.7,"sho_apr":165,"sai_apr":134,"kus_apr":3,"cand_apr":1,"total_apr":299,"sps_apr":0.8},{"name":"脳神経外科","type":"geka","avg_monthly":245,"sho_m":[33,43,36],"sai_m":[217,182,224],"kus_m":[15,27,27],"cand_m":[7,13,11],"total_m":[250,225,260],"sps_m":[6.6,4.2,6.2],"sho_target":41,"kus_target":19,"sps_target":5.0,"sho_apr":36,"sai_apr":224,"kus_apr":27,"cand_apr":11,"total_apr":260,"sps_apr":6.2},{"name":"心臓血管外科","type":"geka","avg_monthly":218,"sho_m":[6,3,3],"sai_m":[213,220,210],"kus_m":[21,15,27],"cand_m":[11,8,8],"total_m":[219,223,213],"sps_m":[35.5,73.3,70.0],"sho_target":4,"kus_target":17,"sps_target":48.2,"sho_apr":3,"sai_apr":210,"kus_apr":27,"cand_apr":8,"total_apr":213,"sps_apr":70.0},{"name":"呼吸器外科","type":"geka","avg_monthly":195,"sho_m":[10,4,6],"sai_m":[177,175,215],"kus_m":[7,10,7],"cand_m":[6,5,2],"total_m":[187,179,221],"sps_m":[17.7,43.8,35.8],"sho_target":7,"kus_target":6,"sps_target":25.5,"sho_apr":6,"sai_apr":215,"kus_apr":7,"cand_apr":2,"total_apr":221,"sps_apr":35.8},{"name":"アレルギー科","type":"naika","avg_monthly":149,"sho_m":[1,4,2],"sai_m":[140,141,160],"kus_m":[9,13,3],"cand_m":[2,2,1],"total_m":[141,145,162],"sps_m":[140.0,35.2,80.0],"sho_target":2,"kus_target":7,"sps_target":56.7,"sho_apr":2,"sai_apr":160,"kus_apr":3,"cand_apr":1,"total_apr":162,"sps_apr":80.0},{"name":"臨床腫瘍科","type":"naika","avg_monthly":145,"sho_m":[1,0,0],"sai_m":[139,133,164],"kus_m":[18,21,20],"cand_m":[0,1,1],"total_m":[140,133,164],"sps_m":[139.0,null,null],"sho_target":0,"kus_target":16,"sps_target":392.4,"sho_apr":0,"sai_apr":164,"kus_apr":20,"cand_apr":1,"total_apr":164,"sps_apr":null}],"detail":{"アレルギー科":{"tz":{"am":161,"pm1":1,"pm2":0,"eve":0},"doctors":[{"n":"医師A","total":46,"sho":0,"rate":0.0},{"n":"医師B","total":45,"sho":0,"rate":0.0},{"n":"医師C","total":34,"sho":1,"rate":2.9},{"n":"医師D","total":33,"sho":1,"rate":3.0},{"n":"医師E","total":2,"sho":0,"rate":0.0},{"n":"医師F","total":2,"sho":0,"rate":0.0}],"rare":[{"n":"SL_0783","t":1,"r":0.0},{"n":"SL_0820","t":1,"r":100.0},{"n":"SL_0561","t":2,"r":100.0},{"n":"SL_0628","t":2,"r":100.0},{"n":"SL_0852","t":2,"r":0.0}],"saijyu":[{"n":"SL_0189","t":131,"r":0.0},{"n":"SL_0061","t":106,"r":0.9},{"n":"SL_0100","t":83,"r":0.0},{"n":"SL_0033","t":79,"r":0.0},{"n":"SL_0009","t":26,"r":3.8}],"kairi":[]},"メンタルケア科":{"tz":{"am":232,"pm1":86,"pm2":12,"eve":9},"doctors":[{"n":"医師A","total":117,"sho":1,"rate":0.9},{"n":"医師B","total":84,"sho":0,"rate":0.0},{"n":"医師C","total":73,"sho":1,"rate":1.4},{"n":"医師D","total":49,"sho":1,"rate":2.0},{"n":"医師E","total":9,"sho":0,"rate":0.0},{"n":"医師F","total":2,"sho":0,"rate":0.0},{"n":"医師G","total":2,"sho":0,"rate":0.0},{"n":"医師H","total":1,"sho":0,"rate":0.0},{"n":"医師I","total":1,"sho":0,"rate":0.0},{"n":"医師J","total":1,"sho":0,"rate":0.0}],"rare":[{"n":"SL_1012","t":1,"r":0.0},{"n":"SL_0005","t":4,"r":0.0},{"n":"SL_0763","t":4,"r":0.0},{"n":"SL_0891","t":4,"r":0.0}],"saijyu":[{"n":"SL_0043","t":358,"r":0.0},{"n":"SL_0009","t":255,"r":0.0},{"n":"SL_0255","t":185,"r":0.0},{"n":"SL_0721","t":117,"r":0.9},{"n":"SL_0609","t":25,"r":0.0}],"kairi":[]},"リウマチ膠原病内科":{"tz":{"am":800,"pm1":160,"pm2":8,"eve":1},"doctors":[{"n":"医師A","total":226,"sho":17,"rate":7.5},{"n":"医師B","total":187,"sho":5,"rate":2.7},{"n":"医師C","total":175,"sho":7,"rate":4.0},{"n":"医師D","total":122,"sho":0,"rate":0.0},{"n":"医師E","total":88,"sho":0,"rate":0.0},{"n":"医師F","total":35,"sho":8,"rate":22.9},{"n":"医師G","total":33,"sho":0,"rate":0.0},{"n":"医師H","total":33,"sho":0,"rate":0.0},{"n":"医師I","total":30,"sho":0,"rate":0.0},{"n":"医師J","total":16,"sho":0,"rate":0.0}],"rare":[{"n":"SL_0873","t":1,"r":0.0},{"n":"SL_0957","t":1,"r":100.0},{"n":"SL_0983","t":1,"r":0.0},{"n":"SL_0682","t":2,"r":0.0},{"n":"SL_0866","t":2,"r":0.0}],"saijyu":[{"n":"SL_0210","t":696,"r":0.0},{"n":"SL_0174","t":516,"r":0.0},{"n":"SL_0222","t":356,"r":0.0},{"n":"SL_0066","t":320,"r":0.0},{"n":"SL_0139","t":319,"r":0.0}],"kairi":[]},"一般消化器外科":{"tz":{"am":949,"pm1":189,"pm2":32,"eve":18},"doctors":[{"n":"医師A","total":274,"sho":23,"rate":8.4},{"n":"医師B","total":168,"sho":8,"rate":4.8},{"n":"医師C","total":107,"sho":3,"rate":2.8},{"n":"医師D","total":105,"sho":3,"rate":2.9},{"n":"医師E","total":96,"sho":10,"rate":10.4},{"n":"医師F","total":66,"sho":6,"rate":9.1},{"n":"医師G","total":64,"sho":3,"rate":4.7},{"n":"医師H","total":56,"sho":3,"rate":5.4},{"n":"医師I","total":55,"sho":4,"rate":7.3},{"n":"医師J","total":45,"sho":0,"rate":0.0}],"rare":[{"n":"SL_0475","t":1,"r":0.0},{"n":"SL_0845","t":1,"r":0.0},{"n":"SL_0872","t":1,"r":100.0},{"n":"SL_0968","t":1,"r":0.0},{"n":"SL_0984","t":1,"r":0.0}],"saijyu":[{"n":"SL_0103","t":689,"r":0.0},{"n":"SL_0022","t":474,"r":1.3},{"n":"SL_0009","t":356,"r":0.0},{"n":"SL_0085","t":264,"r":3.8},{"n":"SL_0202","t":263,"r":2.7}],"kairi":[]},"乳腺外科":{"tz":{"am":1419,"pm1":231,"pm2":37,"eve":2},"doctors":[{"n":"医師A","total":1064,"sho":46,"rate":4.3},{"n":"医師B","total":402,"sho":2,"rate":0.5},{"n":"医師C","total":103,"sho":6,"rate":5.8},{"n":"医師D","total":79,"sho":1,"rate":1.3},{"n":"医師E","total":10,"sho":0,"rate":0.0},{"n":"医師F","total":10,"sho":1,"rate":10.0},{"n":"医師G","total":9,"sho":0,"rate":0.0},{"n":"医師H","total":6,"sho":0,"rate":0.0},{"n":"医師I","total":6,"sho":0,"rate":0.0}],"rare":[{"n":"SL_0516","t":1,"r":100.0},{"n":"SL_0815","t":1,"r":100.0},{"n":"SL_0909","t":4,"r":100.0}],"saijyu":[{"n":"SL_0175","t":2552,"r":0.8},{"n":"SL_0702","t":1011,"r":0.3},{"n":"SL_0009","t":461,"r":0.0},{"n":"SL_0241","t":277,"r":0.7},{"n":"SL_0839","t":241,"r":2.1}],"kairi":[]},"内科":{"tz":{"am":94,"pm1":22,"pm2":9,"eve":174},"doctors":[{"n":"医師A","total":299,"sho":165,"rate":55.2}],"rare":[{"n":"SL_0009","t":3,"r":0.0}],"saijyu":[{"n":"SL_0015","t":942,"r":54.8}],"kairi":[]},"呼吸器内科":{"tz":{"am":992,"pm1":343,"pm2":26,"eve":5},"doctors":[{"n":"医師A","total":308,"sho":0,"rate":0.0},{"n":"医師B","total":198,"sho":9,"rate":4.5},{"n":"医師C","total":183,"sho":9,"rate":4.9},{"n":"医師D","total":160,"sho":12,"rate":7.5},{"n":"医師E","total":131,"sho":5,"rate":3.8},{"n":"医師F","total":98,"sho":16,"rate":16.3},{"n":"医師G","total":98,"sho":4,"rate":4.1},{"n":"医師H","total":71,"sho":10,"rate":14.1},{"n":"医師I","total":55,"sho":9,"rate":16.4},{"n":"医師J","total":31,"sho":0,"rate":0.0}],"rare":[{"n":"SL_0914","t":1,"r":100.0},{"n":"SL_1009","t":1,"r":0.0},{"n":"SL_0808","t":2,"r":0.0},{"n":"SL_0873","t":2,"r":0.0},{"n":"SL_0884","t":2,"r":0.0}],"saijyu":[{"n":"SL_0082","t":754,"r":0.1},{"n":"SL_0189","t":522,"r":0.2},{"n":"SL_0009","t":457,"r":0.0},{"n":"SL_0061","t":445,"r":0.2},{"n":"SL_0106","t":412,"r":0.0}],"kairi":[]},"呼吸器外科":{"tz":{"am":171,"pm1":46,"pm2":4,"eve":0},"doctors":[{"n":"医師A","total":120,"sho":2,"rate":1.7},{"n":"医師B","total":87,"sho":4,"rate":4.6},{"n":"医師C","total":10,"sho":0,"rate":0.0},{"n":"医師D","total":4,"sho":0,"rate":0.0}],"rare":[{"n":"SL_0005","t":2,"r":0.0},{"n":"SL_0836","t":2,"r":100.0},{"n":"SL_0878","t":2,"r":50.0}],"saijyu":[{"n":"SL_0188","t":298,"r":0.3},{"n":"SL_0024","t":181,"r":0.0},{"n":"SL_0486","t":26,"r":0.0},{"n":"SL_0584","t":26,"r":0.0},{"n":"SL_0009","t":24,"r":0.0}],"kairi":[]},"小児科":{"tz":{"am":411,"pm1":130,"pm2":66,"eve":43},"doctors":[{"n":"医師A","total":80,"sho":8,"rate":10.0},{"n":"医師B","total":78,"sho":64,"rate":82.1},{"n":"医師C","total":70,"sho":6,"rate":8.6},{"n":"医師D","total":55,"sho":37,"rate":67.3},{"n":"医師E","total":50,"sho":9,"rate":18.0},{"n":"医師F","total":48,"sho":4,"rate":8.3},{"n":"医師G","total":43,"sho":6,"rate":14.0},{"n":"医師H","total":35,"sho":1,"rate":2.9},{"n":"医師I","total":34,"sho":2,"rate":5.9},{"n":"医師J","total":34,"sho":1,"rate":2.9}],"rare":[{"n":"SL_0890","t":1,"r":0.0},{"n":"SL_0949","t":1,"r":0.0},{"n":"SL_0667","t":3,"r":100.0},{"n":"SL_0180","t":4,"r":50.0}],"saijyu":[{"n":"SL_0260","t":232,"r":82.8},{"n":"SL_0009","t":171,"r":1.2},{"n":"SL_0070","t":129,"r":6.2},{"n":"SL_0272","t":116,"r":7.8},{"n":"SL_0351","t":106,"r":5.7}],"kairi":[]},"形成外科":{"tz":{"am":496,"pm1":71,"pm2":29,"eve":3},"doctors":[{"n":"医師A","total":225,"sho":20,"rate":8.9},{"n":"医師B","total":128,"sho":5,"rate":3.9},{"n":"医師C","total":109,"sho":9,"rate":8.3},{"n":"医師D","total":62,"sho":6,"rate":9.7},{"n":"医師E","total":26,"sho":0,"rate":0.0},{"n":"医師F","total":16,"sho":0,"rate":0.0},{"n":"医師G","total":15,"sho":4,"rate":26.7},{"n":"医師H","total":6,"sho":0,"rate":0.0},{"n":"医師I","total":5,"sho":0,"rate":0.0},{"n":"医師J","total":3,"sho":0,"rate":0.0}],"rare":[{"n":"SL_0816","t":3,"r":0.0},{"n":"SL_0896","t":3,"r":0.0},{"n":"SL_0475","t":4,"r":0.0},{"n":"SL_0687","t":4,"r":0.0},{"n":"SL_0713","t":4,"r":0.0}],"saijyu":[{"n":"SL_0009","t":428,"r":0.0},{"n":"SL_0701","t":251,"r":0.8},{"n":"SL_0939","t":168,"r":0.0},{"n":"SL_0941","t":160,"r":0.0},{"n":"SL_0707","t":146,"r":0.0}],"kairi":[]},"循環器内科":{"tz":{"am":1130,"pm1":374,"pm2":53,"eve":36},"doctors":[{"n":"医師A","total":252,"sho":22,"rate":8.7},{"n":"医師B","total":207,"sho":30,"rate":14.5},{"n":"医師C","total":199,"sho":13,"rate":6.5},{"n":"医師D","total":165,"sho":7,"rate":4.2},{"n":"医師E","total":145,"sho":8,"rate":5.5},{"n":"医師F","total":124,"sho":6,"rate":4.8},{"n":"医師G","total":108,"sho":0,"rate":0.0},{"n":"医師H","total":106,"sho":10,"rate":9.4},{"n":"医師I","total":92,"sho":0,"rate":0.0},{"n":"医師J","total":56,"sho":9,"rate":16.1}],"rare":[{"n":"SL_0980","t":1,"r":0.0},{"n":"SL_1002","t":1,"r":100.0}],"saijyu":[{"n":"SL_0150","t":663,"r":1.2},{"n":"SL_0009","t":639,"r":0.0},{"n":"SL_0193","t":455,"r":0.0},{"n":"SL_0044","t":438,"r":1.6},{"n":"SL_0153","t":336,"r":0.0}],"kairi":[]},"心臓血管外科":{"tz":{"am":173,"pm1":36,"pm2":2,"eve":2},"doctors":[{"n":"医師A","total":134,"sho":3,"rate":2.2},{"n":"医師B","total":60,"sho":0,"rate":0.0},{"n":"医師C","total":18,"sho":0,"rate":0.0},{"n":"医師D","total":1,"sho":0,"rate":0.0}],"rare":[{"n":"SL_1004","t":1,"r":0.0},{"n":"SL_1006","t":1,"r":100.0},{"n":"SL_0005","t":2,"r":0.0}],"saijyu":[{"n":"SL_0726","t":404,"r":0.0},{"n":"SL_0168","t":152,"r":0.0},{"n":"SL_0009","t":63,"r":0.0}],"kairi":[]},"放射線治療科":{"tz":{"am":672,"pm1":230,"pm2":51,"eve":6},"doctors":[{"n":"医師A","total":434,"sho":7,"rate":1.6},{"n":"医師B","total":231,"sho":0,"rate":0.0},{"n":"医師C","total":82,"sho":0,"rate":0.0},{"n":"医師D","total":80,"sho":0,"rate":0.0},{"n":"医師E","total":38,"sho":0,"rate":0.0},{"n":"医師F","total":37,"sho":0,"rate":0.0},{"n":"医師G","total":21,"sho":0,"rate":0.0},{"n":"医師H","total":12,"sho":0,"rate":0.0},{"n":"医師I","total":12,"sho":0,"rate":0.0},{"n":"医師J","total":7,"sho":0,"rate":0.0}],"rare":[{"n":"SL_0786","t":1,"r":0.0},{"n":"SL_1014","t":1,"r":100.0},{"n":"SL_0393","t":4,"r":100.0}],"saijyu":[{"n":"SL_0134","t":1182,"r":0.1},{"n":"SL_0009","t":635,"r":0.0},{"n":"SL_0108","t":440,"r":0.0},{"n":"SL_0209","t":214,"r":0.0},{"n":"SL_0023","t":145,"r":0.0}],"kairi":[]},"救急科":{"tz":{"am":120,"pm1":96,"pm2":47,"eve":47},"doctors":[{"n":"医師A","total":294,"sho":205,"rate":69.7},{"n":"医師B","total":16,"sho":0,"rate":0.0}],"rare":[],"saijyu":[{"n":"SL_0072","t":939,"r":71.5},{"n":"SL_0395","t":33,"r":0.0},{"n":"SL_0009","t":30,"r":0.0}],"kairi":[]},"整形外科":{"tz":{"am":1493,"pm1":313,"pm2":70,"eve":37},"doctors":[{"n":"医師A","total":226,"sho":14,"rate":6.2},{"n":"医師B","total":170,"sho":1,"rate":0.6},{"n":"医師C","total":134,"sho":11,"rate":8.2},{"n":"医師D","total":107,"sho":38,"rate":35.5},{"n":"医師E","total":104,"sho":17,"rate":16.3},{"n":"医師F","total":103,"sho":11,"rate":10.7},{"n":"医師G","total":102,"sho":23,"rate":22.5},{"n":"医師H","total":96,"sho":11,"rate":11.5},{"n":"医師I","total":91,"sho":0,"rate":0.0},{"n":"医師J","total":89,"sho":14,"rate":15.7}],"rare":[{"n":"SL_0253","t":1,"r":0.0},{"n":"SL_1010","t":1,"r":0.0},{"n":"SL_0391","t":2,"r":0.0},{"n":"SL_0982","t":2,"r":0.0},{"n":"SL_0996","t":2,"r":0.0}],"saijyu":[{"n":"SL_0038","t":592,"r":0.0},{"n":"SL_0009","t":538,"r":0.4},{"n":"SL_0227","t":519,"r":1.5},{"n":"SL_0261","t":293,"r":1.4},{"n":"SL_0279","t":253,"r":0.0}],"kairi":[]},"歯科口腔外科":{"tz":{"am":760,"pm1":225,"pm2":70,"eve":1},"doctors":[{"n":"医師A","total":216,"sho":37,"rate":17.1},{"n":"医師B","total":158,"sho":37,"rate":23.4},{"n":"医師C","total":149,"sho":23,"rate":15.4},{"n":"医師D","total":124,"sho":29,"rate":23.4},{"n":"医師E","total":111,"sho":38,"rate":34.2},{"n":"医師F","total":55,"sho":20,"rate":36.4},{"n":"医師G","total":49,"sho":26,"rate":53.1},{"n":"医師H","total":48,"sho":21,"rate":43.8},{"n":"医師I","total":38,"sho":32,"rate":84.2},{"n":"医師J","total":25,"sho":0,"rate":0.0}],"rare":[{"n":"SL_0997","t":1,"r":0.0},{"n":"SL_1011","t":1,"r":0.0},{"n":"SL_0955","t":2,"r":0.0},{"n":"SL_0643","t":4,"r":25.0}],"saijyu":[{"n":"SL_0009","t":520,"r":17.9},{"n":"SL_0123","t":380,"r":0.5},{"n":"SL_0703","t":308,"r":7.1},{"n":"SL_0732","t":259,"r":1.5},{"n":"SL_0080","t":220,"r":0.0}],"kairi":[]},"泌尿器科":{"tz":{"am":2787,"pm1":735,"pm2":49,"eve":18},"doctors":[{"n":"医師A","total":503,"sho":14,"rate":2.8},{"n":"医師B","total":482,"sho":19,"rate":3.9},{"n":"医師C","total":471,"sho":23,"rate":4.9},{"n":"医師D","total":451,"sho":24,"rate":5.3},{"n":"医師E","total":276,"sho":0,"rate":0.0},{"n":"医師F","total":276,"sho":0,"rate":0.0},{"n":"医師G","total":227,"sho":12,"rate":5.3},{"n":"医師H","total":205,"sho":4,"rate":2.0},{"n":"医師I","total":105,"sho":1,"rate":1.0},{"n":"医師J","total":90,"sho":1,"rate":1.1}],"rare":[{"n":"SL_0921","t":1,"r":0.0},{"n":"SL_0948","t":1,"r":100.0},{"n":"SL_0694","t":2,"r":0.0},{"n":"SL_0775","t":2,"r":100.0},{"n":"SL_0864","t":3,"r":0.0}],"saijyu":[{"n":"SL_0009","t":2527,"r":0.0},{"n":"SL_0006","t":1323,"r":0.5},{"n":"SL_0019","t":1275,"r":0.4},{"n":"SL_0128","t":1203,"r":0.8},{"n":"SL_0112","t":1154,"r":0.2}],"kairi":[]},"消化器内科":{"tz":{"am":1146,"pm1":430,"pm2":27,"eve":8},"doctors":[{"n":"医師A","total":396,"sho":28,"rate":7.1},{"n":"医師B","total":290,"sho":22,"rate":7.6},{"n":"医師C","total":251,"sho":25,"rate":10.0},{"n":"医師D","total":234,"sho":34,"rate":14.5},{"n":"医師E","total":228,"sho":34,"rate":14.9},{"n":"医師F","total":126,"sho":7,"rate":5.6},{"n":"医師G","total":28,"sho":8,"rate":28.6},{"n":"医師H","total":17,"sho":0,"rate":0.0},{"n":"医師I","total":15,"sho":4,"rate":26.7},{"n":"医師J","total":10,"sho":0,"rate":0.0}],"rare":[{"n":"SL_0998","t":2,"r":0.0},{"n":"SL_0970","t":3,"r":100.0}],"saijyu":[{"n":"SL_0214","t":493,"r":0.0},{"n":"SL_0120","t":473,"r":0.0},{"n":"SL_0009","t":468,"r":0.4},{"n":"SL_0152","t":380,"r":0.0},{"n":"SL_0730","t":339,"r":0.0}],"kairi":[]},"産婦人科":{"tz":{"am":1438,"pm1":468,"pm2":58,"eve":17},"doctors":[{"n":"医師A","total":333,"sho":19,"rate":5.7},{"n":"医師B","total":285,"sho":19,"rate":6.7},{"n":"医師C","total":282,"sho":21,"rate":7.4},{"n":"医師D","total":221,"sho":12,"rate":5.4},{"n":"医師E","total":177,"sho":21,"rate":11.9},{"n":"医師F","total":121,"sho":0,"rate":0.0},{"n":"医師G","total":109,"sho":12,"rate":11.0},{"n":"医師H","total":91,"sho":15,"rate":16.5},{"n":"医師I","total":79,"sho":0,"rate":0.0},{"n":"医師J","total":67,"sho":5,"rate":7.5}],"rare":[{"n":"SL_0882","t":1,"r":0.0},{"n":"SL_0653","t":2,"r":0.0},{"n":"SL_0663","t":3,"r":0.0},{"n":"SL_0994","t":4,"r":0.0},{"n":"SL_1007","t":4,"r":0.0}],"saijyu":[{"n":"SL_0124","t":787,"r":0.0},{"n":"SL_0028","t":649,"r":0.3},{"n":"SL_0009","t":522,"r":0.2},{"n":"SL_0049","t":488,"r":0.2},{"n":"SL_0207","t":388,"r":0.0}],"kairi":[]},"皮膚科":{"tz":{"am":1090,"pm1":198,"pm2":43,"eve":15},"doctors":[{"n":"医師A","total":273,"sho":29,"rate":10.6},{"n":"医師B","total":255,"sho":18,"rate":7.1},{"n":"医師C","total":242,"sho":28,"rate":11.6},{"n":"医師D","total":219,"sho":26,"rate":11.9},{"n":"医師E","total":143,"sho":0,"rate":0.0},{"n":"医師F","total":70,"sho":9,"rate":12.9},{"n":"医師G","total":61,"sho":0,"rate":0.0},{"n":"医師H","total":53,"sho":0,"rate":0.0},{"n":"医師I","total":20,"sho":1,"rate":5.0},{"n":"医師J","total":5,"sho":4,"rate":80.0}],"rare":[{"n":"SL_0762","t":3,"r":0.0}],"saijyu":[{"n":"SL_0009","t":774,"r":0.4},{"n":"SL_0101","t":642,"r":5.9},{"n":"SL_0972","t":596,"r":3.7},{"n":"SL_0173","t":570,"r":4.4},{"n":"SL_0091","t":516,"r":7.2}],"kairi":[]},"眼科":{"tz":{"am":2334,"pm1":969,"pm2":143,"eve":7},"doctors":[{"n":"医師A","total":320,"sho":27,"rate":8.4},{"n":"医師B","total":319,"sho":0,"rate":0.0},{"n":"医師C","total":317,"sho":39,"rate":12.3},{"n":"医師D","total":282,"sho":20,"rate":7.1},{"n":"医師E","total":238,"sho":2,"rate":0.8},{"n":"医師F","total":229,"sho":14,"rate":6.1},{"n":"医師G","total":224,"sho":21,"rate":9.4},{"n":"医師H","total":197,"sho":19,"rate":9.6},{"n":"医師I","total":189,"sho":0,"rate":0.0},{"n":"医師J","total":150,"sho":0,"rate":0.0}],"rare":[{"n":"SL_0880","t":1,"r":0.0},{"n":"SL_0917","t":1,"r":0.0},{"n":"SL_1005","t":1,"r":0.0},{"n":"SL_0965","t":2,"r":0.0},{"n":"SL_0822","t":3,"r":0.0}],"saijyu":[{"n":"SL_0170","t":954,"r":0.0},{"n":"SL_0007","t":756,"r":0.9},{"n":"SL_0154","t":696,"r":0.7},{"n":"SL_0009","t":621,"r":3.1},{"n":"SL_0136","t":603,"r":0.0}],"kairi":[]},"総合内科":{"tz":{"am":1032,"pm1":201,"pm2":29,"eve":1},"doctors":[{"n":"医師A","total":441,"sho":207,"rate":46.9},{"n":"医師B","total":145,"sho":0,"rate":0.0},{"n":"医師C","total":124,"sho":0,"rate":0.0},{"n":"医師D","total":93,"sho":28,"rate":30.1},{"n":"医師E","total":74,"sho":0,"rate":0.0},{"n":"医師F","total":46,"sho":0,"rate":0.0},{"n":"医師G","total":44,"sho":0,"rate":0.0},{"n":"医師H","total":42,"sho":0,"rate":0.0},{"n":"医師I","total":41,"sho":0,"rate":0.0},{"n":"医師J","total":32,"sho":0,"rate":0.0}],"rare":[{"n":"SL_0888","t":2,"r":100.0},{"n":"SL_0893","t":2,"r":50.0},{"n":"SL_0249","t":4,"r":0.0}],"saijyu":[{"n":"SL_0009","t":958,"r":9.5},{"n":"SL_0172","t":427,"r":0.0},{"n":"SL_0238","t":247,"r":0.0},{"n":"SL_0254","t":231,"r":83.5},{"n":"SL_0289","t":199,"r":0.0}],"kairi":[]},"耳鼻咽喉科":{"tz":{"am":1447,"pm1":371,"pm2":81,"eve":8},"doctors":[{"n":"医師A","total":257,"sho":36,"rate":14.0},{"n":"医師B","total":255,"sho":28,"rate":11.0},{"n":"医師C","total":248,"sho":0,"rate":0.0},{"n":"医師D","total":245,"sho":62,"rate":25.3},{"n":"医師E","total":148,"sho":25,"rate":16.9},{"n":"医師F","total":130,"sho":0,"rate":0.0},{"n":"医師G","total":127,"sho":8,"rate":6.3},{"n":"医師H","total":108,"sho":12,"rate":11.1},{"n":"医師I","total":106,"sho":7,"rate":6.6},{"n":"医師J","total":73,"sho":0,"rate":0.0}],"rare":[{"n":"SL_0512","t":1,"r":100.0},{"n":"SL_0792","t":2,"r":0.0}],"saijyu":[{"n":"SL_0009","t":865,"r":0.0},{"n":"SL_0064","t":607,"r":0.0},{"n":"SL_0095","t":458,"r":12.7},{"n":"SL_0155","t":457,"r":11.8},{"n":"SL_0181","t":435,"r":6.7}],"kairi":[]},"脳神経内科":{"tz":{"am":499,"pm1":51,"pm2":3,"eve":1},"doctors":[{"n":"医師A","total":308,"sho":40,"rate":13.0},{"n":"医師B","total":121,"sho":11,"rate":9.1},{"n":"医師C","total":61,"sho":3,"rate":4.9},{"n":"医師D","total":55,"sho":7,"rate":12.7},{"n":"医師E","total":5,"sho":0,"rate":0.0},{"n":"医師F","total":3,"sho":0,"rate":0.0},{"n":"医師G","total":1,"sho":0,"rate":0.0}],"rare":[{"n":"SL_0971","t":1,"r":0.0},{"n":"SL_1013","t":1,"r":100.0},{"n":"SL_0873","t":2,"r":0.0},{"n":"SL_0677","t":4,"r":0.0}],"saijyu":[{"n":"SL_0013","t":658,"r":0.0},{"n":"SL_0160","t":307,"r":0.0},{"n":"SL_0009","t":237,"r":8.4},{"n":"SL_0291","t":119,"r":0.0},{"n":"SL_0437","t":107,"r":84.1}],"kairi":[]},"脳神経外科":{"tz":{"am":239,"pm1":12,"pm2":4,"eve":5},"doctors":[{"n":"医師A","total":68,"sho":11,"rate":16.2},{"n":"医師B","total":53,"sho":8,"rate":15.1},{"n":"医師C","total":51,"sho":2,"rate":3.9},{"n":"医師D","total":27,"sho":1,"rate":3.7},{"n":"医師E","total":19,"sho":0,"rate":0.0},{"n":"医師F","total":17,"sho":1,"rate":5.9},{"n":"医師G","total":10,"sho":8,"rate":80.0},{"n":"医師H","total":10,"sho":5,"rate":50.0},{"n":"医師I","total":2,"sho":0,"rate":0.0},{"n":"医師J","total":2,"sho":0,"rate":0.0}],"rare":[{"n":"SL_0345","t":1,"r":0.0},{"n":"SL_0659","t":2,"r":0.0},{"n":"SL_0610","t":4,"r":0.0}],"saijyu":[{"n":"SL_0184","t":152,"r":2.6},{"n":"SL_0343","t":150,"r":4.0},{"n":"SL_0302","t":113,"r":6.2},{"n":"SL_0009","t":70,"r":1.4},{"n":"SL_0352","t":47,"r":0.0}],"kairi":[]},"腎内科":{"tz":{"am":665,"pm1":118,"pm2":10,"eve":1},"doctors":[{"n":"医師A","total":278,"sho":14,"rate":5.0},{"n":"医師B","total":237,"sho":3,"rate":1.3},{"n":"医師C","total":104,"sho":1,"rate":1.0},{"n":"医師D","total":52,"sho":2,"rate":3.8},{"n":"医師E","total":51,"sho":1,"rate":2.0},{"n":"医師F","total":49,"sho":0,"rate":0.0},{"n":"医師G","total":18,"sho":2,"rate":11.1},{"n":"医師H","total":2,"sho":0,"rate":0.0},{"n":"医師I","total":2,"sho":0,"rate":0.0},{"n":"医師J","total":1,"sho":0,"rate":0.0}],"rare":[{"n":"SL_0405","t":4,"r":0.0},{"n":"SL_0638","t":4,"r":100.0}],"saijyu":[{"n":"SL_0041","t":740,"r":0.0},{"n":"SL_0027","t":611,"r":0.0},{"n":"SL_0009","t":271,"r":0.0},{"n":"SL_0203","t":185,"r":0.0},{"n":"SL_0282","t":123,"r":0.8}],"kairi":[]},"臨床腫瘍科":{"tz":{"am":154,"pm1":7,"pm2":3,"eve":0},"doctors":[{"n":"医師A","total":153,"sho":0,"rate":0.0},{"n":"医師B","total":7,"sho":0,"rate":0.0},{"n":"医師C","total":3,"sho":0,"rate":0.0},{"n":"医師D","total":1,"sho":0,"rate":0.0}],"rare":[],"saijyu":[{"n":"SL_0088","t":307,"r":0.3},{"n":"SL_0009","t":59,"r":0.0},{"n":"SL_0633","t":41,"r":0.0},{"n":"SL_0543","t":24,"r":0.0}],"kairi":[]},"血液内科":{"tz":{"am":806,"pm1":81,"pm2":5,"eve":3},"doctors":[{"n":"医師A","total":196,"sho":4,"rate":2.0},{"n":"医師B","total":162,"sho":9,"rate":5.6},{"n":"医師C","total":147,"sho":7,"rate":4.8},{"n":"医師D","total":90,"sho":7,"rate":7.8},{"n":"医師E","total":68,"sho":4,"rate":5.9},{"n":"医師F","total":62,"sho":0,"rate":0.0},{"n":"医師G","total":30,"sho":0,"rate":0.0},{"n":"医師H","total":29,"sho":0,"rate":0.0},{"n":"医師I","total":29,"sho":0,"rate":0.0},{"n":"医師J","total":28,"sho":2,"rate":7.1}],"rare":[{"n":"SL_0873","t":1,"r":0.0},{"n":"SL_0788","t":3,"r":0.0}],"saijyu":[{"n":"SL_0012","t":501,"r":0.0},{"n":"SL_0096","t":415,"r":0.2},{"n":"SL_0169","t":354,"r":0.0},{"n":"SL_0089","t":206,"r":0.0},{"n":"SL_0216","t":168,"r":0.0}],"kairi":[]}},"total_sho_monthly":[2885,2831,2857],"total_sai_monthly":[28436,27316,28486],"total_kus_monthly":[4188,4023,3987],"total_cand_monthly":[1912,1852,1780],"total_monthly":[31321,30147,31343],"total_sho_apr":2857,"total_sai_apr":28486,"total_kus_apr":3987,"global_sho_target":3133,"global_kus_target":3441,"generated_at":"2026-04-27T15:36:50.343627"};
+
+// ============================================================
+// SCREEN 1: KPI cards
+// ============================================================
+const apr = DATA.months.length - 1;
+const mar = Math.max(0, apr - 1);
+const hasPrev = apr > 0;
+
+// 総件数
+const totalApr = DATA.total_sho_apr + DATA.total_sai_apr;
+const totalMar = hasPrev ? (DATA.total_sho_monthly[mar] + DATA.total_sai_monthly[mar]) : totalApr;
+const totalPct = hasPrev ? ((totalApr/totalMar - 1)*100).toFixed(1) : '0.0';
+document.getElementById('kpi1Val').innerHTML = fmtNum(totalApr) + '<span class="kpi-unit">件</span>';
+document.getElementById('kpi1Target').textContent = hasPrev
+  ? `前月 ${fmtNum(totalMar)} ／ ${DATA.monthLabels[apr]}実績 ${fmtNum(DATA.total_monthly[apr])}`
+  : `${DATA.monthLabels[apr]}実績 ${fmtNum(DATA.total_monthly[apr])}`;
+const tr1 = document.getElementById('kpi1Trend');
+if (hasPrev) {
+  tr1.className = 'kpi-trend ' + (totalPct>1?'trend-up':totalPct<-1?'trend-down':'trend-flat');
+  tr1.textContent = (totalPct>0?'▲ ':'▼ ') + Math.abs(totalPct) + '%';
+} else {
+  tr1.className = 'kpi-trend trend-flat';
+  tr1.textContent = '—';
+}
+
+// 初診件数
+const shoApr = DATA.total_sho_apr;
+const shoMar = hasPrev ? DATA.total_sho_monthly[mar] : shoApr;
+const shoPct = hasPrev ? ((shoApr/shoMar - 1)*100).toFixed(1) : '0.0';
+const shoAch = DATA.global_sho_target ? (shoApr/DATA.global_sho_target*100).toFixed(0) : '0';
+document.getElementById('kpi2Val').innerHTML = fmtNum(shoApr) + '<span class="kpi-unit">件</span>';
+document.getElementById('kpi2Target').textContent = hasPrev
+  ? `前月 ${fmtNum(shoMar)} ／ 目標 ${fmtNum(DATA.global_sho_target)} ／ 達成率 ${shoAch}%`
+  : `目標 ${fmtNum(DATA.global_sho_target)} ／ 達成率 ${shoAch}%`;
+document.getElementById('kpi2Bar').style.width = Math.min(100, shoAch) + '%';
+const tr2 = document.getElementById('kpi2Trend');
+if (hasPrev) {
+  tr2.className = 'kpi-trend ' + (shoPct>1?'trend-up':shoPct<-1?'trend-down':'trend-flat');
+  tr2.textContent = (shoPct>0?'▲ ':'▼ ') + Math.abs(shoPct) + '%';
+} else {
+  tr2.className = 'kpi-trend trend-flat';
+  tr2.textContent = '—';
+}
+
+// 再診:初診 比率
+const spsApr = (DATA.total_sai_apr / shoApr).toFixed(1);
+const spsMar = hasPrev ? (DATA.total_sai_monthly[mar] / shoMar).toFixed(1) : spsApr;
+const spsDelta = hasPrev ? (spsApr - spsMar).toFixed(1) : '0.0';
+document.getElementById('kpi3Val').innerHTML = spsApr + '<span class="kpi-unit">倍</span>';
+document.getElementById('kpi3Target').textContent = hasPrev
+  ? `前月 ${spsMar}倍 ／ 低下=改善方向`
+  : `低下=改善方向`;
+const tr3 = document.getElementById('kpi3Trend');
+if (hasPrev) {
+  tr3.className = 'kpi-trend ' + (spsDelta<-0.1?'trend-up':spsDelta>0.1?'trend-down':'trend-flat');
+  tr3.textContent = (spsDelta>0?'▲ ':'▼ ') + Math.abs(spsDelta);
+} else {
+  tr3.className = 'kpi-trend trend-flat';
+  tr3.textContent = '—';
+}
+
+// 「薬のみ」再診件数
+const kusApr = DATA.total_kus_apr;
+const kusMar = hasPrev ? DATA.total_kus_monthly[mar] : kusApr;
+const kusPct = hasPrev ? ((kusApr/kusMar - 1)*100).toFixed(1) : '0.0';
+document.getElementById('kpi4Val').innerHTML = fmtNum(kusApr) + '<span class="kpi-unit">件</span>';
+document.getElementById('kpi4Target').textContent = hasPrev
+  ? `前月 ${fmtNum(kusMar)} ／ 目標 ${fmtNum(DATA.global_kus_target)}以下 ／ 削減率 ${(100-kusApr/kusMar*100).toFixed(0)}%`
+  : `目標 ${fmtNum(DATA.global_kus_target)}以下`;
+// 目標以下が良い。目標÷実績が100%以上なら良い
+const kusPctBar = kusApr > 0 ? Math.min(100, (DATA.global_kus_target/kusApr*100)) : 0;
+document.getElementById('kpi4Bar').style.width = kusPctBar + '%';
+const tr4 = document.getElementById('kpi4Trend');
+if (hasPrev) {
+  // 減少が改善
+  tr4.className = 'kpi-trend ' + (kusPct<-1?'trend-up':kusPct>1?'trend-down':'trend-flat');
+  tr4.textContent = (kusPct>0?'▲ ':'▼ ') + Math.abs(kusPct) + '%';
+} else {
+  tr4.className = 'kpi-trend trend-flat';
+  tr4.textContent = '—';
+}
+
+// ============================================================
+// Sparklines
+// ============================================================
+function makeSpark(id, data, color){
+  charts[id] = new Chart(document.getElementById(id),{
+    type:'line',
+    data:{labels:DATA.monthLabels,datasets:[{
+      data:data, borderColor:color, backgroundColor:color+'22',
+      borderWidth:1.5, pointRadius:2, pointBackgroundColor:color, fill:true, tension:.3
+    }]},
+    options:{responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{enabled:false}},
+      scales:{x:{display:false},y:{display:false}}}
+  });
+}
+const totalSpark = [...DATA.total_monthly.slice(0,apr), totalApr];
+const shoSpark = [...DATA.total_sho_monthly.slice(0,apr), shoApr];
+const spsSpark = DATA.total_sai_monthly.map((s,i)=>{
+  const sho = i===apr ? shoApr : DATA.total_sho_monthly[i];
+  const sai = i===apr ? DATA.total_sai_apr : s;
+  return sho>0 ? (sai/sho) : 0;
+});
+const kusSpark = [...DATA.total_kus_monthly.slice(0,apr), kusApr];
+makeSpark('sparkTotal', totalSpark, CC.blue);
+makeSpark('sparkSho', shoSpark, CC.blue);
+makeSpark('sparkSps', spsSpark, CC.other);
+makeSpark('sparkKus', kusSpark, CC.gold);
+
+// ============================================================
+// Highlights
+// ============================================================
+// pickHighlights() removed - now handled by Python+LLM pre-generation
+
+// Highlights are pre-generated by Python + LLM
+const hl = {"best":{"head":"今月の好事例（初診件数）","body":"血液内科の初診件数が前月比 +54.5%。最新月 34件（前月 22件）。要因検証と横展開を検討。","raw":{"name":"血液内科","sho_latest":34,"sho_prev":22,"pct_change":54.5,"achievement":110.0,"target":31}},"declining":null,"worst":{"head":"目標達成率 最下位","body":"呼吸器内科の初診達成率は 81%。最新月 77件／目標 95件。個別ヒアリング対象。","raw":{"name":"呼吸器内科","sho_latest":77,"sho_prev":86,"pct_change":-10.5,"achievement":81.0,"target":95}}};
+const hlc = document.getElementById('highlightsContainer');
+function renderHighlight(item, cls, icon) {
+  if(!item) return '';
+  return `
+    <div class="hl-item hl-${cls}">
+      <div class="hl-icon">${icon}</div>
+      <div class="hl-head">${item.head}</div>
+      <div class="hl-body">${item.body}</div>
+    </div>`;
+}
+hlc.innerHTML = renderHighlight(hl.best, 'success', '🎉') +
+                renderHighlight(hl.declining, 'warn', '⚠') +
+                renderHighlight(hl.worst, 'danger', '📉');
+// (Highlights rendered above by renderHighlight())
+
+// ============================================================
+// Heatmaps (3 types)
+// ============================================================
+const topDepts = DATA.depts.filter(d => d.sho_target>0 && d.avg_monthly>=200).slice(0, 18);
+
+function buildHeatmap(type) {
+  // type: 'sho' | 'sps' | 'kus'
+  const headId = {sho:'heatShoHead', sps:'heatSpsHead', kus:'heatKusHead'}[type];
+  const bodyId = {sho:'heatShoBody', sps:'heatSpsBody', kus:'heatKusBody'}[type];
+  const head = document.getElementById(headId);
+  const body = document.getElementById(bodyId);
+
+  const labelMap = {sho:'目標', sps:'目標', kus:'目標'};
+  let h = `<tr><th style="text-align:left;">診療科</th><th>${labelMap[type]}</th>`;
+  DATA.monthLabels.forEach(m => h += `<th>${m}</th>`);
+  h += '</tr>';
+  head.innerHTML = h;
+
+  body.innerHTML = '';
+  topDepts
+    .filter(d => (type==='sho' && d.sho_target>0) ||
+                 (type==='sps' && d.sps_target>0) ||
+                 (type==='kus' && d.kus_target>0))
+    .forEach(d => {
+      let targetVal, monthlyVals, aprAdj, unit='', inverse=false;
+      if(type==='sho'){
+        targetVal = d.sho_target;
+        monthlyVals = d.sho_m;
+        aprAdj = d.sho_apr;
+      } else if(type==='sps'){
+        targetVal = d.sps_target;
+        monthlyVals = d.sps_m;
+        aprAdj = d.sps_apr;
+        unit = '倍';
+        inverse = true;
+      } else {
+        targetVal = d.kus_target;
+        monthlyVals = d.kus_m;
+        aprAdj = d.kus_apr;
+        inverse = true;
+      }
+
+      let row = `<tr>
+        <td><span class="type-tag tag-${d.type}">${d.type==='naika'?'内':d.type==='geka'?'外':'他'}</span>${d.name}</td>
+        <td style="color:var(--dim);">${targetVal}${unit}</td>`;
+      for(let i=0; i<6; i++){
+        const actual = i===5 ? aprAdj : monthlyVals[i];
+        if(actual===null || actual===undefined){
+          row += `<td><div class="hm-cell g-NA">—</div></td>`;
+          continue;
+        }
+        const pct = targetVal>0 ? (actual/targetVal*100) : 0;
+        const g = gradeFromPct(pct, inverse);
+        const tooltip = `${d.name} ${DATA.monthLabels[i]}: ${actual}${unit} / 目標${targetVal}${unit} (${pct.toFixed(0)}%)`;
+        row += `<td style="padding:4px;"><div class="hm-cell g-${g}" title="${tooltip}">${g}</div></td>`;
+      }
+      row += '</tr>';
+      body.innerHTML += row;
+    });
+}
+buildHeatmap('sho');
+buildHeatmap('sps');
+buildHeatmap('kus');
+
+// ============================================================
+// SCREEN 2: Trend charts
+// ============================================================
+const shoSeries = [...DATA.total_sho_monthly.slice(0,apr), shoApr];
+const kusSeries = [...DATA.total_kus_monthly.slice(0,apr), kusApr];
+const spsSeries = DATA.total_sai_monthly.map((s,i)=>{
+  const sho = i===5 ? shoApr : DATA.total_sho_monthly[i];
+  const sai = i===5 ? DATA.total_sai_apr : s;
+  return sho>0 ? +(sai/sho).toFixed(1) : 0;
+});
+
+function createTrendChart(canvasId, data, label, color, targetLine=null, isLine=false){
+  const ds = [{
+    label:label, data:data,
+    backgroundColor:isLine?color+'22':DATA.monthLabels.map((m,i)=>i===5?color+'88':color+'DD'),
+    borderColor:color, borderWidth:isLine?2:0,
+    pointRadius:isLine?4:0, pointBackgroundColor:color,
+    borderRadius:4, tension:.3, fill:isLine, order:2
+  }];
+  if(targetLine !== null){
+    ds.push({
+      label:'目標', data:Array(6).fill(targetLine), type:'line',
+      borderColor:CC.target, backgroundColor:'transparent',
+      borderWidth:2, borderDash:[6,4], pointRadius:0, order:1
+    });
+  }
+  charts[canvasId] = new Chart(document.getElementById(canvasId),{
+    type:isLine?'line':'bar',
+    data:{labels:DATA.monthLabels, datasets:ds},
+    options:{responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{labels:{boxWidth:10,font:{size:11}}}},
+      scales:{y:{beginAtZero:true,ticks:{font:{size:10}}},x:{ticks:{font:{size:10}}}}}
+  });
+}
+createTrendChart('chartShoTrend', shoSeries, '初診件数', CC.blue, DATA.global_sho_target);
+createTrendChart('chartKusTrend', kusSeries, '「薬のみ」再診', CC.gold, DATA.global_kus_target);
+createTrendChart('chartSpsTrend', spsSeries, '再診:初診比率', CC.other, null, true);
+
+// 主要診療科 初診件数
+const top10Sho = [...DATA.depts]
+  .filter(d => d.sho_target>=20)
+  .sort((a,b)=>b.sho_target-a.sho_target).slice(0,10);
+const deptColors = ['#3F7FC1','#D08620','#2B9DB8','#8B6FB6','#2F7A4B','#A33838','#C89020','#3A6F95','#7A746B','#D4A055'];
+
+charts.chartShoDept = new Chart(document.getElementById('chartShoDept'),{
+  type:'line',
+  data:{labels:DATA.monthLabels,
+    datasets: top10Sho.map((d,i)=>{
+      const s = [...d.sho_m.slice(0,apr), d.sho_apr];
+      return {label:d.name, data:s, borderColor:deptColors[i],
+              backgroundColor:'transparent',borderWidth:1.5,
+              pointRadius:3,pointBackgroundColor:deptColors[i],tension:.3};
+    })
+  },
+  options:{responsive:true, maintainAspectRatio:false,
+    plugins:{legend:{labels:{boxWidth:8,font:{size:10}},position:'bottom'}},
+    scales:{y:{beginAtZero:true,ticks:{font:{size:10}}},x:{ticks:{font:{size:10}}}}}
+});
+
+// ============================================================
+// SCREEN 3: Score card
+// ============================================================
+function makeSparkBars(data, color){
+  const max = Math.max(...data.filter(v=>v!==null), 1);
+  return `<div class="spark-bars">` + data.map(v => {
+    if(v===null) return `<div class="spark-bar" style="height:3px;background:#ddd;"></div>`;
+    const h = Math.max(3, v/max*22);
+    return `<div class="spark-bar" style="height:${h}px;background:${color};"></div>`;
+  }).join('') + `</div>`;
+}
+
+function renderScoreCard(filter='all'){
+  const tbody = document.getElementById('scoreCardBody');
+  tbody.innerHTML = '';
+  
+  let list = DATA.depts.filter(d => d.sho_target>0 || d.kus_target>0);
+  
+  if(filter==='naika') list = list.filter(d => d.type==='naika');
+  if(filter==='geka') list = list.filter(d => d.type==='geka');
+  if(filter==='alert') list = list.filter(d => {
+    const shoPct = d.sho_target>0 ? (d.sho_apr/d.sho_target*100) : 100;
+    const spsPct = d.sps_target>0 ? (d.sps_apr/d.sps_target*100) : 100;
+    const kusPct = d.kus_target>0 ? (d.kus_apr/d.kus_target*100) : 100;
+    return gradeFromPct(shoPct) === 'D' ||
+           gradeFromPct(spsPct, true) === 'D' ||
+           gradeFromPct(kusPct, true) === 'D';
+  });
+
+  const detailList = Object.keys(DATA.detail);
+
+  list.forEach(d => {
+    const tr = document.createElement('tr');
+    if(detailList.includes(d.name)){
+      tr.classList.add('clickable');
+      tr.addEventListener('click', () => {
+        document.getElementById('deptSelector').value = d.name;
+        document.getElementById('deptSelector').dispatchEvent(new Event('change'));
+        document.querySelector('.dept-selector-bar').scrollIntoView({behavior:'smooth', block:'start'});
+      });
+    }
+    
+    // 初診
+    const shoTgt = d.sho_target;
+    const shoActual = d.sho_apr;
+    const shoMarVal = d.sho_m[mar];
+    const shoPct = shoTgt>0 ? (shoActual/shoTgt*100) : null;
+    const shoGrade = shoPct !== null ? gradeFromPct(shoPct) : 'NA';
+    const shoDelta = shoActual - shoMarVal;
+    
+    // 再診:初診比率
+    const spsTgt = d.sps_target;
+    const spsActual = d.sps_apr;
+    const spsMarVal = d.sps_m[mar];
+    const spsPct = spsTgt>0 && spsActual!==null ? (spsActual/spsTgt*100) : null;
+    const spsGrade = spsPct !== null ? gradeFromPct(spsPct, true) : 'NA';
+    const spsDelta = spsActual!==null && spsMarVal!==null ? (spsActual - spsMarVal).toFixed(1) : null;
+    
+    // 薬のみ
+    const kusTgt = d.kus_target;
+    const kusActual = d.kus_apr;
+    const kusMarVal = d.kus_m[mar];
+    const kusPct = kusTgt>0 ? (kusActual/kusTgt*100) : null;
+    const kusGrade = kusPct !== null ? gradeFromPct(kusPct, true) : 'NA';
+    const kusDelta = kusActual - kusMarVal;
+
+    const achClass = (pct) => pct>=100 ? 'ach-over' : pct>=90 ? 'ach-near' : 'ach-under';
+    const achClassInv = (pct) => pct<=100 ? 'ach-over' : pct<=110 ? 'ach-near' : 'ach-under';
+    const chgClass = (delta) => delta>0 ? 'change-up' : delta<0 ? 'change-down' : 'change-flat';
+    const chgClassInv = (delta) => delta<0 ? 'change-up' : delta>0 ? 'change-down' : 'change-flat';
+    const chgArrow = (delta) => delta>0 ? '▲' : delta<0 ? '▼' : '→';
+
+    tr.innerHTML = `
+      <td><span class="type-tag tag-${d.type}">${d.type==='naika'?'内':d.type==='geka'?'外':'他'}</span>${d.name}</td>
+      <td style="color:var(--dim);">${fmtNum(d.avg_monthly)}</td>
+      
+      <!-- 初診 -->
+      <td style="background:rgba(63,127,193,.03);"><span class="grade g-${shoGrade}">${shoGrade}</span></td>
+      <td style="background:rgba(63,127,193,.03);">
+        ${shoTgt>0 ? `<div><span style="font-weight:700;">${shoActual}</span><span style="color:var(--dim);">/${shoTgt}</span></div>
+        <div class="achiev ${achClass(shoPct)}">${shoPct.toFixed(0)}%</div>` : '<span style="color:var(--muted);">—</span>'}
+      </td>
+      <td style="background:rgba(63,127,193,.03);">
+        ${shoMarVal>0 ? `<div class="${chgClass(shoDelta)}">${chgArrow(shoDelta)} ${Math.abs(shoDelta)}件</div>` : '—'}
+      </td>
+      
+      <!-- 再診:初診 -->
+      <td style="background:rgba(139,111,182,.03);"><span class="grade g-${spsGrade}">${spsGrade}</span></td>
+      <td style="background:rgba(139,111,182,.03);">
+        ${spsTgt>0 && spsActual!==null ? `<div><span style="font-weight:700;">${spsActual}</span><span style="color:var(--dim);">/${spsTgt}</span></div>
+        <div class="achiev ${achClassInv(spsPct)}">${spsPct.toFixed(0)}%</div>` : '<span style="color:var(--muted);">—</span>'}
+      </td>
+      <td style="background:rgba(139,111,182,.03);">
+        ${spsDelta!==null ? `<div class="${chgClassInv(spsDelta)}">${chgArrow(spsDelta)} ${Math.abs(spsDelta)}</div>` : '—'}
+      </td>
+      
+      <!-- 薬のみ -->
+      <td style="background:rgba(200,144,32,.03);"><span class="grade g-${kusGrade}">${kusGrade}</span></td>
+      <td style="background:rgba(200,144,32,.03);">
+        ${kusTgt>0 ? `<div><span style="font-weight:700;">${kusActual}</span><span style="color:var(--dim);">/${kusTgt}</span></div>
+        <div class="achiev ${achClassInv(kusPct)}">${kusPct.toFixed(0)}%</div>` : '<span style="color:var(--muted);">—</span>'}
+      </td>
+      <td style="background:rgba(200,144,32,.03);">
+        ${kusMarVal>0 ? `<div class="${chgClassInv(kusDelta)}">${chgArrow(kusDelta)} ${Math.abs(kusDelta)}件</div>` : '—'}
+      </td>
+      
+      <!-- 候補件数（参考） -->
+      <td style="background:var(--surface2);color:var(--dim);">${d.cand_apr||0}</td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+renderScoreCard();
+
+document.querySelectorAll('.filter-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.filter-btn').forEach(x=>x.classList.remove('active'));
+    btn.classList.add('active');
+    renderScoreCard(btn.dataset.filter);
+  });
+});
+
+// ============================================================
+// SCREEN 4: Dept drill-down
+// ============================================================
+const detailDeptNames = Object.keys(DATA.detail);
+const sel = document.getElementById('deptSelector');
+detailDeptNames.forEach(n => {
+  const opt = document.createElement('option');
+  opt.value = n; opt.textContent = n;
+  sel.appendChild(opt);
+});
+
+function renderDeptDetail(deptName){
+  const d = DATA.depts.find(x => x.name === deptName);
+  const detail = DATA.detail[deptName];
+  if(!d || !detail) return;
+
+  // Dept info
+  const typeLabel = {naika:'内科系', geka:'外科系', other:'その他'}[d.type];
+  document.getElementById('deptInfo').innerHTML = `
+    <div class="dept-info-item"><span class="dept-info-label">タイプ</span><span class="dept-info-val"><span class="type-tag tag-${d.type}">${typeLabel}</span></span></div>
+    <div class="dept-info-item"><span class="dept-info-label">月平均件数</span><span class="dept-info-val">${fmtNum(d.avg_monthly)}</span></div>
+    <div class="dept-info-item"><span class="dept-info-label">${DATA.monthLabels[apr]}実績</span><span class="dept-info-val" style="color:var(--blue);">${fmtNum(d.total_apr)}</span></div>
+  `;
+
+  // Eval summary cards
+  const shoPct = d.sho_target>0 ? (d.sho_apr/d.sho_target*100) : null;
+  const shoGrade = shoPct !== null ? gradeFromPct(shoPct) : 'NA';
+  const spsPct = d.sps_target>0 && d.sps_apr!==null ? (d.sps_apr/d.sps_target*100) : null;
+  const spsGrade = spsPct !== null ? gradeFromPct(spsPct, true) : 'NA';
+  const kusPct = d.kus_target>0 ? (d.kus_apr/d.kus_target*100) : null;
+  const kusGrade = kusPct !== null ? gradeFromPct(kusPct, true) : 'NA';
+
+  document.getElementById('evalSummary').innerHTML = `
+    <div class="eval-card">
+      <div class="eval-head">
+        <span class="eval-lbl">初診件数</span>
+        <span class="grade g-${shoGrade}">${shoGrade}</span>
+      </div>
+      <div class="eval-val" style="color:var(--blue);">${d.sho_apr}<span style="font-size:14px;color:var(--dim);"> / ${d.sho_target}件</span></div>
+      <div class="eval-target">達成率 ${shoPct!==null?shoPct.toFixed(0)+'%':'—'} ／ 前月 ${d.sho_m[mar]}件</div>
+    </div>
+    <div class="eval-card">
+      <div class="eval-head">
+        <span class="eval-lbl">再診:初診 比率</span>
+        <span class="grade g-${spsGrade}">${spsGrade}</span>
+      </div>
+      <div class="eval-val" style="color:var(--other);">${d.sps_apr!==null?d.sps_apr:'—'}<span style="font-size:14px;color:var(--dim);"> / 目標 ${d.sps_target}倍以下</span></div>
+      <div class="eval-target">達成率(逆) ${spsPct!==null?spsPct.toFixed(0)+'%':'—'} ／ 低い=改善</div>
+    </div>
+    <div class="eval-card">
+      <div class="eval-head">
+        <span class="eval-lbl">「薬のみ」再診件数</span>
+        <span class="grade g-${kusGrade}">${kusGrade}</span>
+      </div>
+      <div class="eval-val" style="color:var(--grade-s-bg);">${d.kus_apr}<span style="font-size:14px;color:var(--dim);"> / 目標 ${d.kus_target}件以下</span></div>
+      <div class="eval-target">達成率(逆) ${kusPct!==null?kusPct.toFixed(0)+'%':'—'} ／ 前月 ${d.kus_m[mar]}件</div>
+    </div>
+    <div class="eval-card">
+      <div class="eval-head">
+        <span class="eval-lbl">逆紹介候補件数 <span style="color:var(--dim);font-weight:400;">(参考)</span></span>
+      </div>
+      <div class="eval-val" style="color:var(--dim);">${d.cand_apr}<span style="font-size:14px;color:var(--muted);"> 件/月</span></div>
+      <div class="eval-target">実行件数は将来拡張</div>
+    </div>
+  `;
+
+  // Destroy old detail charts
+  ['d4ChartSho','d4ChartSai','d4ChartKus','d4ChartSps','d4ChartTz','d4ChartKusCmp','d4ChartDoc'].forEach(id => {
+    if(charts[id]){ charts[id].destroy(); delete charts[id]; }
+  });
+
+  // Mini charts
+  const shoData = [...d.sho_m.slice(0,apr), d.sho_apr];
+  const saiData = [...d.sai_m.slice(0,apr), d.sai_apr];
+  const kusData = [...d.kus_m.slice(0,apr), d.kus_apr];
+  const spsData = [...d.sps_m.slice(0,apr), d.sps_apr].map(v => v===null?0:v);
+
+  function miniChart(id, data, color, target, isLine=false){
+    const ds = [{
+      label:'実績', data:data,
+      backgroundColor:isLine?color+'22':DATA.monthLabels.map((m,i)=>i===5?color+'88':color+'DD'),
+      borderColor:color, borderWidth:isLine?2:0,
+      pointRadius:isLine?4:0, pointBackgroundColor:color,
+      borderRadius:3, tension:.3, fill:isLine
+    }];
+    if(target){
+      ds.push({label:'目標', data:Array(6).fill(target), type:'line',
+               borderColor:CC.target, backgroundColor:'transparent',
+               borderWidth:1.5, borderDash:[5,3], pointRadius:0});
+    }
+    charts[id] = new Chart(document.getElementById(id),{
+      type:isLine?'line':'bar',
+      data:{labels:DATA.monthLabels, datasets:ds},
+      options:{responsive:true, maintainAspectRatio:false,
+        plugins:{legend:{display:false}},
+        scales:{y:{beginAtZero:true,ticks:{font:{size:9}}},x:{ticks:{font:{size:9}}}}}
+    });
+  }
+  miniChart('d4ChartSho', shoData, CC.blue, d.sho_target);
+  miniChart('d4ChartSai', saiData, CC.naika, null);
+  miniChart('d4ChartKus', kusData, CC.gold, d.kus_target);
+  miniChart('d4ChartSps', spsData, CC.other, d.sps_target, true);
+
+  // Time zone chart
+  const tz = detail.tz;
+  const tzTotal = tz.am + tz.pm1 + tz.pm2 + tz.eve;
+  charts.d4ChartTz = new Chart(document.getElementById('d4ChartTz'),{
+    type:'bar',
+    data:{labels:['午前(〜12時)','午後前半(12-15時)','午後後半(15-17時)','夕方以降(17時〜)'],
+      datasets:[{
+        label:'件数', data:[tz.am, tz.pm1, tz.pm2, tz.eve],
+        backgroundColor:[CC.naika, CC.blue, CC.gold, CC.other],
+        borderRadius:4
+      }]},
+    options:{responsive:true, maintainAspectRatio:false, indexAxis:'y',
+      plugins:{legend:{display:false},
+        tooltip:{callbacks:{label:ctx=>`${ctx.parsed.x.toLocaleString()}件 (${(ctx.parsed.x/tzTotal*100).toFixed(1)}%)`}}},
+      scales:{x:{beginAtZero:true,ticks:{font:{size:10}}},y:{ticks:{font:{size:10}}}}}
+  });
+
+  // Kusuri comparison chart
+  charts.d4ChartKusCmp = new Chart(document.getElementById('d4ChartKusCmp'),{
+    type:'bar',
+    data:{labels:DATA.monthLabels,datasets:[
+      {label:'全再診',data:saiData,backgroundColor:CC.naika+'66',borderRadius:3,order:2},
+      {label:'「薬のみ」再診',data:kusData,backgroundColor:CC.gold,borderRadius:3,order:1},
+    ]},
+    options:{responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{labels:{boxWidth:10,font:{size:11}}}},
+      scales:{y:{beginAtZero:true,ticks:{font:{size:10}}},x:{ticks:{font:{size:10}}}}}
+  });
+
+  // Doctors chart
+  const docs = detail.doctors;
+  charts.d4ChartDoc = new Chart(document.getElementById('d4ChartDoc'),{
+    type:'bar',
+    data:{labels:docs.map(x=>x.n),
+      datasets:[
+        {label:'再診', data:docs.map(x=>x.total-x.sho), backgroundColor:CC.naika, stack:'s', borderRadius:3},
+        {label:'初診', data:docs.map(x=>x.sho), backgroundColor:CC.blue, stack:'s', borderRadius:3},
+        {label:'初診率(%)', data:docs.map(x=>x.rate), type:'line',
+         yAxisID:'y1', borderColor:CC.gold, backgroundColor:'transparent',
+         borderWidth:2, pointRadius:4, pointBackgroundColor:CC.gold},
+      ]},
+    options:{responsive:true, maintainAspectRatio:false,
+      plugins:{legend:{labels:{boxWidth:10,font:{size:11}}}},
+      scales:{
+        y:{stacked:true, beginAtZero:true, ticks:{font:{size:10}}, title:{display:true,text:'件数',font:{size:10}}},
+        y1:{position:'right', beginAtZero:true, max:100, ticks:{callback:v=>v+'%',font:{size:10}},
+            title:{display:true,text:'初診率',font:{size:10}}, grid:{drawOnChartArea:false}},
+        x:{stacked:true, ticks:{font:{size:10}}}
+      }}
+  });
+
+  // Slot rankings
+  function renderList(id, items, formatter){
+    const el = document.getElementById(id);
+    if(items.length === 0){
+      el.innerHTML = '<li style="background:var(--surface2);color:var(--dim);justify-content:center;">該当枠なし</li>';
+      return;
+    }
+    el.innerHTML = items.map((item,i) => `
+      <li>
+        <span class="rank-badge">#${i+1}</span>
+        <span class="rank-name">${item.n}</span>
+        <span class="rank-meta">${formatter(item)}</span>
+      </li>
+    `).join('');
+  }
+  renderList('rareSlotList', detail.rare, item => `${item.t}件/6ヶ月`);
+  renderList('saijyuSlotList', detail.saijyu, item => `${item.t}件・初診${item.r}%`);
+  renderList('kairiSlotList', detail.kairi, item => `${item.t}件・初診${item.r}%`);
+}
+
+// Initialize with first dept
+sel.value = detailDeptNames[0];
+renderDeptDetail(detailDeptNames[0]);
+
+sel.addEventListener('change', e => {
+  renderDeptDetail(e.target.value);
+});
+
+</script>
+
+</body>
+</html>

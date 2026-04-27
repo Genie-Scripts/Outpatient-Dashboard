@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>脳神経内科 深掘り 2025-09 | 外来ダッシュボード</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&family=DM+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#F5F3EF; --surface:#FFFFFF; --surface2:#FAF9F6; --surface3:#F0EDE8;
+    --border:#E5E3DF; --border-strong:#D6D3CC;
+    --text:#2C2A28; --text-soft:#5A5651; --dim:#8A847C; --muted:#B0ABA3;
+    --header:#3D3A35; --header-line:#4F4B45;
+    --blue:#3F7FC1; --blue-light:#E7F0FA;
+    --naika:#2B9DB8; --naika-bg:#E4F3F6;
+    --geka:#D08620;  --geka-bg:#FAEEDB;
+    --other:#8B6FB6; --other-bg:#EFEAF5;
+    --up:#2F7A4B; --up-bg:#E5F1E9;
+    --down:#A33838; --down-bg:#F5E4E4;
+    --flat:#8A847C; --flat-bg:#EDEBE7;
+    --warn:#8A6D1A; --warn-bg:#FAF3E0; --warn-border:#D4B860;
+    --grade-s-bg:#C89020;  --grade-s-fg:#FFFFFF;
+    --grade-a-bg:#2F7A4B;  --grade-a-fg:#FFFFFF;
+    --grade-b-bg:#2E5F85;  --grade-b-fg:#FFFFFF;
+    --grade-c-bg:#7A746B;  --grade-c-fg:#FFFFFF;
+    --grade-d-bg:#A33838;  --grade-d-fg:#FFFFFF;
+    --grade-na-bg:#E5E3DF; --grade-na-fg:#8A847C;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.55;}
+  a{color:inherit;text-decoration:none;}
+
+  /* ===== Global header (sticky) ===== */
+  header.site{position:sticky;top:0;z-index:30;background:var(--header);color:#fff;
+              border-bottom:3px solid var(--geka);box-shadow:0 2px 8px rgba(0,0,0,.06);}
+  .gh-row1{display:flex;align-items:center;gap:14px;padding:12px 28px;
+           border-bottom:1px solid var(--header-line);flex-wrap:wrap;}
+  .gh-logo{width:34px;height:34px;background:var(--geka);border-radius:8px;
+           display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;
+           font-family:'DM Mono',monospace;flex-shrink:0;}
+  .gh-title h1{font-size:16px;font-weight:700;color:#fff;margin:0;line-height:1.2;}
+  .gh-title .sub{font-size:11px;color:rgba(255,255,255,.65);font-family:'DM Mono',monospace;}
+  .gh-meta{margin-left:auto;display:flex;gap:14px;align-items:center;font-size:11px;
+           color:rgba(255,255,255,.65);font-family:'DM Mono',monospace;flex-wrap:wrap;}
+
+  .gh-row2{display:flex;align-items:center;gap:18px;padding:8px 28px;
+           background:rgba(0,0,0,.12);flex-wrap:wrap;}
+  .gh-views{display:flex;gap:4px;flex-wrap:wrap;}
+  .gh-views a, .gh-views button.gh-view-btn{font-size:12px;color:rgba(255,255,255,.85);padding:6px 14px;border-radius:6px;
+              transition:background .15s, color .15s;font-weight:500;white-space:nowrap;
+              background:none;border:none;cursor:pointer;font-family:inherit;}
+  .gh-views a:hover, .gh-views button.gh-view-btn:hover{background:rgba(255,255,255,.12);color:#fff;}
+  .gh-views a.active, .gh-views button.gh-view-btn.active{background:#fff;color:var(--header);font-weight:700;}
+  .gh-views a.disabled{color:rgba(255,255,255,.35);cursor:not-allowed;}
+
+  .gh-month{margin-left:auto;display:flex;gap:8px;align-items:center;font-size:12px;color:rgba(255,255,255,.85);flex-wrap:nowrap;}
+  .gh-month label{color:rgba(255,255,255,.6);font-size:11px;letter-spacing:.04em;text-transform:uppercase;font-weight:700;}
+  .gh-month select{background:rgba(255,255,255,.95);color:var(--text);
+                   border:none;padding:5px 10px;border-radius:6px;
+                   font-family:'DM Mono',monospace;font-size:13px;font-weight:600;cursor:pointer;
+                   min-width:110px;}
+  .gh-month button{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.2);
+                   padding:4px 10px;border-radius:5px;font-size:12px;cursor:pointer;
+                   font-family:'DM Mono',monospace;}
+  .gh-month button:hover:not(:disabled){background:rgba(255,255,255,.2);}
+  .gh-month button:disabled{opacity:.35;cursor:not-allowed;}
+
+  @media (max-width: 760px){
+    .gh-row1, .gh-row2{padding-left:14px;padding-right:14px;}
+    .gh-meta{margin-left:0;flex-basis:100%;}
+    .gh-month{margin-left:0;width:100%;justify-content:flex-end;}
+    .gh-views{flex-basis:100%;justify-content:flex-start;}
+    .container{padding:16px 14px 30px;}
+    .breadcrumb{padding:8px 14px;}
+  }
+
+  .breadcrumb{background:var(--surface2);border-bottom:1px solid var(--border);
+              padding:8px 28px;font-size:12px;color:var(--text-soft);
+              display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+  .breadcrumb a{color:var(--blue);}
+  .breadcrumb a:hover{text-decoration:underline;}
+  .breadcrumb .sep{color:var(--dim);}
+  .breadcrumb .current{color:var(--text);font-weight:600;}
+
+  .container{max-width:1400px;margin:0 auto;padding:24px 28px 40px;}
+
+  footer.site{padding:18px 28px;text-align:center;color:var(--dim);font-size:11px;
+              border-top:1px solid var(--border);margin-top:20px;}
+
+  /* テーマ/補助分析ドロップダウン（JS クリックトグル） */
+  .gh-dropdown{position:relative;}
+  .gh-dropdown-menu{
+    display:none;position:absolute;top:calc(100% + 6px);left:0;
+    background:var(--header);border:1px solid var(--header-line);
+    border-radius:8px;min-width:220px;z-index:100;padding:6px 0;
+    box-shadow:0 4px 16px rgba(0,0,0,.2);
+  }
+  .gh-dropdown-menu.open{ display:block; }
+  .gh-dropdown-menu a{
+    display:block;padding:8px 16px;font-size:12px;
+    color:rgba(255,255,255,.85);white-space:nowrap;
+  }
+  .gh-dropdown-menu a:hover{background:rgba(255,255,255,.12);color:#fff;}
+  .gh-dropdown-menu a.active{background:rgba(255,255,255,.15);color:#fff;font-weight:700;}
+  .gh-dropdown-menu a .ext{font-size:9px;margin-left:4px;opacity:.7;}
+</style>
+
+<style>
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;
+        padding:22px 26px;margin-bottom:20px;box-shadow:0 1px 3px rgba(0,0,0,.03);}
+  .card h2{font-size:16px;font-weight:700;color:var(--text);margin-bottom:14px;
+           padding-bottom:10px;border-bottom:1px solid var(--border);}
+  .card h3{font-size:13px;font-weight:600;color:var(--text-soft);margin-bottom:8px;}
+
+  .grid{display:grid;gap:18px;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));}
+
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  table th, table td{padding:8px 10px;border-bottom:1px solid var(--border);text-align:left;}
+  table th{background:var(--surface2);font-weight:700;font-size:11px;color:var(--text-soft);
+           text-transform:uppercase;letter-spacing:.04em;}
+  table td.num, table th.num{text-align:right;font-family:'DM Mono',monospace;}
+
+  .grade{display:inline-block;min-width:24px;padding:2px 8px;border-radius:4px;
+         font-weight:700;text-align:center;font-family:'DM Mono',monospace;font-size:12px;}
+  .grade-S{background:var(--grade-s-bg);color:var(--grade-s-fg);}
+  .grade-A{background:var(--grade-a-bg);color:var(--grade-a-fg);}
+  .grade-B{background:var(--grade-b-bg);color:var(--grade-b-fg);}
+  .grade-C{background:var(--grade-c-bg);color:var(--grade-c-fg);}
+  .grade-D{background:var(--grade-d-bg);color:var(--grade-d-fg);}
+
+  .type-badge{display:inline-block;padding:1px 8px;border-radius:4px;font-size:10px;
+              font-weight:700;letter-spacing:.04em;margin-left:6px;vertical-align:middle;}
+  .type-naika{background:var(--naika-bg);color:var(--naika);}
+  .type-geka{background:var(--geka-bg);color:var(--geka);}
+  .type-other{background:var(--other-bg);color:var(--other);}
+
+  .chart-wrap{position:relative;height:280px;}
+  .site-meta{font-size:12px;color:var(--text-soft);margin-bottom:8px;}
+</style>
+
+</head>
+<body data-view="dept-detail" data-month="2025-09" data-code="NR">
+
+<header class="site">
+  <div class="gh-row1">
+    <div class="gh-logo">OD</div>
+    <div class="gh-title">
+      <h1>外来ダッシュボード</h1>
+      <div class="sub">Outpatient Dashboard</div>
+    </div>
+    <div class="gh-meta">
+      <div>更新 2026-04-27 15:38</div>
+    </div>
+  </div>
+  <div class="gh-row2">
+    <div class="gh-views">
+      <a href="../../index.html">ホーム</a>
+      
+      <a href="../../monthly/2025-09.html">月次経営サマリ</a>
+      <a href="../../dept/2025-09/NR.html" class="active">診療科ドリルダウン</a>
+      
+      <div class="gh-dropdown">
+        <button type="button" class="gh-view-btn" id="gh-extras-btn">
+          補助分析 <span style="font-size:9px;">▾</span>
+        </button>
+        <div class="gh-dropdown-menu">
+          <a href="../../doctor_analysis.html">医師別 深掘り分析</a>
+          <a href="../../drug_revisit.html">薬再診候補スコア</a>
+          <a href="https://genie-scripts.github.io/Outpatient-Restructuring/" target="_blank" rel="noopener">外来再編分析サイト<span class="ext">↗</span></a>
+        </div>
+      </div>
+    </div>
+    
+    <div class="gh-month">
+      <label>月:</label>
+      <button id="gh-prev-month" type="button" title="前月">←</button>
+      <select id="gh-month-select">
+        
+        <option value="2026-04">2026-04</option>
+        
+        <option value="2026-03">2026-03</option>
+        
+        <option value="2026-02">2026-02</option>
+        
+        <option value="2026-01">2026-01</option>
+        
+        <option value="2025-12">2025-12</option>
+        
+        <option value="2025-11">2025-11</option>
+        
+        <option value="2025-10">2025-10</option>
+        
+        <option value="2025-09" selected>2025-09</option>
+        
+        <option value="2025-08">2025-08</option>
+        
+        <option value="2025-07">2025-07</option>
+        
+        <option value="2025-06">2025-06</option>
+        
+        <option value="2025-05">2025-05</option>
+        
+        <option value="2025-04">2025-04</option>
+        
+      </select>
+      <button id="gh-next-month" type="button" title="翌月">→</button>
+    </div>
+    
+  </div>
+</header>
+
+
+<div class="breadcrumb">
+  
+    
+    <a href="../../index.html">ホーム</a>
+    
+    <span class="sep">/</span>
+  
+    
+    <span class="current">診療科ドリルダウン（2025-09）</span>
+    
+    <span class="sep">/</span>
+  
+    
+    <span class="current">脳神経内科</span>
+    
+    
+  
+</div>
+
+
+<main class="container">
+
+<div class="card">
+  <h2>脳神経内科 <span class="type-badge type-naika">内科</span> — 2025-09 深掘り</h2>
+  <div class="grid">
+    <div>
+      <h3>当月サマリ</h3>
+      <table>
+        <tbody>
+          <tr><th>総件数</th><td class="num">597</td></tr>
+          <tr><th>初診</th><td class="num">67</td></tr>
+          <tr><th>再診</th><td class="num">530</td></tr>
+          <tr><th>紹介状あり初診</th><td class="num">65</td></tr>
+          <tr><th>未来院</th><td class="num">26</td></tr>
+          <tr><th>初診率</th><td class="num">11.22%</td></tr>
+          <tr><th>紹介率（初診）</th><td class="num">97.01%</td></tr>
+          <tr><th>未来院率</th><td class="num">4.36%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div>
+      <h3>KPI 評価</h3>
+      <table>
+        <thead><tr><th>指標</th><th class="num">実績</th><th class="num">目標</th><th>評価</th></tr></thead>
+        <tbody>
+          
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <h2>時間帯別（曜日×時間帯ゾーン）件数</h2>
+  <div class="chart-wrap"><canvas id="chartTimezone"></canvas></div>
+</div>
+
+<div class="card">
+  <h2>医師別 当月内訳（上位10名）</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>#</th><th>医師</th>
+        <th class="num">総件数</th><th class="num">初診</th><th class="num">再診</th>
+        <th class="num">紹介状あり初診</th>
+      </tr>
+    </thead>
+    <tbody>
+      
+      <tr>
+        <td class="num">1</td>
+        <td>医師A</td>
+        <td class="num">330</td>
+        <td class="num">38</td>
+        <td class="num">292</td>
+        <td class="num">37</td>
+      </tr>
+      
+      <tr>
+        <td class="num">2</td>
+        <td>医師B</td>
+        <td class="num">128</td>
+        <td class="num">10</td>
+        <td class="num">118</td>
+        <td class="num">10</td>
+      </tr>
+      
+      <tr>
+        <td class="num">3</td>
+        <td>医師C</td>
+        <td class="num">64</td>
+        <td class="num">3</td>
+        <td class="num">61</td>
+        <td class="num">2</td>
+      </tr>
+      
+      <tr>
+        <td class="num">4</td>
+        <td>医師D</td>
+        <td class="num">62</td>
+        <td class="num">10</td>
+        <td class="num">52</td>
+        <td class="num">10</td>
+      </tr>
+      
+      <tr>
+        <td class="num">5</td>
+        <td>医師E</td>
+        <td class="num">5</td>
+        <td class="num">0</td>
+        <td class="num">5</td>
+        <td class="num">0</td>
+      </tr>
+      
+      <tr>
+        <td class="num">6</td>
+        <td>医師F</td>
+        <td class="num">5</td>
+        <td class="num">5</td>
+        <td class="num">0</td>
+        <td class="num">5</td>
+      </tr>
+      
+      <tr>
+        <td class="num">7</td>
+        <td>医師G</td>
+        <td class="num">3</td>
+        <td class="num">1</td>
+        <td class="num">2</td>
+        <td class="num">1</td>
+      </tr>
+      
+    </tbody>
+  </table>
+</div>
+
+<div class="card">
+  <h2>逆紹介候補（薬のみ・短時間・紹介状なし・併科なし 再診）</h2>
+  <p class="site-meta">抽出条件：初再診=再診、紹介状無し、併科無、診察時間 9分以下、診察前検査なし</p>
+  <table>
+    <thead><tr><th>診察時間階級</th><th class="num">件数</th></tr></thead>
+    <tbody>
+      
+      <tr><td>0-4分</td><td class="num">27</td></tr>
+      
+      <tr><td>5-9分</td><td class="num">6</td></tr>
+      
+      <tr><th>合計</th><th class="num">33</th></tr>
+    </tbody>
+  </table>
+</div>
+
+</main>
+
+<footer class="site">
+  外来ダッシュボード
+</footer>
+
+<script>
+/* グローバルヘッダ：月セレクタとビュー切替の連動。
+   現在のビュー（data-view）と現在の科コード（data-code）を保ったまま
+   月だけを切り替える。ホームの場合はその月の monthly に遷移する。 */
+(function(){
+  const body = document.body;
+  const view = body.getAttribute('data-view');
+  const code = body.getAttribute('data-code');
+  const sel = document.getElementById('gh-month-select');
+  const prevBtn = document.getElementById('gh-prev-month');
+  const nextBtn = document.getElementById('gh-next-month');
+  if (!sel) return;
+
+  function rootPrefix(){
+    const a = document.querySelector('header.site .gh-views a');
+    if (!a) return '';
+    const href = a.getAttribute('href') || '';
+    return href.replace(/index\.html$/, '');
+  }
+
+  function targetUrl(month, view, code){
+    const root = rootPrefix();
+    if (view === 'monthly' || view === 'home') {
+      return root + 'monthly/' + month + '.html';
+    }
+    if (view === 'dept' || view === 'dept-detail') {
+      const filename = code ? (code + '.html') : 'index.html';
+      return root + 'dept/' + month + '/' + filename;
+    }
+    return root + 'index.html';
+  }
+
+  sel.addEventListener('change', () => {
+    location.href = targetUrl(sel.value, view, code);
+  });
+
+  function shiftMonth(delta){
+    /* sel.options は新→旧。delta=-1 で前月（idx 増）、+1 で翌月（idx 減）。 */
+    const idx = sel.selectedIndex;
+    const newIdx = idx - delta;
+    if (newIdx < 0 || newIdx >= sel.options.length) return;
+    sel.selectedIndex = newIdx;
+    sel.dispatchEvent(new Event('change'));
+  }
+  if (prevBtn) prevBtn.addEventListener('click', () => shiftMonth(-1));
+  if (nextBtn) nextBtn.addEventListener('click', () => shiftMonth(+1));
+
+  function refreshBtns(){
+    const idx = sel.selectedIndex;
+    if (prevBtn) prevBtn.disabled = (idx >= sel.options.length - 1);
+    if (nextBtn) nextBtn.disabled = (idx <= 0);
+  }
+  refreshBtns();
+  sel.addEventListener('change', refreshBtns);
+})();
+
+/* 補助分析ドロップダウン：クリックトグル */
+(function(){
+  const btn  = document.getElementById('gh-extras-btn');
+  const menu = btn && btn.parentElement.querySelector('.gh-dropdown-menu');
+  if (!btn || !menu) return;
+
+  btn.addEventListener('click', function(e){
+    e.stopPropagation();
+    menu.classList.toggle('open');
+  });
+  menu.addEventListener('click', function(){ menu.classList.remove('open'); });
+  document.addEventListener('click', function(){ menu.classList.remove('open'); });
+})();
+
+/* 共通ユーティリティ（チャート色・整形・評価バッジ）。
+   各ダッシュボードの個別 <script> から OutpatientCommon を参照する。 */
+window.OutpatientCommon = (function(){
+  const palette = {
+    naika:'#2B9DB8', geka:'#D08620', other:'#8B6FB6',
+    primary:'#D08620', accent:'#3F7FC1', muted:'#8A847C',
+  };
+  function formatInt(n){ return (n==null||Number.isNaN(n))?'-':Math.round(n).toLocaleString('ja-JP'); }
+  function formatPct(n, d=1){ return (n==null||Number.isNaN(n))?'-':(n.toFixed(d)+'%'); }
+  function gradeFromPct(pct, inverse=false){
+    if (pct==null||Number.isNaN(pct)) return 'D';
+    if (inverse){
+      if (pct<=90) return 'S'; if (pct<=100) return 'A';
+      if (pct<=110) return 'B'; if (pct<=125) return 'C'; return 'D';
+    }
+    if (pct>=110) return 'S'; if (pct>=100) return 'A';
+    if (pct>=90) return 'B'; if (pct>=75) return 'C'; return 'D';
+  }
+  function gradeBadge(g){ return '<span class="grade grade-'+g+'">'+g+'</span>'; }
+  function typeBadge(t){
+    const label = {naika:'内科', geka:'外科', other:'その他'}[t] || t;
+    return '<span class="type-badge '+t+'">'+label+'</span>';
+  }
+  if (window.Chart){
+    Chart.defaults.font.family = "'Noto Sans JP', sans-serif";
+    Chart.defaults.font.size = 12;
+    Chart.defaults.color = '#2C2A28';
+  }
+  return { palette, formatInt, formatPct, gradeFromPct, gradeBadge, typeBadge };
+})();
+</script>
+
+
+<script>
+const TZ_DATA = {"labels": ["月", "火", "水", "木", "金", "土", "日"], "datasets": [{"label": "午前(〜12時)", "data": [111, 61, 96, 169, 99, 0, 0]}, {"label": "午後前半(12-15時)", "data": [22, 5, 3, 7, 21, 0, 0]}, {"label": "午後後半(15-17時)", "data": [1, 0, 0, 1, 0, 0, 0]}, {"label": "夕方以降(17時〜)", "data": [0, 0, 1, 0, 0, 0, 0]}]};
+new Chart(document.getElementById('chartTimezone'), {
+  type: 'bar',
+  data: {
+    labels: TZ_DATA.labels,
+    datasets: TZ_DATA.datasets.map((ds, i) => ({
+      label: ds.label,
+      data: ds.data,
+      backgroundColor: [
+        OutpatientCommon.palette.primary,
+        OutpatientCommon.palette.accent,
+        OutpatientCommon.palette.naika,
+        OutpatientCommon.palette.other,
+      ][i % 4],
+    })),
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } },
+  },
+});
+</script>
+
+</body>
+</html>
