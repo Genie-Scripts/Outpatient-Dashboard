@@ -32,6 +32,14 @@
   .score-high{background:var(--down);color:#fff;}
   .score-mid{background:var(--grade-s-bg);color:#fff;}
   .score-low{background:var(--surface3);color:var(--text-soft);}
+
+  .observation{margin:6px 0 14px;padding:10px 12px;border-left:3px solid var(--blue);
+               background:var(--surface2);font-size:13px;line-height:1.6;color:var(--text);
+               border-radius:0 6px 6px 0;}
+  .observation::before{content:"観察";display:inline-block;font-size:10px;font-weight:700;
+                       letter-spacing:.06em;color:var(--blue);margin-right:8px;
+                       padding:1px 6px;border:1px solid var(--blue);border-radius:3px;
+                       vertical-align:middle;}
 </style>
 {% endblock %}
 
@@ -99,6 +107,9 @@
       再診 {{ s.sai_total }} 件 / 短時間再診 {{ s.short_ratio }}% / 紹介状なし再診 {{ s.no_shokai_ratio }}%
       / 採点済み医師×枠 {{ s.scoreable_count }}（うちスコア≥60: {{ s.high_score_count }}）
     </p>
+    {% if s.observation %}
+    <p class="observation">{{ s.observation }}</p>
+    {% endif %}
     <table>
       <thead>
         <tr>

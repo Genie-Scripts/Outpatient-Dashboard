@@ -1,9 +1,11 @@
 # Ollama 接続設定
-# Ollama を OpenAI互換サーバとして起動し、推奨モデル（Qwen2.5-14B-Instruct Q4_K_M 等）をロードすること
+# Ollama を OpenAI互換サーバとして起動し、日本語 instruct モデルをロードすること
+# 推奨: Llama-3.1-Swallow-8B-Instruct-v0.5（東工大 Swallow チーム継続事前学習）
+#       Q6_K は 64GB Mac 環境向けに品質優先。Q4_K_M でも実用上問題ない。
 endpoint: http://localhost:11434/v1/chat/completions
-model: ki-krugle-jp/llm-jp-4-8b-thinking:q4_k_m
+model: hf.co/mmnga/Llama-3.1-Swallow-8B-Instruct-v0.5-gguf:Q6_K
 temperature: 0.3
-max_tokens: 500
+max_tokens: 300
 timeout: 120
 system_prompt: |
   あなたは病院経営企画室のデータアナリストです。

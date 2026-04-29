@@ -34,6 +34,9 @@ config/slot_key.csv
 # ローカル確認用（実名表示・Gitコミット厳禁）
 local/
 
+# LLM 観察コメントのキャッシュ（再生成可能・コミット不要）
+data/llm_cache/
+
 # 一時作業
 Temp/
 

@@ -20,10 +20,22 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from src.aggregate import DRUG_REVISIT_MIN_RECORDS, DRUG_REVISIT_SHORT_EXAM_MIN
 from src.core.classify import DeptClassifier
+from src.core.observations import (
+    drug_revisit_facts_dict,
+    drug_revisit_fallback_comment,
+    extract_drug_revisit_observation,
+)
 
 logger = logging.getLogger(__name__)
 
 TOP_N_PER_DEPT = 15
+
+# LLM 観察コメント生成の依頼文（プロンプトを変えたら _OBS_PROMPT_VERSION も上げる）
+_DRUG_REVISIT_INSTRUCTION = (
+    "この診療科の薬再診候補スコア結果について、再編会議の議題作りに使える観察コメントを"
+    "1〜2 文で書いてください。スコア≥60 の医師×枠の集中度合い、最上位の特徴（短時間再診比率と"
+    "再診件数）、そして「逆紹介検討」「枠運用見直し」など議論の方向を簡潔に示してください。"
+)
 
 
 def _load_score(aggregated_root: Path, month: str) -> pd.DataFrame:
@@ -111,6 +123,39 @@ def _build_export_csv(sections: list[dict[str, Any]]) -> str:
     return "\n".join(lines)
 
 
+def _attach_observations(
+    sections: list[dict[str, Any]],
+    month: str,
+    llm_client: Any | None,
+    cache_root: Path | None,
+) -> None:
+    """各セクションに observation コメント（1〜2 文）を付与する。
+
+    LLM クライアントがあれば LLM 生成、無ければ Python 定型文。
+    どちらの場合も observation キーが必ず文字列で入る。
+    """
+    cache_dir = cache_root / month if cache_root is not None else None
+    for s in sections:
+        obs = extract_drug_revisit_observation(s)
+        facts = drug_revisit_facts_dict(obs)
+
+        def _fb(o: Any = obs) -> str:
+            return drug_revisit_fallback_comment(o)
+
+        if llm_client is None:
+            s["observation"] = _fb()
+            continue
+
+        s["observation"] = llm_client.generate_observation(
+            section="drug_revisit",
+            facts=facts,
+            instruction=_DRUG_REVISIT_INSTRUCTION,
+            fallback=_fb,
+            cache_dir=cache_dir,
+            cache_subkey=s["code"],
+        )
+
+
 def build_drug_revisit(
     months: list[str],
     aggregated_root: Path,
@@ -119,8 +164,15 @@ def build_drug_revisit(
     classification_path: Path,
     all_months: list[str],
     default_month: str | None = None,
+    llm_client: Any | None = None,
+    llm_cache_root: Path | None = None,
 ) -> Path:
-    """薬再診候補スコア ダッシュボードHTMLを1枚生成する（全月埋め込み）。"""
+    """薬再診候補スコア ダッシュボードHTMLを1枚生成する（全月埋め込み）。
+
+    Args:
+        llm_client: 観察コメント生成用 LLMClient。None の場合は定型文のみ。
+        llm_cache_root: 観察コメントのキャッシュ保存ルート（data/llm_cache/drug_revisit など）。
+    """
     classifier = DeptClassifier(classification_path)
     if not months:
         raise ValueError("months が空です")
@@ -133,6 +185,7 @@ def build_drug_revisit(
     for m in sorted_months:
         score_df = _load_score(aggregated_root, m)
         sections = _build_dept_sections(score_df, m, classifier)
+        _attach_observations(sections, m, llm_client, llm_cache_root)
         overview = _build_overview(sections)
         months_data.append({
             "month": m,

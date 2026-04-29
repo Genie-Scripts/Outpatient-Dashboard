@@ -57,6 +57,7 @@ DEFAULT_PATHS: dict[str, Path] = {
     "dept_classification": REPO_ROOT / "config" / "dept_classification.csv",
     "dept_targets": REPO_ROOT / "config" / "dept_targets.csv",
     "llm_config": REPO_ROOT / "config" / "llm_config.yaml",
+    "llm_cache": REPO_ROOT / "data" / "llm_cache",
     "non_business_days": REPO_ROOT / "config" / "non_business_days.csv",
 }
 
@@ -254,6 +255,7 @@ def _cmd_build_doctor(
 
 def _cmd_build_drug_revisit(
     month: str | None,
+    use_llm: bool,
     paths: dict[str, Path] = DEFAULT_PATHS,
 ) -> None:
     all_months = _detect_months(paths["anon_dir"])
@@ -262,6 +264,13 @@ def _cmd_build_drug_revisit(
         raise FileNotFoundError("13_drug_revisit_score.csv を持つ月がありません。先に aggregate を実行してください。")
     default_month = month if month in available else available[-1]
     output_path = paths["docs_dir"] / "drug_revisit.html"
+
+    llm_client = None
+    llm_config_path = paths.get("llm_config")
+    if use_llm and llm_config_path and llm_config_path.exists():
+        from src.llm_client import LLMClient
+        llm_client = LLMClient(llm_config_path, enabled=True)
+
     build_drug_revisit(
         months=available,
         aggregated_root=paths["agg_root"],
@@ -270,8 +279,13 @@ def _cmd_build_drug_revisit(
         classification_path=paths["dept_classification"],
         all_months=all_months,
         default_month=default_month,
+        llm_client=llm_client,
+        llm_cache_root=paths.get("llm_cache", DEFAULT_PATHS["llm_cache"]) / "drug_revisit",
     )
-    print(f"✓ 薬再診候補スコア生成 ({len(available)}ヶ月, 既定={default_month}): {output_path}")
+    print(
+        f"✓ 薬再診候補スコア生成 ({len(available)}ヶ月, 既定={default_month}, "
+        f"LLM={'on' if llm_client else 'off'}): {output_path}"
+    )
 
 
 def _cmd_build_hub(paths: dict[str, Path] = DEFAULT_PATHS) -> None:
@@ -294,7 +308,7 @@ def _cmd_run_all(month: str | None, use_llm: bool, no_anon: bool = False) -> Non
     _cmd_build_monthly(month, use_llm, paths, use_real_names=no_anon)
     _cmd_build_dept(month, paths, use_real_names=no_anon)
     _cmd_build_doctor(month, paths, use_real_names=no_anon)
-    _cmd_build_drug_revisit(month, paths)
+    _cmd_build_drug_revisit(month, use_llm, paths)
     _cmd_build_hub(paths)
     print("=== 全処理完了 ===")
 
@@ -328,6 +342,7 @@ def _build_parser() -> argparse.ArgumentParser:
 
     p_drev = build_sub.add_parser("drug-revisit", help="薬再診候補スコア（最新月）")
     p_drev.add_argument("--month", default=None, help="YYYY-MM（省略時は最新月）")
+    p_drev.add_argument("--no-llm", action="store_true", help="LLM 観察コメントを使わず定型文で生成")
 
     build_sub.add_parser("hub", help="ハブページ（docs/index.html）再生成")
 
@@ -361,7 +376,7 @@ def main(argv: list[str] | None = None) -> int:
             elif args.target == "doctor":
                 _cmd_build_doctor(args.month)
             elif args.target == "drug-revisit":
-                _cmd_build_drug_revisit(args.month)
+                _cmd_build_drug_revisit(args.month, use_llm=not args.no_llm)
             elif args.target == "hub":
                 _cmd_build_hub()
             else:
