@@ -195,6 +195,46 @@
   .mini-delta.down{background:var(--down-bg);color:var(--down);}
   .mini-delta.flat{background:var(--flat-bg);color:var(--flat);}
   .dept-arrow{font-size:14px;color:var(--dim);}
+  
+  /* ===== プルダウンメニュー ===== */
+  .dropdown-toggle {
+    background: none;
+    border: none;
+    color: var(--dim);
+    cursor: pointer;
+    font-size: 12px;
+    padding: 0;
+    margin-left: 8px;
+  }
+  
+  .dept-dropdown-menu {
+    position: absolute;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,.15);
+    z-index: 100;
+    min-width: 200px;
+    margin-top: 4px;
+    display: none;
+  }
+  
+  .dropdown-content {
+    padding: 8px 0;
+  }
+  
+  .dropdown-content a,
+  .dropdown-content span {
+    display: block;
+    padding: 8px 16px;
+    font-size: 12px;
+    color: var(--text);
+    text-decoration: none;
+  }
+  
+  .dropdown-content a:hover {
+    background-color: var(--surface2);
+  }
 
   .month-chips{display:flex;flex-wrap:wrap;gap:8px;}
   .month-chip{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;
@@ -248,7 +288,7 @@
       <div class="sub">Outpatient Dashboard</div>
     </div>
     <div class="gh-meta">
-      <div>更新 2026-04-27 15:38</div>
+      <div>更新 2026-04-29 13:10</div>
     </div>
   </div>
   <div class="gh-row2">
@@ -278,7 +318,7 @@
 <main class="container">
 
 <div class="meta-bar">
-  <div><span class="k">最終更新</span><span class="v">2026-04-27 15:38</span></div>
+  <div><span class="k">最終更新</span><span class="v">2026-04-29 13:10</span></div>
   
   <div><span class="k">対象期間</span><span class="v">2025-04 〜 2026-04</span></div>
   
@@ -348,7 +388,7 @@
     <span class="section-sub">科コード＋科名＋KPI＋前月比。カードクリックで深掘りへ</span>
   </div>
 
-  
+    
     
     <div class="group">
       <div class="group-head">
@@ -357,7 +397,7 @@
       </div>
       <div class="dept-grid">
         
-        <a class="dept-card" href="dept/2026-04/CV.html">
+        <div class="dept-card" data-dept-code="CV">
           <div class="dept-card-head">
             <span class="dept-code">CV</span>
             <span class="dept-name">循環器内科</span>
@@ -384,11 +424,20 @@
             <span class="mini-delta down">
               -19.8% MoM
             </span>
-            <span class="dept-arrow">→</span>
+            <button class="dropdown-toggle" data-dept-code="CV">▼</button>
           </div>
-        </a>
+          <!-- プルダウンメニュー -->
+          <div class="dept-dropdown-menu" id="dropdown-CV" style="display:none;">
+            <div class="dropdown-content">
+              
+              <a href="dept/2026-04/CV.html">診療科詳細を見る</a>
+              
+              <!-- 他の診療科情報のリンクをここに追加 -->
+            </div>
+          </div>
+        </div>
         
-        <a class="dept-card" href="dept/2026-04/GI.html">
+        <div class="dept-card" data-dept-code="GI">
           <div class="dept-card-head">
             <span class="dept-code">GI</span>
             <span class="dept-name">消化器内科</span>
@@ -415,11 +464,20 @@
             <span class="mini-delta down">
               -33.2% MoM
             </span>
-            <span class="dept-arrow">→</span>
+            <button class="dropdown-toggle" data-dept-code="GI">▼</button>
           </div>
-        </a>
+          <!-- プルダウンメニュー -->
+          <div class="dept-dropdown-menu" id="dropdown-GI" style="display:none;">
+            <div class="dropdown-content">
+              
+              <a href="dept/2026-04/GI.html">診療科詳細を見る</a>
+              
+              <!-- 他の診療科情報のリンクをここに追加 -->
+            </div>
+          </div>
+        </div>
         
-        <a class="dept-card" href="dept/2026-04/RS.html">
+        <div class="dept-card" data-dept-code="RS">
           <div class="dept-card-head">
             <span class="dept-code">RS</span>
             <span class="dept-name">呼吸器内科</span>
@@ -446,11 +504,20 @@
             <span class="mini-delta down">
               -31.4% MoM
             </span>
-            <span class="dept-arrow">→</span>
+            <button class="dropdown-toggle" data-dept-code="RS">▼</button>
           </div>
-        </a>
+          <!-- プルダウンメニュー -->
+          <div class="dept-dropdown-menu" id="dropdown-RS" style="display:none;">
+            <div class="dropdown-content">
+              
+              <a href="dept/2026-04/RS.html">診療科詳細を見る</a>
+              
+              <!-- 他の診療科情報のリンクをここに追加 -->
+            </div>
+          </div>
+        </div>
         
-        <a class="dept-card" href="dept/2026-04/GM.html">
+        <div class="dept-card" data-dept-code="GM">
           <div class="dept-card-head">
             <span class="dept-code">GM</span>
             <span class="dept-name">総合内科</span>
@@ -477,11 +544,20 @@
             <span class="mini-delta down">
               -31.2% MoM
             </span>
-            <span class="dept-arrow">→</span>
+            <button class="dropdown-toggle" data-dept-code="GM">▼</button>
           </div>
-        </a>
+          <!-- プルダウンメニュー -->
+          <div class="dept-dropdown-menu" id="dropdown-GM" style="display:none;">
+            <div class="dropdown-content">
+              
+              <a href="dept/2026-04/GM.html">診療科詳細を見る</a>
+              
+              <!-- 他の診療科情報のリンクをここに追加 -->
+            </div>
+          </div>
+        </div>
         
-        <a class="dept-card" href="dept/2026-04/RH.html">
+        <div class="dept-card" data-dept-code="RH">
           <div class="dept-card-head">
             <span class="dept-code">RH</span>
             <span class="dept-name">リウマチ膠原病内科</span>
@@ -508,11 +584,20 @@
             <span class="mini-delta down">
               -28.9% MoM
             </span>
-            <span class="dept-arrow">→</span>
+            <button class="dropdown-toggle" data-dept-code="RH">▼</button>
           </div>
-        </a>
+          <!-- プルダウンメニュー -->
+          <div class="dept-dropdown-menu" id="dropdown-RH" style="display:none;">
+            <div class="dropdown-content">
+              
+              <a href="dept/2026-04/RH.html">診療科詳細を見る</a>
+              
+              <!-- 他の診療科情報のリンクをここに追加 -->
+            </div>
+          </div>
+        </div>
         
-        <a class="dept-card" href="dept/2026-04/HE.html">
+        <div class="dept-card" data-dept-code="HE">
           <div class="dept-card-head">
             <span class="dept-code">HE</span>
             <span class="dept-name">血液内科</span>
@@ -539,11 +624,20 @@
             <span class="mini-delta down">
               -20.7% MoM
             </span>
-            <span class="dept-arrow">→</span>
+            <button class="dropdown-toggle" data-dept-code="HE">▼</button>
           </div>
-        </a>
+          <!-- プルダウンメニュー -->
+          <div class="dept-dropdown-menu" id="dropdown-HE" style="display:none;">
+            <div class="dropdown-content">
+              
+              <a href="dept/2026-04/HE.html">診療科詳細を見る</a>
+              
+              <!-- 他の診療科情報のリンクをここに追加 -->
+            </div>
+          </div>
+        </div>
         
-        <a class="dept-card" href="dept/2026-04/NE.html">
+        <div class="dept-card" data-dept-code="NE">
           <div class="dept-card-head">
             <span class="dept-code">NE</span>
             <span class="dept-name">腎内科</span>
@@ -570,11 +664,20 @@
             <span class="mini-delta down">
               -28.5% MoM
             </span>
-            <span class="dept-arrow">→</span>
+            <button class="dropdown-toggle" data-dept-code="NE">▼</button>
           </div>
-        </a>
+          <!-- プルダウンメニュー -->
+          <div class="dept-dropdown-menu" id="dropdown-NE" style="display:none;">
+            <div class="dropdown-content">
+              
+              <a href="dept/2026-04/NE.html">診療科詳細を見る</a>
+              
+              <!-- 他の診療科情報のリンクをここに追加 -->
+            </div>
+          </div>
+        </div>
         
-        <a class="dept-card" href="dept/2026-04/PD.html">
+        <div class="dept-card" data-dept-code="PD">
           <div class="dept-card-head">
             <span class="dept-code">PD</span>
             <span class="dept-name">小児科</span>
@@ -601,11 +704,20 @@
             <span class="mini-delta down">
               -25.2% MoM
             </span>
-            <span class="dept-arrow">→</span>
+            <button class="dropdown-toggle" data-dept-code="PD">▼</button>
           </div>
-        </a>
+          <!-- プルダウンメニュー -->
+          <div class="dept-dropdown-menu" id="dropdown-PD" style="display:none;">
+            <div class="dropdown-content">
+              
+              <a href="dept/2026-04/PD.html">診療科詳細を見る</a>
+              
+              <!-- 他の診療科情報のリンクをここに追加 -->
+            </div>
+          </div>
+        </div>
         
-        <a class="dept-card" href="dept/2026-04/NR.html">
+        <div class="dept-card" data-dept-code="NR">
           <div class="dept-card-head">
             <span class="dept-code">NR</span>
             <span class="dept-name">脳神経内科</span>
@@ -632,11 +744,20 @@
             <span class="mini-delta down">
               -36.6% MoM
             </span>
-            <span class="dept-arrow">→</span>
+            <button class="dropdown-toggle" data-dept-code="NR">▼</button>
           </div>
-        </a>
+          <!-- プルダウンメニュー -->
+          <div class="dept-dropdown-menu" id="dropdown-NR" style="display:none;">
+            <div class="dropdown-content">
+              
+              <a href="dept/2026-04/NR.html">診療科詳細を見る</a>
+              
+              <!-- 他の診療科情報のリンクをここに追加 -->
+            </div>
+          </div>
+        </div>
         
-        <a class="dept-card" href="dept/2026-04/MN.html">
+        <div class="dept-card" data-dept-code="MN">
           <div class="dept-card-head">
             <span class="dept-code">MN</span>
             <span class="dept-name">メンタルケア科</span>
@@ -663,11 +784,20 @@
             <span class="mini-delta down">
               -19.3% MoM
             </span>
-            <span class="dept-arrow">→</span>
+            <button class="dropdown-toggle" data-dept-code="MN">▼</button>
           </div>
-        </a>
+          <!-- プルダウンメニュー -->
+          <div class="dept-dropdown-menu" id="dropdown-MN" style="display:none;">
+            <div class="dropdown-content">
+              
+              <a href="dept/2026-04/MN.html">診療科詳細を見る</a>
+              
+              <!-- 他の診療科情報のリンクをここに追加 -->
+            </div>
+          </div>
+        </div>
         
-        <a class="dept-card" href="dept/2026-04/IM.html">
+        <div class="dept-card" data-dept-code="IM">
           <div class="dept-card-head">
             <span class="dept-code">IM</span>
             <span class="dept-name">内科</span>
@@ -694,11 +824,20 @@
             <span class="mini-delta down">
               -32.3% MoM
             </span>
-            <span class="dept-arrow">→</span>
+            <button class="dropdown-toggle" data-dept-code="IM">▼</button>
           </div>
-        </a>
+          <!-- プルダウンメニュー -->
+          <div class="dept-dropdown-menu" id="dropdown-IM" style="display:none;">
+            <div class="dropdown-content">
+              
+              <a href="dept/2026-04/IM.html">診療科詳細を見る</a>
+              
+              <!-- 他の診療科情報のリンクをここに追加 -->
+            </div>
+          </div>
+        </div>
         
-        <a class="dept-card" href="dept/2026-04/AL.html">
+        <div class="dept-card" data-dept-code="AL">
           <div class="dept-card-head">
             <span class="dept-code">AL</span>
             <span class="dept-name">アレルギー科</span>
@@ -725,11 +864,20 @@
             <span class="mini-delta down">
               -18.9% MoM
             </span>
-            <span class="dept-arrow">→</span>
+            <button class="dropdown-toggle" data-dept-code="AL">▼</button>
           </div>
-        </a>
+          <!-- プルダウンメニュー -->
+          <div class="dept-dropdown-menu" id="dropdown-AL" style="display:none;">
+            <div class="dropdown-content">
+              
+              <a href="dept/2026-04/AL.html">診療科詳細を見る</a>
+              
+              <!-- 他の診療科情報のリンクをここに追加 -->
+            </div>
+          </div>
+        </div>
         
-        <a class="dept-card" href="dept/2026-04/ON.html">
+        <div class="dept-card" data-dept-code="ON">
           <div class="dept-card-head">
             <span class="dept-code">ON</span>
             <span class="dept-name">臨床腫瘍科</span>
@@ -756,11 +904,20 @@
             <span class="mini-delta down">
               -32.8% MoM
             </span>
-            <span class="dept-arrow">→</span>
+            <button class="dropdown-toggle" data-dept-code="ON">▼</button>
           </div>
-        </a>
+          <!-- プルダウンメニュー -->
+          <div class="dept-dropdown-menu" id="dropdown-ON" style="display:none;">
+            <div class="dropdown-content">
+              
+              <a href="dept/2026-04/ON.html">診療科詳細を見る</a>
+              
+              <!-- 他の診療科情報のリンクをここに追加 -->
+            </div>
+          </div>
+        </div>
         
-        <a class="dept-card" href="dept/2026-04/DB.html">
+        <div class="dept-card" data-dept-code="DB">
           <div class="dept-card-head">
             <span class="dept-code">DB</span>
             <span class="dept-name">糖尿病内分泌内科</span>
@@ -787,9 +944,18 @@
             <span class="mini-delta flat">
               0.0% MoM
             </span>
-            <span class="dept-arrow">→</span>
+            <button class="dropdown-toggle" data-dept-code="DB">▼</button>
           </div>
-        </a>
+          <!-- プルダウンメニュー -->
+          <div class="dept-dropdown-menu" id="dropdown-DB" style="display:none;">
+            <div class="dropdown-content">
+              
+              <a href="dept/2026-04/DB.html">診療科詳細を見る</a>
+              
+              <!-- 他の診療科情報のリンクをここに追加 -->
+            </div>
+          </div>
+        </div>
         
       </div>
     </div>
@@ -801,7 +967,7 @@
       </div>
       <div class="dept-grid">
         
-        <a class="dept-card" href="dept/2026-04/U.html">
+        <div class="dept-card" data-dept-code="U">
           <div class="dept-card-head">
             <span class="dept-code">U</span>
             <span class="dept-name">泌尿器科</span>
@@ -828,11 +994,20 @@
             <span class="mini-delta down">
               -19.3% MoM
             </span>
-            <span class="dept-arrow">→</span>
+            <button class="dropdown-toggle" data-dept-code="U">▼</button>
           </div>
-        </a>
+          <!-- プルダウンメニュー -->
+          <div class="dept-dropdown-menu" id="dropdown-U" style="display:none;">
+            <div class="dropdown-content">
+              
+              <a href="dept/2026-04/U.html">診療科詳細を見る</a>
+              
+              <!-- 他の診療科情報のリンクをここに追加 -->
+            </div>
+          </div>
+        </div>
         
-        <a class="dept-card" href="dept/2026-04/E.html">
+        <div class="dept-card" data-dept-code="E">
           <div class="dept-card-head">
             <span class="dept-code">E</span>
             <span class="dept-name">眼科</span>
@@ -859,11 +1034,20 @@
             <span class="mini-delta down">
               -28.5% MoM
             </span>
-            <span class="dept-arrow">→</span>
+            <button class="dropdown-toggle" data-dept-code="E">▼</button>
           </div>
-        </a>
+          <!-- プルダウンメニュー -->
+          <div class="dept-dropdown-menu" id="dropdown-E" style="display:none;">
+            <div class="dropdown-content">
+              
+              <a href="dept/2026-04/E.html">診療科詳細を見る</a>
+              
+              <!-- 他の診療科情報のリンクをここに追加 -->
+            </div>
+          </div>
+        </div>
         
-        <a class="dept-card" href="dept/2026-04/G.html">
+        <div class="dept-card" data-dept-code="G">
           <div class="dept-card-head">
             <span class="dept-code">G</span>
             <span class="dept-name">産婦人科</span>
@@ -890,11 +1074,20 @@
             <span class="mini-delta down">
               -29.2% MoM
             </span>
-            <span class="dept-arrow">→</span>
+            <button class="dropdown-toggle" data-dept-code="G">▼</button>
           </div>
-        </a>
+          <!-- プルダウンメニュー -->
+          <div class="dept-dropdown-menu" id="dropdown-G" style="display:none;">
+            <div class="dropdown-content">
+              
+              <a href="dept/2026-04/G.html">診療科詳細を見る</a>
+              
+              <!-- 他の診療科情報のリンクをここに追加 -->
+            </div>
+          </div>
+        </div>
         
-        <a class="dept-card" href="dept/2026-04/OR.html">
+        <div class="dept-card" data-dept-code="OR">
           <div class="dept-card-head">
             <span class="dept-code">OR</span>
             <span class="dept-name">整形外科</span>
@@ -921,11 +1114,20 @@
             <span class="mini-delta down">
               -34.0% MoM
             </span>
-            <span class="dept-arrow">→</span>
+            <button class="dropdown-toggle" data-dept-code="OR">▼</button>
           </div>
-        </a>
+          <!-- プルダウンメニュー -->
+          <div class="dept-dropdown-menu" id="dropdown-OR" style="display:none;">
+            <div class="dropdown-content">
+              
+              <a href="dept/2026-04/OR.html">診療科詳細を見る</a>
+              
+              <!-- 他の診療科情報のリンクをここに追加 -->
+            </div>
+          </div>
+        </div>
         
-        <a class="dept-card" href="dept/2026-04/ENT.html">
+        <div class="dept-card" data-dept-code="ENT">
           <div class="dept-card-head">
             <span class="dept-code">ENT</span>
             <span class="dept-name">耳鼻咽喉科</span>
@@ -952,11 +1154,20 @@
             <span class="mini-delta down">
               -40.9% MoM
             </span>
-            <span class="dept-arrow">→</span>
+            <button class="dropdown-toggle" data-dept-code="ENT">▼</button>
           </div>
-        </a>
+          <!-- プルダウンメニュー -->
+          <div class="dept-dropdown-menu" id="dropdown-ENT" style="display:none;">
+            <div class="dropdown-content">
+              
+              <a href="dept/2026-04/ENT.html">診療科詳細を見る</a>
+              
+              <!-- 他の診療科情報のリンクをここに追加 -->
+            </div>
+          </div>
+        </div>
         
-        <a class="dept-card" href="dept/2026-04/BR.html">
+        <div class="dept-card" data-dept-code="BR">
           <div class="dept-card-head">
             <span class="dept-code">BR</span>
             <span class="dept-name">乳腺外科</span>
@@ -983,11 +1194,20 @@
             <span class="mini-delta down">
               -40.9% MoM
             </span>
-            <span class="dept-arrow">→</span>
+            <button class="dropdown-toggle" data-dept-code="BR">▼</button>
           </div>
-        </a>
+          <!-- プルダウンメニュー -->
+          <div class="dept-dropdown-menu" id="dropdown-BR" style="display:none;">
+            <div class="dropdown-content">
+              
+              <a href="dept/2026-04/BR.html">診療科詳細を見る</a>
+              
+              <!-- 他の診療科情報のリンクをここに追加 -->
+            </div>
+          </div>
+        </div>
         
-        <a class="dept-card" href="dept/2026-04/DM.html">
+        <div class="dept-card" data-dept-code="DM">
           <div class="dept-card-head">
             <span class="dept-code">DM</span>
             <span class="dept-name">皮膚科</span>
@@ -1014,11 +1234,20 @@
             <span class="mini-delta down">
               -22.0% MoM
             </span>
-            <span class="dept-arrow">→</span>
+            <button class="dropdown-toggle" data-dept-code="DM">▼</button>
           </div>
-        </a>
+          <!-- プルダウンメニュー -->
+          <div class="dept-dropdown-menu" id="dropdown-DM" style="display:none;">
+            <div class="dropdown-content">
+              
+              <a href="dept/2026-04/DM.html">診療科詳細を見る</a>
+              
+              <!-- 他の診療科情報のリンクをここに追加 -->
+            </div>
+          </div>
+        </div>
         
-        <a class="dept-card" href="dept/2026-04/GS.html">
+        <div class="dept-card" data-dept-code="GS">
           <div class="dept-card-head">
             <span class="dept-code">GS</span>
             <span class="dept-name">一般消化器外科</span>
@@ -1045,11 +1274,20 @@
             <span class="mini-delta down">
               -29.6% MoM
             </span>
-            <span class="dept-arrow">→</span>
+            <button class="dropdown-toggle" data-dept-code="GS">▼</button>
           </div>
-        </a>
+          <!-- プルダウンメニュー -->
+          <div class="dept-dropdown-menu" id="dropdown-GS" style="display:none;">
+            <div class="dropdown-content">
+              
+              <a href="dept/2026-04/GS.html">診療科詳細を見る</a>
+              
+              <!-- 他の診療科情報のリンクをここに追加 -->
+            </div>
+          </div>
+        </div>
         
-        <a class="dept-card" href="dept/2026-04/OS.html">
+        <div class="dept-card" data-dept-code="OS">
           <div class="dept-card-head">
             <span class="dept-code">OS</span>
             <span class="dept-name">歯科口腔外科</span>
@@ -1076,11 +1314,20 @@
             <span class="mini-delta down">
               -37.4% MoM
             </span>
-            <span class="dept-arrow">→</span>
+            <button class="dropdown-toggle" data-dept-code="OS">▼</button>
           </div>
-        </a>
+          <!-- プルダウンメニュー -->
+          <div class="dept-dropdown-menu" id="dropdown-OS" style="display:none;">
+            <div class="dropdown-content">
+              
+              <a href="dept/2026-04/OS.html">診療科詳細を見る</a>
+              
+              <!-- 他の診療科情報のリンクをここに追加 -->
+            </div>
+          </div>
+        </div>
         
-        <a class="dept-card" href="dept/2026-04/PS.html">
+        <div class="dept-card" data-dept-code="PS">
           <div class="dept-card-head">
             <span class="dept-code">PS</span>
             <span class="dept-name">形成外科</span>
@@ -1107,11 +1354,20 @@
             <span class="mini-delta down">
               -39.3% MoM
             </span>
-            <span class="dept-arrow">→</span>
+            <button class="dropdown-toggle" data-dept-code="PS">▼</button>
           </div>
-        </a>
+          <!-- プルダウンメニュー -->
+          <div class="dept-dropdown-menu" id="dropdown-PS" style="display:none;">
+            <div class="dropdown-content">
+              
+              <a href="dept/2026-04/PS.html">診療科詳細を見る</a>
+              
+              <!-- 他の診療科情報のリンクをここに追加 -->
+            </div>
+          </div>
+        </div>
         
-        <a class="dept-card" href="dept/2026-04/NS.html">
+        <div class="dept-card" data-dept-code="NS">
           <div class="dept-card-head">
             <span class="dept-code">NS</span>
             <span class="dept-name">脳神経外科</span>
@@ -1138,11 +1394,20 @@
             <span class="mini-delta down">
               -24.2% MoM
             </span>
-            <span class="dept-arrow">→</span>
+            <button class="dropdown-toggle" data-dept-code="NS">▼</button>
           </div>
-        </a>
+          <!-- プルダウンメニュー -->
+          <div class="dept-dropdown-menu" id="dropdown-NS" style="display:none;">
+            <div class="dropdown-content">
+              
+              <a href="dept/2026-04/NS.html">診療科詳細を見る</a>
+              
+              <!-- 他の診療科情報のリンクをここに追加 -->
+            </div>
+          </div>
+        </div>
         
-        <a class="dept-card" href="dept/2026-04/RS2.html">
+        <div class="dept-card" data-dept-code="RS2">
           <div class="dept-card-head">
             <span class="dept-code">RS2</span>
             <span class="dept-name">呼吸器外科</span>
@@ -1169,11 +1434,20 @@
             <span class="mini-delta down">
               -24.5% MoM
             </span>
-            <span class="dept-arrow">→</span>
+            <button class="dropdown-toggle" data-dept-code="RS2">▼</button>
           </div>
-        </a>
+          <!-- プルダウンメニュー -->
+          <div class="dept-dropdown-menu" id="dropdown-RS2" style="display:none;">
+            <div class="dropdown-content">
+              
+              <a href="dept/2026-04/RS2.html">診療科詳細を見る</a>
+              
+              <!-- 他の診療科情報のリンクをここに追加 -->
+            </div>
+          </div>
+        </div>
         
-        <a class="dept-card" href="dept/2026-04/CS.html">
+        <div class="dept-card" data-dept-code="CS">
           <div class="dept-card-head">
             <span class="dept-code">CS</span>
             <span class="dept-name">心臓血管外科</span>
@@ -1200,9 +1474,18 @@
             <span class="mini-delta down">
               -45.8% MoM
             </span>
-            <span class="dept-arrow">→</span>
+            <button class="dropdown-toggle" data-dept-code="CS">▼</button>
           </div>
-        </a>
+          <!-- プルダウンメニュー -->
+          <div class="dept-dropdown-menu" id="dropdown-CS" style="display:none;">
+            <div class="dropdown-content">
+              
+              <a href="dept/2026-04/CS.html">診療科詳細を見る</a>
+              
+              <!-- 他の診療科情報のリンクをここに追加 -->
+            </div>
+          </div>
+        </div>
         
       </div>
     </div>
@@ -1214,7 +1497,7 @@
       </div>
       <div class="dept-grid">
         
-        <a class="dept-card" href="dept/2026-04/RT.html">
+        <div class="dept-card" data-dept-code="RT">
           <div class="dept-card-head">
             <span class="dept-code">RT</span>
             <span class="dept-name">放射線治療科</span>
@@ -1241,11 +1524,20 @@
             <span class="mini-delta down">
               -21.5% MoM
             </span>
-            <span class="dept-arrow">→</span>
+            <button class="dropdown-toggle" data-dept-code="RT">▼</button>
           </div>
-        </a>
+          <!-- プルダウンメニュー -->
+          <div class="dept-dropdown-menu" id="dropdown-RT" style="display:none;">
+            <div class="dropdown-content">
+              
+              <a href="dept/2026-04/RT.html">診療科詳細を見る</a>
+              
+              <!-- 他の診療科情報のリンクをここに追加 -->
+            </div>
+          </div>
+        </div>
         
-        <a class="dept-card" href="dept/2026-04/AD.html">
+        <div class="dept-card" data-dept-code="AD">
           <div class="dept-card-head">
             <span class="dept-code">AD</span>
             <span class="dept-name">入退院支援センター</span>
@@ -1272,11 +1564,20 @@
             <span class="mini-delta down">
               -22.3% MoM
             </span>
-            <span class="dept-arrow">→</span>
+            <button class="dropdown-toggle" data-dept-code="AD">▼</button>
           </div>
-        </a>
+          <!-- プルダウンメニュー -->
+          <div class="dept-dropdown-menu" id="dropdown-AD" style="display:none;">
+            <div class="dropdown-content">
+              
+              <a href="dept/2026-04/AD.html">診療科詳細を見る</a>
+              
+              <!-- 他の診療科情報のリンクをここに追加 -->
+            </div>
+          </div>
+        </div>
         
-        <a class="dept-card" href="dept/2026-04/OT.html">
+        <div class="dept-card" data-dept-code="OT">
           <div class="dept-card-head">
             <span class="dept-code">OT</span>
             <span class="dept-name">外来手術室</span>
@@ -1303,11 +1604,20 @@
             <span class="mini-delta down">
               -15.6% MoM
             </span>
-            <span class="dept-arrow">→</span>
+            <button class="dropdown-toggle" data-dept-code="OT">▼</button>
           </div>
-        </a>
+          <!-- プルダウンメニュー -->
+          <div class="dept-dropdown-menu" id="dropdown-OT" style="display:none;">
+            <div class="dropdown-content">
+              
+              <a href="dept/2026-04/OT.html">診療科詳細を見る</a>
+              
+              <!-- 他の診療科情報のリンクをここに追加 -->
+            </div>
+          </div>
+        </div>
         
-        <a class="dept-card" href="dept/2026-04/AN.html">
+        <div class="dept-card" data-dept-code="AN">
           <div class="dept-card-head">
             <span class="dept-code">AN</span>
             <span class="dept-name">麻酔科</span>
@@ -1334,11 +1644,20 @@
             <span class="mini-delta down">
               -24.0% MoM
             </span>
-            <span class="dept-arrow">→</span>
+            <button class="dropdown-toggle" data-dept-code="AN">▼</button>
           </div>
-        </a>
+          <!-- プルダウンメニュー -->
+          <div class="dept-dropdown-menu" id="dropdown-AN" style="display:none;">
+            <div class="dropdown-content">
+              
+              <a href="dept/2026-04/AN.html">診療科詳細を見る</a>
+              
+              <!-- 他の診療科情報のリンクをここに追加 -->
+            </div>
+          </div>
+        </div>
         
-        <a class="dept-card" href="dept/2026-04/ER.html">
+        <div class="dept-card" data-dept-code="ER">
           <div class="dept-card-head">
             <span class="dept-code">ER</span>
             <span class="dept-name">救急科</span>
@@ -1365,9 +1684,18 @@
             <span class="mini-delta down">
               -26.1% MoM
             </span>
-            <span class="dept-arrow">→</span>
+            <button class="dropdown-toggle" data-dept-code="ER">▼</button>
           </div>
-        </a>
+          <!-- プルダウンメニュー -->
+          <div class="dept-dropdown-menu" id="dropdown-ER" style="display:none;">
+            <div class="dropdown-content">
+              
+              <a href="dept/2026-04/ER.html">診療科詳細を見る</a>
+              
+              <!-- 他の診療科情報のリンクをここに追加 -->
+            </div>
+          </div>
+        </div>
         
       </div>
     </div>
@@ -3819,6 +4147,45 @@ if (TREND_DATA && TREND_DATA.length > 0 && document.getElementById('trendChart')
     }
   });
 }
+
+// プルダウンメニューの機能
+document.addEventListener('DOMContentLoaded', function() {
+  // 各診療科カードのプルダウンボタンを取得
+  const dropdownToggles = document.querySelectorAll('.dropdown-toggle');
+  
+  // 全てのプルダウンメニューを閉じる関数
+  function closeAllDropdowns() {
+    document.querySelectorAll('.dept-dropdown-menu').forEach(menu => {
+      menu.style.display = 'none';
+    });
+  }
+  
+  // プルダウンボタンクリック時の処理
+  dropdownToggles.forEach(button => {
+    button.addEventListener('click', function(e) {
+      e.stopPropagation();
+      
+      // 現在のボタンに関連するプルダウンメニューを取得
+      const deptCode = this.getAttribute('data-dept-code');
+      const dropdownMenu = document.getElementById(`dropdown-${deptCode}`);
+      
+      // 他のすべてのプルダウンを閉じる
+      closeAllDropdowns();
+      
+      // クリックされたメニューを開く
+      if (dropdownMenu) {
+        dropdownMenu.style.display = 'block';
+      }
+    });
+  });
+  
+  // ページクリック時にプルダウンを閉じる
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.dept-card')) {
+      closeAllDropdowns();
+    }
+  });
+});
 </script>
 
 </body>

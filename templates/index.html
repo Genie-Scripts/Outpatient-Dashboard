@@ -90,6 +90,46 @@
   .mini-delta.down{background:var(--down-bg);color:var(--down);}
   .mini-delta.flat{background:var(--flat-bg);color:var(--flat);}
   .dept-arrow{font-size:14px;color:var(--dim);}
+  
+  /* ===== プルダウンメニュー ===== */
+  .dropdown-toggle {
+    background: none;
+    border: none;
+    color: var(--dim);
+    cursor: pointer;
+    font-size: 12px;
+    padding: 0;
+    margin-left: 8px;
+  }
+  
+  .dept-dropdown-menu {
+    position: absolute;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,.15);
+    z-index: 100;
+    min-width: 200px;
+    margin-top: 4px;
+    display: none;
+  }
+  
+  .dropdown-content {
+    padding: 8px 0;
+  }
+  
+  .dropdown-content a,
+  .dropdown-content span {
+    display: block;
+    padding: 8px 16px;
+    font-size: 12px;
+    color: var(--text);
+    text-decoration: none;
+  }
+  
+  .dropdown-content a:hover {
+    background-color: var(--surface2);
+  }
 
   .month-chips{display:flex;flex-wrap:wrap;gap:8px;}
   .month-chip{display:inline-flex;align-items:center;gap:6px;padding:8px 14px;
@@ -205,7 +245,7 @@
     <span class="section-sub">科コード＋科名＋KPI＋前月比。カードクリックで深掘りへ</span>
   </div>
 
-  {% if dept_groups %}
+    {% if dept_groups %}
     {% for g in dept_groups %}
     <div class="group">
       <div class="group-head">
@@ -214,7 +254,7 @@
       </div>
       <div class="dept-grid">
         {% for it in g["items"] %}
-        <a class="dept-card" href="{{ it.href }}">
+        <div class="dept-card" data-dept-code="{{ it.code }}">
           <div class="dept-card-head">
             <span class="dept-code">{{ it.code }}</span>
             <span class="dept-name">{{ it.name }}</span>
@@ -241,9 +281,20 @@
             <span class="mini-delta {{ it.delta.sign }}">
               {{ '+' if it.delta.pct > 0 else '' }}{{ it.delta.pct }}% MoM
             </span>
-            <span class="dept-arrow">→</span>
+            <button class="dropdown-toggle" data-dept-code="{{ it.code }}">▼</button>
           </div>
-        </a>
+          <!-- プルダウンメニュー -->
+          <div class="dept-dropdown-menu" id="dropdown-{{ it.code }}" style="display:none;">
+            <div class="dropdown-content">
+              {% if it.href %}
+              <a href="{{ it.href }}">診療科詳細を見る</a>
+              {% else %}
+              <span>診療科詳細（ファイル未作成）</span>
+              {% endif %}
+              <!-- 他の診療科情報のリンクをここに追加 -->
+            </div>
+          </div>
+        </div>
         {% endfor %}
       </div>
     </div>
@@ -401,5 +452,44 @@ if (TREND_DATA && TREND_DATA.length > 0 && document.getElementById('trendChart')
     }
   });
 }
+
+// プルダウンメニューの機能
+document.addEventListener('DOMContentLoaded', function() {
+  // 各診療科カードのプルダウンボタンを取得
+  const dropdownToggles = document.querySelectorAll('.dropdown-toggle');
+  
+  // 全てのプルダウンメニューを閉じる関数
+  function closeAllDropdowns() {
+    document.querySelectorAll('.dept-dropdown-menu').forEach(menu => {
+      menu.style.display = 'none';
+    });
+  }
+  
+  // プルダウンボタンクリック時の処理
+  dropdownToggles.forEach(button => {
+    button.addEventListener('click', function(e) {
+      e.stopPropagation();
+      
+      // 現在のボタンに関連するプルダウンメニューを取得
+      const deptCode = this.getAttribute('data-dept-code');
+      const dropdownMenu = document.getElementById(`dropdown-${deptCode}`);
+      
+      // 他のすべてのプルダウンを閉じる
+      closeAllDropdowns();
+      
+      // クリックされたメニューを開く
+      if (dropdownMenu) {
+        dropdownMenu.style.display = 'block';
+      }
+    });
+  });
+  
+  // ページクリック時にプルダウンを閉じる
+  document.addEventListener('click', function(e) {
+    if (!e.target.closest('.dept-card')) {
+      closeAllDropdowns();
+    }
+  });
+});
 </script>
 {% endblock %}
