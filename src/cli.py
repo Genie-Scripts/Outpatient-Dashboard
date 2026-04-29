@@ -31,7 +31,10 @@ from src.anonymize import (
     passthrough_directory,
     passthrough_monthly_data,
 )
-from src.dashboards.dept_drilldown import build_dept_drilldown
+from src.dashboards.dept_drilldown import (
+    build_dept_drilldown,
+    build_dept_drilldown_index,
+)
 from src.dashboards.doctor_analysis import build_doctor_analysis
 from src.dashboards.drug_revisit import build_drug_revisit
 from src.dashboards.hub import build_hub_page
@@ -216,7 +219,16 @@ def _cmd_build_dept(
             all_months=all_months,
             use_real_names=use_real_names,
         )
-        print(f"✓ 診療科深掘り生成: {len(generated)} 件 → {out_dir}")
+        index_path = build_dept_drilldown_index(
+            month=m,
+            aggregated_root=paths["agg_root"],
+            templates_dir=paths["templates_dir"],
+            output_dir=out_dir,
+            classification_path=paths["dept_classification"],
+            all_months=all_months,
+        )
+        print(f"✓ 診療科深掘り生成: {len(generated)} 件 + index → {out_dir}")
+        print(f"  入口ページ: {index_path}")
 
 
 def _cmd_build_doctor(

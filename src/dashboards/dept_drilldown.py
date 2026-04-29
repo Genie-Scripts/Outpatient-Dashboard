@@ -29,6 +29,8 @@ TIMEZONE_ORDER = [
     "夕方以降(17時〜)",
 ]
 WEEKDAY_LABELS = ["月", "火", "水", "木", "金", "土", "日"]
+_TYPE_ORDER = ["内科系", "外科系", "その他"]
+_TYPE_KEY = {"内科系": "naika", "外科系": "geka", "その他": "other"}
 
 
 @dataclass
@@ -230,6 +232,132 @@ def _render(
         reverse_referral_total=f"{reverse_referral_total:,}",
         timezone_data_json=json.dumps(timezone_data, ensure_ascii=False),
     )
+
+
+def _delta_pct(cur: int, prev: int) -> dict[str, Any]:
+    """前月比を {pct, sign} で返す。prev が 0 の場合は flat 表示。"""
+    if prev == 0:
+        return {"pct": 0.0, "sign": "flat"}
+    pct = (cur - prev) / prev * 100
+    if pct > 2:
+        sign = "up"
+    elif pct < -2:
+        sign = "down"
+    else:
+        sign = "flat"
+    return {"pct": round(pct, 1), "sign": sign}
+
+
+def _index_groups(
+    kpi_df: pd.DataFrame,
+    prev_kpi_df: pd.DataFrame | None,
+    classifier: DeptClassifier,
+    month: str,
+) -> list[dict[str, Any]]:
+    """指定月の評価対象診療科を内科系/外科系/その他にグルーピング。"""
+    sub = kpi_df[kpi_df["月"].astype(str) == month]
+    prev_map: dict[str, int] = {}
+    if prev_kpi_df is not None and not prev_kpi_df.empty:
+        prev_map = {
+            str(r["診療科名"]): int(r["総件数"])
+            for _, r in prev_kpi_df.iterrows()
+        }
+
+    by_type: dict[str, list[dict[str, Any]]] = {t: [] for t in _TYPE_ORDER}
+    for info in classifier.evaluation_targets():
+        row = sub[sub["診療科名"] == info.name]
+        if row.empty:
+            continue
+        r = row.iloc[0]
+        total = int(r["総件数"])
+        if total == 0:
+            continue
+        prev_total = prev_map.get(info.name, 0)
+        by_type.setdefault(info.type, []).append({
+            "code": info.code,
+            "name": info.name,
+            "total": total,
+            "sho": int(r["初診件数"]),
+            "ref_rate": round(float(r["紹介率"]), 1),
+            "miraiin_rate": round(float(r["未来院率"]), 1),
+            "href": f"{info.code}.html",
+            "delta": _delta_pct(total, prev_total) if prev_total else None,
+            "_order": info.display_order,
+        })
+
+    groups: list[dict[str, Any]] = []
+    for t in _TYPE_ORDER:
+        items = sorted(by_type.get(t, []), key=lambda x: (-x["total"], x["_order"]))
+        if not items:
+            continue
+        for it in items:
+            it.pop("_order", None)
+        groups.append({
+            "group": t,
+            "type_key": _TYPE_KEY[t],
+            "items": items,
+        })
+    return groups
+
+
+def build_dept_drilldown_index(
+    month: str,
+    aggregated_root: Path,
+    templates_dir: Path,
+    output_dir: Path,
+    classification_path: Path,
+    all_months: list[str],
+) -> Path:
+    """`dept/{month}/index.html` を生成する。
+
+    各科ページ（{code}.html）への入口となる一覧ページ。
+    内科系/外科系/その他 のグループでカード表示し、前月比も表示する。
+    """
+    classifier = DeptClassifier(classification_path)
+    data = load_aggregated_data(aggregated_root, month)
+
+    sorted_desc = sorted(all_months, reverse=True)
+    prev_kpi: pd.DataFrame | None = None
+    if month in sorted_desc:
+        idx = sorted_desc.index(month)
+        if idx + 1 < len(sorted_desc):
+            prev_month = sorted_desc[idx + 1]
+            prev_path = aggregated_root / prev_month / "10_referral_kpi.csv"
+            if prev_path.exists():
+                prev_kpi = pd.read_csv(prev_path, encoding="utf-8-sig")
+
+    groups = _index_groups(data.referral_kpi, prev_kpi, classifier, month)
+    latest = sorted_desc[0] if sorted_desc else month
+
+    env = Environment(
+        loader=FileSystemLoader(str(templates_dir)),
+        autoescape=select_autoescape(["html"]),
+    )
+    breadcrumb = [
+        {"label": "ホーム", "href": "../../index.html"},
+        {"label": f"診療科ドリルダウン（{month}）", "href": None},
+    ]
+    html = env.get_template("dept_drilldown_index.html").render(
+        # ===== グローバルレイアウト共通コンテキスト =====
+        title=f"診療科ドリルダウン {month}",
+        active="dept",
+        current_month=month,
+        latest_month=latest,
+        current_code=None,
+        all_months=sorted_desc,
+        root_prefix="../../",
+        breadcrumb=breadcrumb,
+        generated_at=datetime.now().strftime("%Y-%m-%d %H:%M"),
+        # ===== ページ固有 =====
+        month=month,
+        dept_groups=groups,
+    )
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    out_path = output_dir / "index.html"
+    out_path.write_text(html, encoding="utf-8")
+    logger.info("診療科ドリルダウン index 出力: %s", out_path)
+    return out_path
 
 
 def build_dept_drilldown(
