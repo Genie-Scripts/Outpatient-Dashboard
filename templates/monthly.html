@@ -784,23 +784,37 @@ const spsSeries = DATA.total_sai_monthly.map((s,i)=>{
   return sho>0 ? +(sai/sho).toFixed(1) : 0;
 });
 
-function createTrendChart(canvasId, data, label, color, targetLine=null, isLine=false){
+function linReg(data){
+  const n = data.length;
+  const sumX = (n*(n-1))/2;
+  const sumX2 = (n*(n-1)*(2*n-1))/6;
+  const sumY = data.reduce((a,b)=>a+b,0);
+  const sumXY = data.reduce((s,y,i)=>s+i*y,0);
+  const slope = (n*sumXY - sumX*sumY) / (n*sumX2 - sumX*sumX);
+  const intercept = (sumY - slope*sumX) / n;
+  return data.map((_,i) => +( intercept + slope*i ).toFixed(2));
+}
+function createTrendChart(canvasId, data, label, color, targetLine=null){
   const ds = [{
     label:label, data:data,
-    backgroundColor:isLine?color+'22':DATA.monthLabels.map((m,i)=>i===5?color+'88':color+'DD'),
-    borderColor:color, borderWidth:isLine?2:0,
-    pointRadius:isLine?4:0, pointBackgroundColor:color,
-    borderRadius:4, tension:.3, fill:isLine, order:2
+    borderColor:color, backgroundColor:'transparent',
+    borderWidth:2, pointRadius:4, pointBackgroundColor:color,
+    tension:0, fill:false, order:2
+  },{
+    label:'回帰', data:linReg(data),
+    borderColor:color, backgroundColor:'transparent',
+    borderWidth:1.5, borderDash:[5,5], pointRadius:0,
+    tension:0, fill:false, order:3
   }];
   if(targetLine !== null){
     ds.push({
-      label:'目標', data:Array(6).fill(targetLine), type:'line',
+      label:'目標', data:Array(6).fill(targetLine),
       borderColor:CC.target, backgroundColor:'transparent',
       borderWidth:2, borderDash:[6,4], pointRadius:0, order:1
     });
   }
   charts[canvasId] = new Chart(document.getElementById(canvasId),{
-    type:isLine?'line':'bar',
+    type:'line',
     data:{labels:DATA.monthLabels, datasets:ds},
     options:{responsive:true, maintainAspectRatio:false,
       plugins:{legend:{labels:{boxWidth:10,font:{size:11}}}},
@@ -809,7 +823,7 @@ function createTrendChart(canvasId, data, label, color, targetLine=null, isLine=
 }
 createTrendChart('chartShoTrend', shoSeries, '初診件数', CC.blue, DATA.global_sho_target);
 createTrendChart('chartKusTrend', kusSeries, '「薬のみ」再診', CC.gold, DATA.global_kus_target);
-createTrendChart('chartSpsTrend', spsSeries, '再診:初診比率', CC.other, null, true);
+createTrendChart('chartSpsTrend', spsSeries, '再診:初診比率', CC.other);
 
 // 主要診療科 初診件数
 const top10Sho = [...DATA.depts]
