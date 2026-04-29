@@ -288,7 +288,7 @@
       <div class="sub">Outpatient Dashboard</div>
     </div>
     <div class="gh-meta">
-      <div>更新 2026-04-29 14:29</div>
+      <div>更新 2026-04-29 14:47</div>
     </div>
   </div>
   <div class="gh-row2">
@@ -318,7 +318,7 @@
 <main class="container">
 
 <div class="meta-bar">
-  <div><span class="k">最終更新</span><span class="v">2026-04-29 14:29</span></div>
+  <div><span class="k">最終更新</span><span class="v">2026-04-29 14:47</span></div>
   
   <div><span class="k">対象期間</span><span class="v">2025-04 〜 2026-04</span></div>
   
@@ -4144,6 +4144,18 @@ window.OutpatientCommon = (function(){
 <script>
 const TREND_DATA = [{"month": "2025-04", "total": 34295, "sho": 2903, "sai": 31392, "ref_rate": 74.1, "miraiin": 1837, "miraiin_rate": 5.4, "doctors": 430}, {"month": "2025-05", "total": 34636, "sho": 2840, "sai": 31796, "ref_rate": 72.3, "miraiin": 3333, "miraiin_rate": 9.6, "doctors": 435}, {"month": "2025-06", "total": 34348, "sho": 2869, "sai": 31479, "ref_rate": 73.6, "miraiin": 1876, "miraiin_rate": 5.5, "doctors": 418}, {"month": "2025-07", "total": 35718, "sho": 2884, "sai": 32834, "ref_rate": 71.5, "miraiin": 1852, "miraiin_rate": 5.2, "doctors": 421}, {"month": "2025-08", "total": 31351, "sho": 2657, "sai": 28694, "ref_rate": 68.3, "miraiin": 1795, "miraiin_rate": 5.7, "doctors": 415}, {"month": "2025-09", "total": 33834, "sho": 2737, "sai": 31097, "ref_rate": 71.6, "miraiin": 1955, "miraiin_rate": 5.8, "doctors": 417}, {"month": "2025-10", "total": 35723, "sho": 2974, "sai": 32749, "ref_rate": 71.3, "miraiin": 2184, "miraiin_rate": 6.1, "doctors": 421}, {"month": "2025-11", "total": 31821, "sho": 2632, "sai": 29189, "ref_rate": 67.4, "miraiin": 2989, "miraiin_rate": 9.4, "doctors": 421}, {"month": "2025-12", "total": 35415, "sho": 2829, "sai": 32586, "ref_rate": 71.1, "miraiin": 2027, "miraiin_rate": 5.7, "doctors": 423}, {"month": "2026-01", "total": 32935, "sho": 2728, "sai": 30207, "ref_rate": 68.3, "miraiin": 1901, "miraiin_rate": 5.8, "doctors": 433}, {"month": "2026-02", "total": 30538, "sho": 2414, "sai": 28124, "ref_rate": 66.3, "miraiin": 1755, "miraiin_rate": 5.7, "doctors": 416}, {"month": "2026-03", "total": 35895, "sho": 2716, "sai": 33179, "ref_rate": 70.8, "miraiin": 2114, "miraiin_rate": 5.9, "doctors": 417}, {"month": "2026-04", "total": 25710, "sho": 2025, "sai": 23685, "ref_rate": 71.2, "miraiin": 1545, "miraiin_rate": 6.0, "doctors": 413}];
 if (TREND_DATA && TREND_DATA.length > 0 && document.getElementById('trendChart')) {
+  function linRegHub(arr){
+    const n = arr.length;
+    const sumX = (n*(n-1))/2;
+    const sumX2 = (n*(n-1)*(2*n-1))/6;
+    const sumY = arr.reduce((a,b)=>a+b,0);
+    const sumXY = arr.reduce((s,y,i)=>s+i*y,0);
+    const slope = (n*sumXY - sumX*sumY) / (n*sumX2 - sumX*sumX);
+    const intercept = (sumY - slope*sumX) / n;
+    return arr.map((_,i) => +( intercept + slope*i ).toFixed(2));
+  }
+  const totalData = TREND_DATA.map(d => d.total);
+  const shoData   = TREND_DATA.map(d => d.sho);
   const ctx = document.getElementById('trendChart').getContext('2d');
   new Chart(ctx, {
     type: 'line',
@@ -4152,26 +4164,50 @@ if (TREND_DATA && TREND_DATA.length > 0 && document.getElementById('trendChart')
       datasets: [
         {
           label: '総件数',
-          data: TREND_DATA.map(d => d.total),
+          data: totalData,
           borderColor: '#3D3A35',
-          backgroundColor: 'rgba(61,58,53,.08)',
+          backgroundColor: 'transparent',
           borderWidth: 2.5,
-          tension: 0.25,
-          fill: true,
+          tension: 0,
+          fill: false,
           pointRadius: 4,
           pointBackgroundColor: '#3D3A35',
           yAxisID: 'y'
         },
         {
+          label: '総件数 回帰',
+          data: linRegHub(totalData),
+          borderColor: '#3D3A35',
+          backgroundColor: 'transparent',
+          borderWidth: 1.5,
+          borderDash: [5, 5],
+          tension: 0,
+          fill: false,
+          pointRadius: 0,
+          yAxisID: 'y'
+        },
+        {
           label: '初診件数',
-          data: TREND_DATA.map(d => d.sho),
+          data: shoData,
           borderColor: '#D08620',
-          backgroundColor: 'rgba(208,134,32,.08)',
+          backgroundColor: 'transparent',
           borderWidth: 2,
-          tension: 0.25,
+          tension: 0,
           fill: false,
           pointRadius: 3,
           pointBackgroundColor: '#D08620',
+          yAxisID: 'y1'
+        },
+        {
+          label: '初診件数 回帰',
+          data: linRegHub(shoData),
+          borderColor: '#D08620',
+          backgroundColor: 'transparent',
+          borderWidth: 1.5,
+          borderDash: [5, 5],
+          tension: 0,
+          fill: false,
+          pointRadius: 0,
           yAxisID: 'y1'
         }
       ]
@@ -4183,6 +4219,7 @@ if (TREND_DATA && TREND_DATA.length > 0 && document.getElementById('trendChart')
       plugins: {
         legend: { display: false },
         tooltip: {
+          filter: (item) => !item.dataset.label.includes('回帰'),
           backgroundColor: '#2C2A28',
           titleFont: { family: 'DM Mono, monospace' },
           bodyFont: { family: 'Noto Sans JP' },
